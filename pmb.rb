@@ -8,12 +8,12 @@ class Db
 		@db 			= SQLite3::Database.open path
 
 		if @db
-			@db.execute "CREATE TABLE IF NOT EXISTS bookmark" \
-				"(id INTEGER PRIMARY KEY" \
-				",name text" \
-				",url text" \
-				",comment text" \
-				",tag tex)"
+			@db.execute 	"CREATE TABLE IF NOT EXISTS bookmark" \
+						"(id INTEGER PRIMARY KEY" \
+						",name text" \
+						",url text" \
+						",comment text" \
+						",tag tex)"
 		end
 	end
 
@@ -388,26 +388,38 @@ class Gtk_Ui < Gtk_Window
 
 				if key == "j"
 					@tree.move_cursor :display_lines, 1 
+					cursor, column = @tree.cursor
+					@tree.set_cursor cursor, nil, false
 				end
 
 				if key == "k"
 					@tree.move_cursor :display_lines, -1 
+					cursor, column = @tree.cursor
+					@tree.set_cursor cursor, nil, false
 				end
 
 				if key == "g"
 					@tree.move_cursor :buffer_ends, -1
+					cursor, column = @tree.cursor
+					@tree.set_cursor cursor, nil, false
 				end
 
 				if key == "G"
 					@tree.move_cursor :buffer_ends, 1
+					cursor, column = @tree.cursor
+					@tree.set_cursor cursor, nil, false
 				end
 
 				if key == "b"
 					@tree.move_cursor :pages, 1
+					cursor, column = @tree.cursor
+					@tree.set_cursor cursor, nil, false
 				end
 
 				if key == "B"
 					@tree.move_cursor :pages, -1
+					cursor, column = @tree.cursor
+					@tree.set_cursor cursor, nil, false
 				end
 
 				if key == "h"
