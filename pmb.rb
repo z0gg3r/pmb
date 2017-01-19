@@ -66,11 +66,12 @@ class Db
 					stm 	= @db.prepare "UPDATE bookmark " \
 						"SET tag = ? WHERE id = ?"
 			end
+
+			stm.bind_param 		1, value
+			stm.bind_param 		2, id
+			rs 			= stm.execute
 		end
 
-		stm.bind_param 		1, value
-		stm.bind_param 		2, id
-		rs 			= stm.execute
 	end
 
 	def edit_tag tag, new_tag
