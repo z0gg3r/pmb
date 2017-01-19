@@ -52,24 +52,17 @@ class Db
 
 	def edit id, field, value
 		if @db
-			case field
-				when "name"
-					stm 	= @db.prepare "UPDATE bookmark " \
-						"SET name = ? WHERE id = ?"
-				when "url"
-					stm 	= @db.prepare "UPDATE bookmark "\
-						"SET url = ? WHERE id = ?"
-				when "comment"
-					stm 	= @db.prepare "UPDATE bookmark " \
-						"SET comment = ? WHERE id = ?"
-				when "tag"
-					stm 	= @db.prepare "UPDATE bookmark " \
-						"SET tag = ? WHERE id = ?"
-			end
+			if field == "name" \
+			or field == "url" \
+			or field == "comment" \
+			or field == "tag"
+				stm 	= @db.prepare "UPDATE bookmark " \
+						"SET #{field} = ? WHERE id = ?"
 
-			stm.bind_param 	1, value
-			stm.bind_param 	2, id
-			rs 		= stm.execute
+				stm.bind_param 	1, value
+				stm.bind_param 	2, id
+				rs 		= stm.execute
+			end
 		end
 
 	end
@@ -149,6 +142,10 @@ class Actions
 			store_feed 	db, store, tree
 		end
 	end
+
+	def self.error message, fatal
+		Gtk_Error.new message, fatal
+	end
 end
 
 class Store < Gtk::TreeStore
@@ -192,7 +189,7 @@ class Gtk_Window < Gtk::Window
 end
 
 class Gtk_Error < Gtk_Window
-	def initialize message
+	def initialize message, fatal
 		super()
 		error_title 		= Gtk::Label.new 
 		error_title.set_markup	"<span foreground='red' " \
@@ -204,8 +201,14 @@ class Gtk_Error < Gtk_Window
 		error 			= Gtk::Label.new message
 		close 			= Gtk::Button.new :label => "Close"
 
-		close.signal_connect "clicked" do
-			destroy
+		if fatal
+			close.signal_connect "clicked" do
+				Gtk.main_quit
+			end
+		else
+			close.signal_connect "clicked" do
+				destroy
+			end
 		end
 
 		vbox 			= Gtk::Box.new :vertical, 2
@@ -259,7 +262,7 @@ class Gtk_Insert < Gtk_Window
 				Actions.store_feed 	db, store, tree
 				destroy
 			else
-				Gtk_Error.new "Need at least name and url."
+				Actions.error "Need at least name and url", false
 			end
 		end
 
