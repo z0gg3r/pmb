@@ -194,11 +194,12 @@ class Gtk_Insert < Gtk_Window
 		super()
 		set_title 		"Poor man's bookmark - Insert"
 
-		name_entry 		= Gtk::Entry.new
-		url_entry 		= Gtk::Entry.new
-		comment_entry 		= Gtk::Entry.new
-		tag_entry 		= Gtk::Entry.new
-		insert_button 		= Gtk::Button.new :label => "Insert"
+		name_entry 			= Gtk::Entry.new
+		url_entry 			= Gtk::Entry.new
+		comment_entry 			= Gtk::Entry.new
+		tag_entry 			= Gtk::Entry.new
+		insert_button 			= Gtk::Button.new :label => "_Insert"
+		insert_button.use_underline 	= true
 
 		if tree.selection.selected
 			tag_entry.set_text store.get_value \
@@ -259,11 +260,12 @@ class Gtk_Edit < Gtk_Window
 		super()
 		set_title 		"Poor man's bookmark - Edit"
 
-		name_entry 		= Gtk::Entry.new
-		url_entry 		= Gtk::Entry.new
-		comment_entry 		= Gtk::Entry.new
-		tag_entry 		= Gtk::Entry.new
-		edit_button 		= Gtk::Button.new :label => "Edit"
+		name_entry 			= Gtk::Entry.new
+		url_entry 			= Gtk::Entry.new
+		comment_entry 			= Gtk::Entry.new
+		tag_entry 			= Gtk::Entry.new
+		edit_button 			= Gtk::Button.new :label => "_Edit"
+		edit_button.use_underline 	= true
 
 		grid 			= Gtk::Grid.new
 		grid.set_property 	"row-homogeneous", true
@@ -367,6 +369,7 @@ class Gtk_Ui < Gtk_Window
 		add 			vbox
 
 		@tree.set_cursor (@tree.model.iter_first).path, nil, false
+		@tree.grab_focus
 
 		signal_connect "key-press-event" do |w, e|
 			key = "#{Gdk::Keyval.to_name e.keyval}"
@@ -378,6 +381,14 @@ class Gtk_Ui < Gtk_Window
 
 				if key == "x"
 					@tree.collapse_all
+				end
+
+				if key == "j"
+					@tree.move_cursor :display_lines, 1 
+				end
+
+				if key == "k"
+					@tree.move_cursor :display_lines, -1 
 				end
 			end
 		end
@@ -412,6 +423,7 @@ class Gtk_Ui < Gtk_Window
 		end
 
 		menu 			= Gtk::Menu.new
+
 		menu.append 		menu_item_copy
 		menu.append 		menu_item_insert
 		menu.append 		menu_item_edit
@@ -461,22 +473,26 @@ class Gtk_Ui < Gtk_Window
 	end
 
 	def make_action_box 
-		insert_button 		= Gtk::Button.new :label => "Insert"
+		insert_button 			= Gtk::Button.new :label => "_Insert"
+		insert_button.use_underline 	= true
 		insert_button.signal_connect "clicked" do
 			Actions.insert 		@db, @store, @tree
 		end
 
-		edit_button 		= Gtk::Button.new :label => "Edit"
+		edit_button 			= Gtk::Button.new :label => "_Edit"
+		edit_button.use_underline 	= true
 		edit_button.signal_connect "clicked" do
 			Actions.edit 		@db, @store, @tree
 		end
 
-		delete_button 		= Gtk::Button.new :label => "delete"
+		delete_button 			= Gtk::Button.new :label => "_delete"
+		delete_button.use_underline 	= true
 		delete_button.signal_connect "clicked" do
 			Actions.delete 		@db, @store, @tree
 		end
 
-		fetch_button 		= Gtk::Button.new :label => "Fetch"
+		fetch_button 			= Gtk::Button.new :label => "_Fetch"
+		fetch_button.use_underline 	= true
 		fetch_button.signal_connect "clicked" do
 			Actions.store_feed 	@db, @store, @tree
 		end
