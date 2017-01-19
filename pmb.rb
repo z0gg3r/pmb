@@ -1,3 +1,5 @@
+#!/usr/bin/env ruby
+
 require 'gtk3'
 require 'sqlite3'
 
@@ -222,8 +224,6 @@ class Gtk_Insert < Gtk_Window
 				db.insert 		[name, url, comment, tag]
 				Actions.store_feed 	db, store, tree
 				destroy
-			else
-				puts "no"
 			end
 		end
 
@@ -268,14 +268,10 @@ class Gtk_Edit < Gtk_Window
 		grid.set_property 	"row-homogeneous", true
 		grid.set_property 	"column-homogeneous", true
 
-		id 			= store.get_value \
-						(tree.selection).selected, 0
+		rs 			= db.find (store.get_value \
+						(tree.selection).selected, 0)
 
-		rs 			= db.find id
-		n 			= rs.next	
-
-		if n
-
+		if n = rs.next
 			name_entry.set_text 	n[1]
 			url_entry.set_text 	n[2]
 			comment_entry.set_text 	n[3]
@@ -283,24 +279,23 @@ class Gtk_Edit < Gtk_Window
 
 			edit_button.signal_connect "clicked" do
 				if n[1] != name_entry.text 
-					db.edit id, "name", name_entry.text
+					db.edit n[0], "name", name_entry.text
 				end
 
 				if n[2] != url_entry.text 
-					db.edit id, "url", url_entry.text
+					db.edit n[0], "url", url_entry.text
 				end
 
 				if n[3] != comment_entry.text 
-					db.edit id, "comment", comment_entry.text
+					db.edit n[0], "comment", comment_entry.text
 				end
 
 				if n[4] != tag_entry.text
-					db.edit id, "tag", tag_entry.text
+					db.edit n[0], "tag", tag_entry.text
 				end
 
 				Actions.store_feed 	db, store, tree
 				destroy
-
 			end
 								#e   #t   #l    #a
 			grid.attach (Gtk::Label.new "Name"),	0,   0,   20,   1
@@ -328,7 +323,6 @@ class Gtk_Edit < Gtk_Window
 			grid.attach tag_entry, 			20,  0,   20,   1
 			grid.attach edit_button,		0,   1,   40,   1
 		end
-
 
 		vbox 			= Gtk::Box.new :vertical, 2
 		vbox.pack_start 	grid \
