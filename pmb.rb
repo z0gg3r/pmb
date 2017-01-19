@@ -346,13 +346,40 @@ class Gtk_Ui < Gtk_Window
 		end
 
 		@db 			= Db.new ENV['HOME']+"/.bookmarks.db"
-
 		@store 			= Store.new String, String \
 						,String, String, String
-
 		@tree 			= make_tree 
 
-		interface
+		Actions.store_feed 	@db, @store, @tree
+
+		sw 			= Gtk::ScrolledWindow.new nil, nil
+		sw.border_width 	= 2
+		sw.add 			@tree
+
+		vbox 			= Gtk::Box.new :vertical, 2
+
+		vbox.pack_start 	make_action_box \
+						,:expand 	=> false \
+						,:fill 		=> false
+
+		vbox.pack_start 	sw 
+		add 			vbox
+
+		signal_connect "key-press-event" do |w, e|
+			key = "#{Gdk::Keyval.to_name e.keyval}"
+
+			if e.state.control_mask?
+				if key == "a" 
+					@tree.expand_all
+				end
+
+				if key == "x"
+					@tree.collapse_all
+				end
+			end
+		end
+
+		show_all
 	end
 
 	def make_tree_menu 
@@ -457,39 +484,6 @@ class Gtk_Ui < Gtk_Window
 		action_box.pack_start 	delete_button 
 		action_box.pack_start 	fetch_button 
 		action_box
-	end
-
-	def interface
-		Actions.store_feed 	@db, @store, @tree
-
-		sw 			= Gtk::ScrolledWindow.new nil, nil
-		sw.border_width 	= 2
-		sw.add 			@tree
-
-		vbox 			= Gtk::Box.new :vertical, 2
-
-		vbox.pack_start 	make_action_box \
-						,:expand 	=> false \
-						,:fill 		=> false
-
-		vbox.pack_start 	sw 
-		add 			vbox
-
-		signal_connect "key-press-event" do |w, e|
-			key = "#{Gdk::Keyval.to_name e.keyval}"
-
-			if e.state.control_mask?
-				if key == "a" 
-					@tree.expand_all
-				end
-
-				if key == "x"
-					@tree.collapse_all
-				end
-			end
-		end
-
-		show_all
 	end
 end
 
