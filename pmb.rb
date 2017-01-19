@@ -67,9 +67,9 @@ class Db
 						"SET tag = ? WHERE id = ?"
 			end
 
-			stm.bind_param 		1, value
-			stm.bind_param 		2, id
-			rs 			= stm.execute
+			stm.bind_param 	1, value
+			stm.bind_param 	2, id
+			rs 		= stm.execute
 		end
 
 	end
@@ -140,11 +140,11 @@ class Actions
 			tag 	= store.get_value \
 					(tree.selection).selected, 3
 
-			db.delete_tag 		tag
-			store_feed		db, store, tree
+			db.delete_tag 	tag
+			store_feed	db, store, tree
 		else
-			db.delete 		id
-			store_feed 		db, store, tree
+			db.delete 	id
+			store_feed 	db, store, tree
 		end
 	end
 end
@@ -365,6 +365,8 @@ class Gtk_Ui < Gtk_Window
 
 		vbox.pack_start 	sw 
 		add 			vbox
+
+		@tree.set_cursor (@tree.model.iter_first).path, nil, false
 
 		signal_connect "key-press-event" do |w, e|
 			key = "#{Gdk::Keyval.to_name e.keyval}"
