@@ -284,12 +284,10 @@ class Gtk_Edit < Gtk_Window
 			edit_button.signal_connect "clicked" do
 				if n[1] != name_entry.text 
 					db.edit id, "name", name_entry.text
-					puts "edit name"
 				end
 
 				if n[2] != url_entry.text 
 					db.edit id, "url", url_entry.text
-					puts "edit url"
 				end
 
 				if n[3] != comment_entry.text 
