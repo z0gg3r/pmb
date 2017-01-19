@@ -390,6 +390,22 @@ class Gtk_Ui < Gtk_Window
 				if key == "k"
 					@tree.move_cursor :display_lines, -1 
 				end
+
+				if key == "g"
+					@tree.move_cursor :buffer_ends, -1
+				end
+
+				if key == "G"
+					@tree.move_cursor :buffer_ends, 1
+				end
+
+				if key == "b"
+					@tree.move_cursor :pages, 1
+				end
+
+				if key == "B"
+					@tree.move_cursor :pages, -1
+				end
 			end
 		end
 
@@ -397,27 +413,27 @@ class Gtk_Ui < Gtk_Window
 	end
 
 	def make_tree_menu 
-		menu_item_copy 		= Gtk::MenuItem.new "Copy"
+		menu_item_copy 			= Gtk::MenuItem.new "_Copy"
 		menu_item_copy.signal_connect "activate" do
 			Actions.clipboard 	@store, @tree
 		end
 		
-		menu_item_insert 	= Gtk::MenuItem.new "Insert"
+		menu_item_insert 		= Gtk::MenuItem.new "_Insert"
 		menu_item_insert.signal_connect "activate" do
 			Actions.insert 		@db, @store, @tree
 		end
 
-		menu_item_delete 	= Gtk::MenuItem.new "Delete"
+		menu_item_delete 		= Gtk::MenuItem.new "Delete"
 		menu_item_delete.signal_connect "activate" do
 			Actions.delete 		@db, @store, @tree
 		end
 
-		menu_item_edit 		= Gtk::MenuItem.new "Edit"
+		menu_item_edit 			= Gtk::MenuItem.new "Edit"
 		menu_item_edit.signal_connect "activate" do
 			Actions.edit 		@db, @store, @tree
 		end
 
-		menu_item_fetch 	= Gtk::MenuItem.new "Fetch"
+		menu_item_fetch 		= Gtk::MenuItem.new "Fetch"
 		menu_item_fetch.signal_connect "activate" do
 			Actions.store_feed 	@db, @store, @tree
 		end
