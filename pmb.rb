@@ -9,11 +9,11 @@ class Db
 
 		if @db
 			@db.execute "CREATE TABLE IF NOT EXISTS bookmark" \
-			"(id INTEGER PRIMARY KEY" \
-			",name text" \
-			",url text" \
-			",comment text" \
-			",tag tex)"
+				"(id INTEGER PRIMARY KEY" \
+				",name text" \
+				",url text" \
+				",comment text" \
+				",tag tex)"
 		end
 	end
 
@@ -79,8 +79,8 @@ class Db
 			stm 		= @db.prepare "UPDATE bookmark " \
 						"SET tag = ? WHERE tag = ?"
 
-			stm.bind_param 1, new_tag
-			stm.bind_param 2, tag
+			stm.bind_param 	1, new_tag
+			stm.bind_param 	2, tag
 			rs 		= stm.execute
 		end
 	end
@@ -97,7 +97,9 @@ class Db
 
 	def fetch 
 		if @db
-			stm = @db.prepare "SELECT * from bookmark ORDER BY tag ASC"
+			stm 		= @db.prepare "SELECT * from bookmark " \
+						"ORDER BY tag ASC"
+
 			rs 		= stm.execute
 		end
 	end
@@ -192,7 +194,7 @@ end
 class Gtk_Insert < Gtk_Window
 	def initialize db, store, tree
 		super()
-		set_title 		"Poor man's bookmark - Insert"
+		set_title 			"Poor man's bookmark - Insert"
 
 		name_entry 			= Gtk::Entry.new
 		url_entry 			= Gtk::Entry.new
@@ -208,19 +210,19 @@ class Gtk_Insert < Gtk_Window
 
 		insert_button.signal_connect "clicked" do
 			if (name_entry.text).size > 0 and (url_entry.text).size > 0
-				name	= name_entry.text
-				url 	= url_entry.text
+				name		= name_entry.text
+				url 		= url_entry.text
 
 				if (comment_entry.text).size == 0
-					comment = "none"
+					comment 	= "none"
 				else
-					comment = comment_entry.text
+					comment 	= comment_entry.text
 				end
 
 				if (tag_entry.text).size == 0
-					tag 	= "none"
+					tag 		= "none"
 				else
-					tag 	= tag_entry.text
+					tag 		= tag_entry.text
 				end
 
 				db.insert 		[name, url, comment, tag]
@@ -258,7 +260,7 @@ end
 class Gtk_Edit < Gtk_Window
 	def initialize db, store, tree
 		super()
-		set_title 		"Poor man's bookmark - Edit"
+		set_title 			"Poor man's bookmark - Edit"
 
 		name_entry 			= Gtk::Entry.new
 		url_entry 			= Gtk::Entry.new
@@ -311,6 +313,7 @@ class Gtk_Edit < Gtk_Window
 			grid.attach tag_entry,			20,  3,   20,   1
 			grid.attach edit_button,		0,   4,   40,   1
 		else
+			set_title 	"Poor man's bookmark - Edit tag"
 			old_tag 	= store.get_value \
 						(tree.selection).selected, 3
 
@@ -405,6 +408,28 @@ class Gtk_Ui < Gtk_Window
 
 				if key == "B"
 					@tree.move_cursor :pages, -1
+				end
+
+				if key == "h"
+					if sel = @tree.selection.selected
+						@tree.scroll_to_cell \
+							sel.path \
+							,(@tree.get_column 0) \
+							,false \
+							,0.0 \
+							,0.0
+					end
+				end
+
+				if key == "l"
+					if sel = @tree.selection.selected
+						@tree.scroll_to_cell \
+							sel.path \
+							,(@tree.get_column 4) \
+							,false \
+							,0.0 \
+							,0.0
+					end
 				end
 			end
 		end
