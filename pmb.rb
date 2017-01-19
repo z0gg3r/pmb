@@ -191,6 +191,36 @@ class Gtk_Window < Gtk::Window
 	end
 end
 
+class Gtk_Error < Gtk_Window
+	def initialize message
+		super()
+		error_title 		= Gtk::Label.new 
+		error_title.set_markup	"<span foreground='red' " \
+						"font-weight='heavy' " \
+						"size='large'>" \
+						"Error \n" \
+						"</span>"
+
+		error 			= Gtk::Label.new message
+		close 			= Gtk::Button.new :label => "Close"
+
+		close.signal_connect "clicked" do
+			destroy
+		end
+
+		vbox 			= Gtk::Box.new :vertical, 2
+		vbox.pack_start 	error_title
+		vbox.pack_start 	error
+		vbox.pack_start 	close \
+						,:expand => false \
+						,:fill => false \
+						,:padding => 0 \
+
+		add vbox
+		show_all
+	end
+end
+
 class Gtk_Insert < Gtk_Window
 	def initialize db, store, tree
 		super()
@@ -228,6 +258,8 @@ class Gtk_Insert < Gtk_Window
 				db.insert 		[name, url, comment, tag]
 				Actions.store_feed 	db, store, tree
 				destroy
+			else
+				Gtk_Error.new "Need at least name and url."
 			end
 		end
 
@@ -387,42 +419,42 @@ class Gtk_Ui < Gtk_Window
 				end
 
 				if key == "j"
-					@tree.move_cursor :display_lines, 1 
-					cursor, column = @tree.cursor
-					@tree.set_cursor cursor, nil, false
+					@tree.move_cursor 	:display_lines, 1 
+					cursor, column 		= @tree.cursor
+					@tree.set_cursor 	cursor, nil, false
 				end
 
-				if key == "k"
-					@tree.move_cursor :display_lines, -1 
-					cursor, column = @tree.cursor
-					@tree.set_cursor cursor, nil, false
+				if key == "k" 
+					@tree.move_cursor 	:display_lines, -1 
+					cursor, column 		= @tree.cursor
+					@tree.set_cursor 	cursor, nil, false
 				end
 
 				if key == "g"
-					@tree.move_cursor :buffer_ends, -1
-					cursor, column = @tree.cursor
-					@tree.set_cursor cursor, nil, false
+					@tree.move_cursor 	:buffer_ends, -1
+					cursor, column 		= @tree.cursor
+					@tree.set_cursor 	cursor, nil, false
 				end
 
 				if key == "G"
-					@tree.move_cursor :buffer_ends, 1
-					cursor, column = @tree.cursor
-					@tree.set_cursor cursor, nil, false
+					@tree.move_cursor 	:buffer_ends, 1
+					cursor, column 		= @tree.cursor
+					@tree.set_cursor 	cursor, nil, false
 				end
 
 				if key == "b"
-					@tree.move_cursor :pages, 1
-					cursor, column = @tree.cursor
-					@tree.set_cursor cursor, nil, false
+					@tree.move_cursor 	:pages, 1
+					cursor, column 		= @tree.cursor
+					@tree.set_cursor 	cursor, nil, false
 				end
 
 				if key == "B"
-					@tree.move_cursor :pages, -1
-					cursor, column = @tree.cursor
-					@tree.set_cursor cursor, nil, false
+					@tree.move_cursor 	:pages, -1
+					cursor, column 		= @tree.cursor
+					@tree.set_cursor 	cursor, nil, false
 				end
 
-				if key == "h"
+				if key == "h" or key == "a"
 					if sel = @tree.selection.selected
 						@tree.scroll_to_cell \
 							sel.path \
@@ -433,7 +465,7 @@ class Gtk_Ui < Gtk_Window
 					end
 				end
 
-				if key == "l"
+				if key == "l" or key == "e"
 					if sel = @tree.selection.selected
 						@tree.scroll_to_cell \
 							sel.path \
