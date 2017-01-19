@@ -3,8 +3,7 @@ require 'sqlite3'
 
 class Db
 	def initialize path
-		@path 			= path
-		@db 			= SQLite3::Database.open @path
+		@db 			= SQLite3::Database.open path
 
 		if @db
 			@db.execute "CREATE TABLE IF NOT EXISTS bookmark" \
