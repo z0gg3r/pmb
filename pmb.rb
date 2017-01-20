@@ -12,7 +12,6 @@ class Db
 			exit
 		end
 
-
 		@db.execute 	"CREATE TABLE IF NOT EXISTS bookmark" \
 					"(id INTEGER PRIMARY KEY" \
 					",name text" \
@@ -159,6 +158,7 @@ class Gtk_Window < Gtk::Window
 		set_title 		"Poor man's bookmark"
 		set_type_hint 		:dialog
 
+
 		signal_connect "destroy" do
 			destroy
 		end
@@ -179,12 +179,10 @@ class Gtk_Error < Gtk_Window
 		close_button 			= Gtk::Button.new :label => "_Close"
 		close_button.use_underline 	= true
 
-		if fatal
-			close_button.signal_connect "clicked" do
+		close_button.signal_connect "clicked" do
+			if fatal
 				Gtk.main_quit
-			end
-		else
-			close_button.signal_connect "clicked" do
+			else
 				destroy
 			end
 		end
@@ -213,6 +211,9 @@ class Gtk_Insert < Gtk_Window
 		tag_entry 			= Gtk::Entry.new
 		insert_button 			= Gtk::Button.new :label => "_Insert"
 		insert_button.use_underline 	= true
+		cancel_button 			= Gtk::Button.new :label => "_Cancel"
+		cancel_button.use_underline 	= true
+
 
 		if tree.selection.selected
 			tag_entry.set_text store.get_value \
@@ -244,6 +245,10 @@ class Gtk_Insert < Gtk_Window
 			end
 		end
 
+		cancel_button.signal_connect "clicked" do
+			destroy
+		end
+
 		grid 			= Gtk::Grid.new
 		grid.set_property 	"row-homogeneous", true
 		grid.set_property 	"column-homogeneous", true
@@ -257,7 +262,8 @@ class Gtk_Insert < Gtk_Window
 		grid.attach comment_entry,			20,  2,   20,   1
 		grid.attach (Gtk::Label.new "Tag"), 		0,   3,   20,   1
 		grid.attach tag_entry,				20,  3,   20,   1
-		grid.attach insert_button,			0,   4,   40,   1
+		grid.attach insert_button,			0,   4,   20,   1
+		grid.attach cancel_button,			20,  4,   20,   1
 
 		vbox 			= Gtk::Box.new :vertical, 2
 		vbox.pack_start 	grid \
@@ -281,6 +287,8 @@ class Gtk_Edit < Gtk_Window
 		tag_entry 			= Gtk::Entry.new
 		edit_button 			= Gtk::Button.new :label => "_Edit"
 		edit_button.use_underline 	= true
+		cancel_button 			= Gtk::Button.new :label => "_Cancel"
+		cancel_button.use_underline 	= true
 
 		grid 			= Gtk::Grid.new
 		grid.set_property 	"row-homogeneous", true
@@ -324,7 +332,8 @@ class Gtk_Edit < Gtk_Window
 			grid.attach comment_entry,		20,  2,   20,   1
 			grid.attach (Gtk::Label.new "Tag"), 	0,   3,   20,   1
 			grid.attach tag_entry,			20,  3,   20,   1
-			grid.attach edit_button,		0,   4,   40,   1
+			grid.attach edit_button,		0,   4,   20,   1
+			grid.attach cancel_button,		20,  4,   20,   1
 		else
 			set_title 	"Poor man's bookmark - Edit tag"
 			old_tag 	= store.get_value \
@@ -340,7 +349,12 @@ class Gtk_Edit < Gtk_Window
 								#e   #t   #l    #a
 			grid.attach (Gtk::Label.new "Tag"),	0,   0,   20,   1
 			grid.attach tag_entry, 			20,  0,   20,   1
-			grid.attach edit_button,		0,   1,   40,   1
+			grid.attach edit_button,		0,   1,   20,   1
+			grid.attach cancel_button,		20,  1,   20,   1
+		end
+
+		cancel_button.signal_connect "clicked" do
+			destroy
 		end
 
 		vbox 			= Gtk::Box.new :vertical, 2
@@ -412,7 +426,7 @@ class Gtk_Delete < Gtk_Window
 		cancel_button.signal_connect "clicked" do
 			destroy
 		end
-		
+
 		grid 			= Gtk::Grid.new
 		grid.set_property 	"row-homogeneous", true
 		grid.set_property 	"column-homogeneous", true
