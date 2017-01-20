@@ -5,96 +5,85 @@ require 'sqlite3'
 
 class Db
 	def initialize path
-		@db 			= SQLite3::Database.open path
-
-		if @db
-			@db.execute 	"CREATE TABLE IF NOT EXISTS bookmark" \
-						"(id INTEGER PRIMARY KEY" \
-						",name text" \
-						",url text" \
-						",comment text" \
-						",tag tex)"
+		begin
+			@db = SQLite3::Database.open path
+		rescue
+			puts 		"can't open database"
+			exit
 		end
+
+
+		@db.execute 	"CREATE TABLE IF NOT EXISTS bookmark" \
+					"(id INTEGER PRIMARY KEY" \
+					",name text" \
+					",url text" \
+					",comment text" \
+					",tag tex)"
 	end
 
 	def insert data
-		if @db
-			stm 		= @db.prepare "INSERT INTO bookmark " \
-					"(name, url, comment, tag) VALUES(?,?,?,?)"
-		
-			stm.bind_param 	1, data[0]
-			stm.bind_param 	2, data[1]
-			stm.bind_param 	3, data[2]
-			stm.bind_param 	4, data[3]
-			rs 		= stm.execute
-		end
+		stm 		= @db.prepare "INSERT INTO bookmark " \
+				"(name, url, comment, tag) VALUES(?,?,?,?)"
+	
+		stm.bind_param 	1, data[0]
+		stm.bind_param 	2, data[1]
+		stm.bind_param 	3, data[2]
+		stm.bind_param 	4, data[3]
+		rs 		= stm.execute
 	end
 
 	def delete id
-		if @db
-			stm 		= @db.prepare "DELETE FROM bookmark " \
-						"WHERE id = ?"	
+		stm 		= @db.prepare "DELETE FROM bookmark " \
+					"WHERE id = ?"	
 
-			stm.bind_param	1, id
-			rs 		= stm.execute
-		end
+		stm.bind_param	1, id
+		rs 		= stm.execute
 	end
 
 	def delete_tag tag
-		if @db
-			stm 		= @db.prepare "DELETE FROM bookmark " \
-						"WHERE tag = ?"
+		stm 		= @db.prepare "DELETE FROM bookmark " \
+					"WHERE tag = ?"
 
-			stm.bind_param 	1, tag
-			rs 		= stm.execute
-		end
+		stm.bind_param 	1, tag
+		rs 		= stm.execute
 	end
 
 	def edit id, field, value
-		if @db
-			if field == "name" \
-			or field == "url" \
-			or field == "comment" \
-			or field == "tag"
-				stm 	= @db.prepare "UPDATE bookmark " \
+		if field == "name" \
+		or field == "url" \
+		or field == "comment" \
+		or field == "tag"
+			stm 		= @db.prepare "UPDATE bookmark " \
 						"SET #{field} = ? WHERE id = ?"
 
-				stm.bind_param 	1, value
-				stm.bind_param 	2, id
-				rs 		= stm.execute
-			end
+			stm.bind_param 	1, value
+			stm.bind_param 	2, id
+			rs 		= stm.execute
 		end
-
 	end
 
 	def edit_tag tag, new_tag
-		if @db
-			stm 		= @db.prepare "UPDATE bookmark " \
-						"SET tag = ? WHERE tag = ?"
+		stm 		= @db.prepare "UPDATE bookmark " \
+					"SET tag = ? WHERE tag = ?"
 
-			stm.bind_param 	1, new_tag
-			stm.bind_param 	2, tag
-			rs 		= stm.execute
-		end
+		stm.bind_param 	1, new_tag
+		stm.bind_param 	2, tag
+		rs 		= stm.execute
 	end
 
 	def find id
-		if @db
-			stm 		= @db.prepare "SELECT * FROM bookmark " \
-						"WHERE id = ? ORDER BY tag ASC"
+		stm 		= @db.prepare "SELECT * FROM bookmark " \
+					"WHERE id = ? ORDER BY tag ASC"
 
-			stm.bind_param 	1, id
-			rs		= stm.execute
-		end
+		stm.bind_param 	1, id
+		rs		= stm.execute
 	end
 
 	def fetch 
-		if @db
-			stm 		= @db.prepare "SELECT * from bookmark " \
-						"ORDER BY tag ASC"
+		stm 		= @db.prepare "SELECT * from bookmark " \
+					"ORDER BY tag ASC"
 
-			rs 		= stm.execute
-		end
+		rs 		= stm.execute
 	end
 end
 
@@ -128,11 +117,11 @@ class Actions
 	end
 
 	def self.delete db, store, tree
-		Gtk_Delete.new db, store, tree
+		Gtk_Delete.new 		db, store, tree
 	end
 
 	def self.error message, fatal
-		Gtk_Error.new message, fatal
+		Gtk_Error.new 		message, fatal
 	end
 end
 
@@ -186,15 +175,16 @@ class Gtk_Error < Gtk_Window
 						"Error \n" \
 						"</span>"
 
-		error 			= Gtk::Label.new message
-		close 			= Gtk::Button.new :label => "Close"
+		error 				= Gtk::Label.new message
+		close_button 			= Gtk::Button.new :label => "_Close"
+		close_button.use_underline 	= true
 
 		if fatal
-			close.signal_connect "clicked" do
+			close_button.signal_connect "clicked" do
 				Gtk.main_quit
 			end
 		else
-			close.signal_connect "clicked" do
+			close_button.signal_connect "clicked" do
 				destroy
 			end
 		end
@@ -202,7 +192,7 @@ class Gtk_Error < Gtk_Window
 		vbox 			= Gtk::Box.new :vertical, 2
 		vbox.pack_start 	error_title
 		vbox.pack_start 	error
-		vbox.pack_start 	close \
+		vbox.pack_start 	close_button \
 						,:expand => false \
 						,:fill => false \
 						,:padding => 0 \
@@ -404,6 +394,7 @@ class Gtk_Delete < Gtk_Window
 		delete_button.use_underline 	= true
 
 		delete_button.signal_connect "clicked" do
+
 			if id.size < 2
 				db.delete_tag 		tag
 				Actions.store_feed	db, store, tree
@@ -443,7 +434,6 @@ class Gtk_Delete < Gtk_Window
 						,:expand => false \
 						,:fill => false \
 						,:padding => 0 \
-
 
 		cancel_button.grab_focus
 		add vbox
