@@ -128,19 +128,7 @@ class Actions
 	end
 
 	def self.delete db, store, tree
-		id 		= store.get_value \
-					(tree.selection).selected, 0
-
-		if id.size < 2
-			tag 	= store.get_value \
-					(tree.selection).selected, 3
-
-			db.delete_tag 	tag
-			store_feed	db, store, tree
-		else
-			db.delete 	id
-			store_feed 	db, store, tree
-		end
+		Gtk_Delete.new db, store, tree
 	end
 
 	def self.error message, fatal
@@ -376,6 +364,93 @@ class Gtk_Edit < Gtk_Window
 	end
 end
 
+class Gtk_Delete < Gtk_Window
+	def initialize db, store, tree
+		super()
+		set_title 			"Poor man's bookmark - Delete?"
+
+		id 		= store.get_value \
+					(tree.selection).selected, 0
+
+		name 		= store.get_value \
+					(tree.selection).selected, 1
+
+		url 		= store.get_value \
+					(tree.selection).selected, 2
+
+		comment 	= store.get_value \
+					(tree.selection).selected, 4
+
+		tag 		= store.get_value \
+					(tree.selection).selected, 3
+
+		name_entry 			= Gtk::Entry.new
+		name_entry.set_text 		name
+		name_entry.set_editable 	false
+
+		url_entry 			= Gtk::Entry.new
+		url_entry.set_text 		url
+		url_entry.set_editable 		false
+
+		comment_entry 			= Gtk::Entry.new
+		comment_entry.set_text 		comment
+		comment_entry.set_editable 	false
+
+		tag_entry 			= Gtk::Entry.new
+		tag_entry.set_text 		tag
+		tag_entry.set_editable 		false
+
+		delete_button 			= Gtk::Button.new :label => "_Delete"
+		delete_button.use_underline 	= true
+
+		delete_button.signal_connect "clicked" do
+			if id.size < 2
+				db.delete_tag 		tag
+				Actions.store_feed	db, store, tree
+			else
+				db.delete 		id
+				Actions.store_feed 	db, store, tree
+			end
+
+			destroy
+		end
+
+		cancel_button 			= Gtk::Button.new :label => "_Cancel"
+		cancel_button.use_underline 	= true
+
+		cancel_button.signal_connect "clicked" do
+			destroy
+		end
+		
+		grid 			= Gtk::Grid.new
+		grid.set_property 	"row-homogeneous", true
+		grid.set_property 	"column-homogeneous", true
+
+								#e   #t   #l    #a
+		grid.attach (Gtk::Label.new "Name"), 		0,   0,   20,   1
+		grid.attach name_entry, 			20,  0,   20,   1
+		grid.attach (Gtk::Label.new "Url"), 		0,   1,   20,   1
+		grid.attach url_entry,				20,  1,   20,   1
+		grid.attach (Gtk::Label.new "Comment"),		0,   2,   20,   1
+		grid.attach comment_entry,			20,  2,   20,   1
+		grid.attach (Gtk::Label.new "Tag"), 		0,   3,   20,   1
+		grid.attach tag_entry,				20,  3,   20,   1
+		grid.attach delete_button,			0,   4,   20,   1
+		grid.attach cancel_button,			20,  4,   20,   1
+
+		vbox 			= Gtk::Box.new :vertical, 2
+		vbox.pack_start 	grid \
+						,:expand => false \
+						,:fill => false \
+						,:padding => 0 \
+
+
+		cancel_button.grab_focus
+		add vbox
+		show_all
+	end
+end
+
 class Gtk_Ui < Gtk_Window
 	def initialize 
 		super
@@ -485,12 +560,12 @@ class Gtk_Ui < Gtk_Window
 	end
 
 	def make_tree_menu 
-		menu_item_copy 			= Gtk::MenuItem.new "_Copy"
+		menu_item_copy 			= Gtk::MenuItem.new "Copy"
 		menu_item_copy.signal_connect "activate" do
 			Actions.clipboard 	@store, @tree
 		end
 		
-		menu_item_insert 		= Gtk::MenuItem.new "_Insert"
+		menu_item_insert 		= Gtk::MenuItem.new "Insert"
 		menu_item_insert.signal_connect "activate" do
 			Actions.insert 		@db, @store, @tree
 		end
@@ -573,7 +648,7 @@ class Gtk_Ui < Gtk_Window
 			Actions.edit 		@db, @store, @tree
 		end
 
-		delete_button 			= Gtk::Button.new :label => "_delete"
+		delete_button 			= Gtk::Button.new :label => "_Delete"
 		delete_button.use_underline 	= true
 		delete_button.signal_connect "clicked" do
 			Actions.delete 		@db, @store, @tree
