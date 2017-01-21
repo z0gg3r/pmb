@@ -78,9 +78,19 @@ class Db
 		rs		= stm.execute
 	end
 
-	def fetch 
-		stm 		= @db.prepare "SELECT * from bookmark " \
-					"ORDER BY tag ASC"
+	def fetch filter
+		if filter
+			stm 		= @db.prepare "SELECT * FROM bookmark " \
+						"WHERE name LIKE '%%#{filter}%%' " \
+						"OR url LIKE '%%#{filter}%%' " \
+						"OR comment LIKE '%%#{filter}%%' " \
+						"OR tag LIKE '%%#{filter}%%' " \
+						"ORDER BY tag ASC"
+
+		else
+			stm 		= @db.prepare "SELECT * from bookmark " \
+						"ORDER BY tag ASC"
+		end
 
 		rs 		= stm.execute
 	end
@@ -103,7 +113,7 @@ class Actions
 
 	def self.store_feed db, store, tree
 		store.clear
-		store.feed 		db.fetch
+		store.feed 		db.fetch store.filter
 		tree.expand_all
 	end
 
@@ -125,6 +135,8 @@ class Actions
 end
 
 class Store < Gtk::TreeStore
+	attr_accessor :filter
+
 	def feed result
 		last 			= nil
 		number_of_items 	= 0
@@ -418,15 +430,13 @@ class Gtk_Delete < Gtk_Window
 		cancel_button.use_underline 	= true
 
 		delete_button.signal_connect "clicked" do
-
 			if id.size < 2
 				db.delete_tag 		tag
-				Actions.store_feed	db, store, tree
 			else
 				db.delete 		id
-				Actions.store_feed 	db, store, tree
 			end
 
+			Actions.store_feed 	db, store, tree
 			destroy
 		end
 
@@ -490,6 +500,11 @@ class Gtk_Ui < Gtk_Window
 						,:fill 		=> false
 
 		vbox.pack_start 	sw 
+
+		vbox.pack_start 	make_filter_box \
+						,:expand 	=> false \
+						,:fill 		=> false
+	
 		add 			vbox
 
 		@tree.set_cursor (@tree.model.iter_first).path, nil, false
@@ -681,6 +696,33 @@ class Gtk_Ui < Gtk_Window
 
 		frame.add 		action_box
 		frame
+	end
+
+	def make_filter_box
+		filter_label 			= Gtk::Label.new " Key "
+		filter_entry 			= Gtk::Entry.new
+		filter_button 			= Gtk::Button.new :label => "Fi_lter"
+		filter_button.use_underline 	= true
+
+		filter_button.signal_connect "clicked" do
+			@store.filter 		= filter_entry.text
+			Actions.store_feed 	@db, @store, @tree
+		end
+
+		filter_box 			= Gtk::Box.new :horizontal, 2
+		filter_box.pack_start 		filter_label \
+						,:expand 	=> false \
+						,:fill 		=> false
+
+		filter_box.pack_start 		filter_entry \
+						,:expand 	=> true \
+						,:fill 		=> true 
+
+		filter_box.pack_start 		filter_button \
+						,:expand 	=> false \
+						,:fill 		=> false
+
+		filter_box
 	end
 end
 
