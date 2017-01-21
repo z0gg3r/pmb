@@ -187,10 +187,17 @@ class Gtk_Error < Gtk_Window
 			end
 		end
 
+		grid 				= Gtk::Grid.new
+		grid.set_property 		"row-homogeneous", true
+		grid.set_property 		"column-homogeneous", true
+
+						#e   #t   #l    #a
+		grid.attach error_title, 	0,   0,   20,   1
+		grid.attach error, 		0,   1,   20,   1
+		grid.attach close_button, 	0,   2,   20,   1
+
 		vbox 			= Gtk::Box.new :vertical, 2
-		vbox.pack_start 	error_title
-		vbox.pack_start 	error
-		vbox.pack_start 	close_button \
+		vbox.pack_start 	grid \
 						,:expand => false \
 						,:fill => false \
 						,:padding => 0 \
@@ -210,8 +217,8 @@ class Gtk_Insert < Gtk_Window
 		comment_entry 			= Gtk::Entry.new
 		tag_entry 			= Gtk::Entry.new
 		insert_button 			= Gtk::Button.new :label => "_Insert"
-		insert_button.use_underline 	= true
 		cancel_button 			= Gtk::Button.new :label => "_Cancel"
+		insert_button.use_underline 	= true
 		cancel_button.use_underline 	= true
 
 
@@ -286,8 +293,8 @@ class Gtk_Edit < Gtk_Window
 		comment_entry 			= Gtk::Entry.new
 		tag_entry 			= Gtk::Entry.new
 		edit_button 			= Gtk::Button.new :label => "_Edit"
-		edit_button.use_underline 	= true
 		cancel_button 			= Gtk::Button.new :label => "_Cancel"
+		edit_button.use_underline 	= true
 		cancel_button.use_underline 	= true
 
 		grid 			= Gtk::Grid.new
@@ -407,6 +414,9 @@ class Gtk_Delete < Gtk_Window
 		delete_button 			= Gtk::Button.new :label => "_Delete"
 		delete_button.use_underline 	= true
 
+		cancel_button 			= Gtk::Button.new :label => "_Cancel"
+		cancel_button.use_underline 	= true
+
 		delete_button.signal_connect "clicked" do
 
 			if id.size < 2
@@ -419,9 +429,6 @@ class Gtk_Delete < Gtk_Window
 
 			destroy
 		end
-
-		cancel_button 			= Gtk::Button.new :label => "_Cancel"
-		cancel_button.use_underline 	= true
 
 		cancel_button.signal_connect "clicked" do
 			destroy
@@ -590,7 +597,6 @@ class Gtk_Ui < Gtk_Window
 		end
 
 		menu 			= Gtk::Menu.new
-
 		menu.append 		menu_item_copy
 		menu.append 		menu_item_insert
 		menu.append 		menu_item_edit
@@ -664,12 +670,17 @@ class Gtk_Ui < Gtk_Window
 			Actions.store_feed 	@db, @store, @tree
 		end
 
+		frame 			= Gtk::Frame.new "Actions"
+		frame.set_shadow_type  :none
 		action_box 		= Gtk::Box.new :horizontal, 2
+
 		action_box.pack_start 	insert_button
 		action_box.pack_start 	edit_button 
 		action_box.pack_start 	delete_button 
 		action_box.pack_start 	fetch_button 
-		action_box
+
+		frame.add 		action_box
+		frame
 	end
 end
 
