@@ -22,7 +22,7 @@ class Db
 
 	def insert data
 		stm 		= @db.prepare "INSERT INTO bookmark " \
-				"(name, url, comment, tag) VALUES(?,?,?,?)"
+					"(name, url, comment, tag) VALUES(?,?,?,?)"
 	
 		stm.bind_param 	1, data[0]
 		stm.bind_param 	2, data[1]
@@ -80,16 +80,15 @@ class Db
 
 	def fetch filter
 		if filter
-			stm 		= @db.prepare "SELECT * FROM bookmark " \
-						"WHERE name LIKE '%%#{filter}%%' " \
-						"OR url LIKE '%%#{filter}%%' " \
-						"OR comment LIKE '%%#{filter}%%' " \
-						"OR tag LIKE '%%#{filter}%%' " \
-						"ORDER BY tag ASC"
-
+			stm 	= @db.prepare "SELECT * FROM bookmark " \
+					"WHERE name LIKE '%%#{filter}%%' " \
+					"OR url LIKE '%%#{filter}%%' " \
+					"OR comment LIKE '%%#{filter}%%' " \
+					"OR tag LIKE '%%#{filter}%%' " \
+					"ORDER BY tag ASC"
 		else
-			stm 		= @db.prepare "SELECT * from bookmark " \
-						"ORDER BY tag ASC"
+			stm 	= @db.prepare "SELECT * from bookmark " \
+					"ORDER BY tag ASC"
 		end
 
 		rs 		= stm.execute
@@ -163,6 +162,14 @@ class Store < Gtk::TreeStore
 	end
 end
 
+class Grid < Gtk::Grid
+	def initialize
+		super()
+		set_property 		"row-homogeneous", true
+		set_property 		"column-homogeneous", true
+	end
+end
+
 class Gtk_Window < Gtk::Window
 	def initialize 
 		super
@@ -199,22 +206,20 @@ class Gtk_Error < Gtk_Window
 			end
 		end
 
-		grid 				= Gtk::Grid.new
-		grid.set_property 		"row-homogeneous", true
-		grid.set_property 		"column-homogeneous", true
+		grid 				= Grid.new
 
 						#e   #t   #l    #a
 		grid.attach error_title, 	0,   0,   20,   1
 		grid.attach error, 		0,   1,   20,   1
 		grid.attach close_button, 	0,   2,   20,   1
 
-		vbox 			= Gtk::Box.new :vertical, 2
-		vbox.pack_start 	grid \
-						,:expand => false \
-						,:fill => false \
-						,:padding => 0 \
+		vbox 				= Gtk::Box.new :vertical, 2
+		vbox.pack_start 		grid \
+							,:expand => false \
+							,:fill => false \
+							,:padding => 0 \
 
-		add vbox
+		add 				vbox
 		show_all
 	end
 end
@@ -268,9 +273,7 @@ class Gtk_Insert < Gtk_Window
 			destroy
 		end
 
-		grid 			= Gtk::Grid.new
-		grid.set_property 	"row-homogeneous", true
-		grid.set_property 	"column-homogeneous", true
+		grid 			= Grid.new
 
 								#e   #t   #l    #a
 		grid.attach (Gtk::Label.new "Name"), 		0,   0,   20,   1
@@ -290,7 +293,7 @@ class Gtk_Insert < Gtk_Window
 						,:fill => false \
 						,:padding => 0 \
 
-		add vbox
+		add 			vbox
 		show_all
 	end
 end
@@ -309,9 +312,7 @@ class Gtk_Edit < Gtk_Window
 		edit_button.use_underline 	= true
 		cancel_button.use_underline 	= true
 
-		grid 			= Gtk::Grid.new
-		grid.set_property 	"row-homogeneous", true
-		grid.set_property 	"column-homogeneous", true
+		grid 			= Grid.new
 
 		rs 			= db.find (store.get_value \
 						(tree.selection).selected, 0)
@@ -382,7 +383,7 @@ class Gtk_Edit < Gtk_Window
 						,:fill 		=> false \
 						,:padding 	=> 0 \
 
-		add vbox
+		add 			vbox
 		show_all
 	end
 end
@@ -444,9 +445,7 @@ class Gtk_Delete < Gtk_Window
 			destroy
 		end
 
-		grid 			= Gtk::Grid.new
-		grid.set_property 	"row-homogeneous", true
-		grid.set_property 	"column-homogeneous", true
+		grid 			= Grid.new
 
 								#e   #t   #l    #a
 		grid.attach (Gtk::Label.new "Name"), 		0,   0,   20,   1
@@ -467,7 +466,7 @@ class Gtk_Delete < Gtk_Window
 						,:padding => 0 \
 
 		cancel_button.grab_focus
-		add vbox
+		add 			vbox
 		show_all
 	end
 end
@@ -685,17 +684,12 @@ class Gtk_Ui < Gtk_Window
 			Actions.store_feed 	@db, @store, @tree
 		end
 
-		frame 			= Gtk::Frame.new "Actions"
-		frame.set_shadow_type  :none
-		action_box 		= Gtk::Box.new :horizontal, 2
-
-		action_box.pack_start 	insert_button
-		action_box.pack_start 	edit_button 
-		action_box.pack_start 	delete_button 
-		action_box.pack_start 	fetch_button 
-
-		frame.add 		action_box
-		frame
+		action_box 			= Gtk::Box.new :horizontal, 2
+		action_box.pack_start 		insert_button
+		action_box.pack_start 		edit_button 
+		action_box.pack_start 		delete_button 
+		action_box.pack_start 		fetch_button 
+		action_box
 	end
 
 	def make_filter_box
@@ -711,16 +705,16 @@ class Gtk_Ui < Gtk_Window
 
 		filter_box 			= Gtk::Box.new :horizontal, 2
 		filter_box.pack_start 		filter_label \
-						,:expand 	=> false \
-						,:fill 		=> false
+							,:expand 	=> false \
+							,:fill 		=> false
 
 		filter_box.pack_start 		filter_entry \
-						,:expand 	=> true \
-						,:fill 		=> true 
+							,:expand 	=> true \
+							,:fill 		=> true 
 
 		filter_box.pack_start 		filter_button \
-						,:expand 	=> false \
-						,:fill 		=> false
+							,:expand 	=> false \
+							,:fill 		=> false
 
 		filter_box
 	end
