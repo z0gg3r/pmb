@@ -157,20 +157,18 @@ class Settings
 		f = File.open("#{@s['dir']}/#{@s['config']}", "r")
 
 		while l = f.gets do
-			@s.each do |i|
-				# need a better regex ..
-				if i[0] + ' ' == l[/(^.*?\s)/] 
-					@s[i[0]] = l[/(?<==\s).*/]
+			if @s[l[/(^.*?\s)/][0...-1]]
+				@s[l[/(^.*?\s)/][0...-1]] = l[/(?<==\s).*/]
 
-					#special cases ..
-					if l[/^search_column/]
-						@s[i[0]] = l[/(?<==\s).*/].to_i
-					end
+				#special cases ..
+				if l[/^search_column/]
+					@s[l[/(^.*?\s)/][0...-1]] \
+						= l[/(?<==\s).*/].to_i
+				end
 
-					if l[/^show_expanders/] \
-					and l[/(?<==\s).*/] == "false"
-						@s[i[0]] = false
-					end
+				if l[/^show_expanders/] \
+				and l[/(?<==\s).*/] == "false"
+					@s[l[/(^.*?\s)/][0...-1]] = false
 				end
 			end
 		end
@@ -205,11 +203,19 @@ class Actions
 	end
 
 	def self.edit db, store, tree
-		Gtk_Edit.new 		db, store, tree
+		if tree.model.iter_first
+			Gtk_Edit.new 		db, store, tree
+		else
+			error "Nothing to edit.", false
+		end
 	end
 
 	def self.delete db, store, tree
-		Gtk_Delete.new 		db, store, tree
+		if tree.model.iter_first
+			Gtk_Delete.new 		db, store, tree
+		else
+			error "Nothing to delete.", false
+		end
 	end
 
 	def self.error message, fatal
@@ -217,7 +223,7 @@ class Actions
 	end
 
 	def self.settings settings, tree
-		Gtk_Settings.new settings, tree
+		Gtk_Settings.new 	settings, tree
 	end
 end
 
