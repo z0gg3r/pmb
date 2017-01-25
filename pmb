@@ -98,26 +98,28 @@ end
 class Settings
 	def initialize
 		@s = Hash[ \
-			"dir" => "#{ENV['HOME']}/.config/poor-man-s-bookmark" \
-			,"config" => "config" \
-			,"db_name" => "bookmarks.db" \
-			,"id_fg" => "" \
-			,"id_bg" => "" \
-			,"id_font" => "" \
-			,"name_fg" => "" \
-			,"name_bg" => "" \
-			,"name_font" => "" \
-			,"url_fg" => "" \
-			,"url_bg" => "" \
-			,"url_font" => "" \
-			,"comment_fg" => "" \
-			,"comment_bg"=> "" \
-			,"comment_font"=> "" \
-			,"tag_fg" => "" \
-			,"tag_bg" => "" \
-			,"tag_font" => "" \
-			,"show_expanders" => false \
-			,"search_column" => 1]
+			"dir" 			=> "#{ENV['HOME']}/.config/" \
+						"pmb" \
+			,"config" 		=> "config" \
+			,"db" 			=> "#{ENV['HOME']}/.config/" \
+						"pmb/bookmarks.db" \
+			,"id_fg" 		=> String.new \
+			,"id_bg" 		=> String.new \
+			,"id_font" 		=> String.new \
+			,"name_fg" 		=> String.new \
+			,"name_bg" 		=> String.new \
+			,"name_font" 		=> String.new \
+			,"url_fg" 		=> String.new \
+			,"url_bg" 		=> String.new \
+			,"url_font" 		=> String.new \
+			,"comment_fg" 		=> String.new \
+			,"comment_bg"		=> String.new \
+			,"comment_font"		=> String.new \
+			,"tag_fg" 		=> String.new \
+			,"tag_bg" 		=> String.new \
+			,"tag_font" 		=> String.new \
+			,"show_expanders" 	=> false \
+			,"search_column" 	=> 1]
 
 		if !(File.exists? "#{@s['dir']}")
 			Dir.mkdir "#{@s['dir']}"
@@ -322,7 +324,6 @@ class Tree < Gtk::TreeView
 		else
 			@render_id.font 	= nil
 		end
-
 
 		if !s['name_font'].empty?
 			@render_name.font 	= s['name_font']
@@ -686,6 +687,12 @@ class Gtk_Settings < Gtk_Window
 		tag_fg 			= Gtk::ColorButton.new
 		tag_bg 			= Gtk::ColorButton.new 
 
+		id_font_button 		= Gtk::FontButton.new s['id_font']
+		name_font_button 	= Gtk::FontButton.new s['name_font']
+		url_font_button 	= Gtk::FontButton.new s['url_font']
+		comment_font_button 	= Gtk::FontButton.new s['comment_font']
+		tag_font_button 	= Gtk::FontButton.new s['tag_font']
+
 		id_fg.color 		= Gdk::Color.parse s['id_fg'] \
 						if !s['id_fg'].empty?
 
@@ -716,16 +723,16 @@ class Gtk_Settings < Gtk_Window
 		tag_bg.color 		= Gdk::Color.parse s['tag_bg'] \
 						if !s['tag_bg'].empty?
 
-		t_id_fg 		= ""
-		t_id_bg 		= ""
-		t_name_fg 		= ""
-		t_name_bg 		= ""
-		t_url_fg 		= ""
-		t_url_bg 		= ""
-		t_comment_fg 		= ""
-		t_comment_bg 		= ""
-		t_tag_fg 		= ""
-		t_tag_bg 		= ""
+		t_id_fg 		= String.new
+		t_id_bg 		= String.new
+		t_name_fg 		= String.new
+		t_name_bg 		= String.new
+		t_url_fg 		= String.new
+		t_url_bg 		= String.new
+		t_comment_fg 		= String.new
+		t_comment_bg 		= String.new
+		t_tag_fg 		= String.new
+		t_tag_bg 		= String.new
 
 		id_fg.signal_connect "color-set" do
 			t_id_fg = id_fg.color.to_s
@@ -767,12 +774,6 @@ class Gtk_Settings < Gtk_Window
 			t_tag_bg = tag_bg.color.to_s
 		end
 
-		id_font_button 		= Gtk::FontButton.new s['id_font']
-		name_font_button 	= Gtk::FontButton.new s['name_font']
-		url_font_button 	= Gtk::FontButton.new s['url_font']
-		comment_font_button 	= Gtk::FontButton.new s['comment_font']
-		tag_font_button 	= Gtk::FontButton.new s['tag_font']
-
 		grid 			= Grid.new
 
 								#e   #t   #l   #a
@@ -803,7 +804,6 @@ class Gtk_Settings < Gtk_Window
 
 		frame 		= Gtk::Frame.new "Appearance"
 		frame.add 	grid
-
 
 		vbox 			= Gtk::Box.new :vertical, 2
 		vbox.pack_start 	frame \
@@ -872,7 +872,7 @@ class Gtk_Ui < Gtk_Window
 
 		@settings 		= Settings.new
 		@s 			= @settings.s
-		@db 			= Db.new "#{@s['dir']}/#{@s['db_name']}"
+		@db 			= Db.new @s['db']
 		@store 			= Store.new String, String \
 						,String, String, String
 		@tree 			= make_tree 
@@ -885,7 +885,7 @@ class Gtk_Ui < Gtk_Window
 
 		vbox 			= Gtk::Box.new :vertical, 2
 
-		vbox.pack_start 	make_action_box \
+		vbox.pack_start 	(make_menubar make_menu) \
 						,:expand 	=> false \
 						,:fill 		=> false
 
@@ -968,43 +968,100 @@ class Gtk_Ui < Gtk_Window
 		show_all
 	end
 
-	def make_tree_menu 
-		menu_item_copy 			= Gtk::MenuItem.new "Copy"
-		menu_item_copy.signal_connect "activate" do
-			Actions.clipboard 	@store, @tree
-		end
-		
-		menu_item_insert 		= Gtk::MenuItem.new "Insert"
-		menu_item_insert.signal_connect "activate" do
-			Actions.insert 		@db, @store, @tree
+	def make_menu
+		file_item 			= Gtk::MenuItem.new "_File"
+		file_item.use_underline 	= true
+		file_exit 			= Gtk::MenuItem.new "_Exit"
+		file_exit.use_underline 	= true
+
+		file_menu 			= Gtk::Menu.new
+		file_item.set_submenu 		file_menu
+		file_menu.append 		file_exit
+
+		edit_item 			= Gtk::MenuItem.new "_Edit"
+		edit_item.use_underline 	= true 
+		edit_fetch	 		= Gtk::MenuItem.new "_Fetch"
+		edit_fetch.use_underline 	= true
+		edit_copy	 		= Gtk::MenuItem.new "_Copy"
+		edit_copy.use_underline 	= true
+		edit_insert	 		= Gtk::MenuItem.new "_Insert"
+		edit_insert.use_underline 	= true
+		edit_edit	 		= Gtk::MenuItem.new "E_dit"
+		edit_edit.use_underline 	= true
+		edit_delete	 		= Gtk::MenuItem.new "_Delete"
+		edit_delete.use_underline 	= true
+		edit_preferences 		= Gtk::MenuItem.new "_Preferences"
+		edit_preferences.use_underline	= true
+
+		edit_menu 			= Gtk::Menu.new
+		edit_item.set_submenu 		edit_menu
+		edit_menu.append 		edit_fetch
+		edit_menu.append 		edit_copy
+		edit_menu.append 		edit_insert
+		edit_menu.append 		edit_edit
+		edit_menu.append 		edit_delete
+		edit_menu.append 		edit_preferences
+
+		help_item 			= Gtk::MenuItem.new "_Help"
+		help_item.use_underline 	= true
+		help_doc 			= Gtk::MenuItem.new "_Doc"
+		help_doc.use_underline 		= true
+		help_about 			= Gtk::MenuItem.new "_About"
+		help_about.use_underline 	= true
+
+		help_menu 			= Gtk::Menu.new 
+		help_item.set_submenu 		help_menu
+		help_menu.append		help_doc
+		help_menu.append		help_about
+
+		file_exit.signal_connect "activate" do
+			Gtk.main_quit
 		end
 
-		menu_item_delete 		= Gtk::MenuItem.new "Delete"
-		menu_item_delete.signal_connect "activate" do
-			Actions.delete 		@db, @store, @tree
-		end
-
-		menu_item_edit 			= Gtk::MenuItem.new "Edit"
-		menu_item_edit.signal_connect "activate" do
-			Actions.edit 		@db, @store, @tree
-		end
-
-		menu_item_fetch 		= Gtk::MenuItem.new "Fetch"
-		menu_item_fetch.signal_connect "activate" do
+		edit_fetch.signal_connect "activate" do
 			Actions.store_feed 	@db, @store, @tree
 		end
 
-		menu_item_settings 		= Gtk::MenuItem.new "Settings"
-		menu_item_settings.signal_connect "activate" do
+		edit_copy.signal_connect "activate" do
+			Actions.clipboard 	@store, @tree
+		end
+
+		edit_insert.signal_connect "activate" do
+			Actions.insert 		@db, @store, @tree
+		end
+
+		edit_delete.signal_connect "activate" do
+			Actions.delete 		@db, @store, @tree
+		end
+
+		edit_edit.signal_connect "activate" do
+			Actions.edit 		@db, @store, @tree
+		end
+
+		edit_preferences.signal_connect "activate" do
 			Actions.settings 	@settings, @tree
 		end
 
+		menu_items = Hash[\
+			"file" => file_item \
+			,"edit" => edit_item \
+			,"help" => help_item]
+	end
+
+	def make_menubar items
+		menu_bar = Gtk::MenuBar.new
+		menu_bar.append 	items['file']
+		menu_bar.append 	items['edit']
+		#menu_bar.append 	items['help']
+
+		menu_bar
+	end
+
+	def make_tree_menu items
 		menu 			= Gtk::Menu.new
-		menu.append 		menu_item_copy
-		menu.append 		menu_item_insert
-		menu.append 		menu_item_edit
-		menu.append 		menu_item_delete
-		menu.append 		menu_item_settings
+		menu.append 		items['file']
+		menu.append 		items['edit']
+		#menu.append 		items['help']
 		menu.show_all
 		menu
 	end
@@ -1044,7 +1101,7 @@ class Gtk_Ui < Gtk_Window
 			end
 		end
 
-		menu			= make_tree_menu
+		menu			= make_tree_menu make_menu
 
 		tree.signal_connect "button-press-event" do |tree, e|
 			if e.kind_of? Gdk::EventButton and e.button == 3
