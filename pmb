@@ -199,28 +199,37 @@ class Actions
 		tree.expand_all
 	end
 
-	def self.open db, store, tree, settings, window
+	def self.open store, tree, settings, window
 		chooser = Gtk::FileChooserDialog.new \
 			:title => "Open" \
 			,:parent => window \
 			,:action => :save \
-			,:buttons => nil
+			,:buttons => [ \
+				[Gtk::Stock::CANCEL, Gtk::ResponseType::CANCEL] \
+				,[Gtk::Stock::OPEN, Gtk::ResponseType::ACCEPT]]
 
-		chooser.signal_connect "file-activated" do
+		db 	= nil
+
+		if chooser.run == Gtk::ResponseType::ACCEPT
 			begin
 				db 			= Db.new chooser.filename
 				settings.s['db'] 	= chooser.filename
 
 				chooser.destroy
+
 				Actions.store_feed 	db, store, tree
 				settings.save_config
 			rescue
 				chooser.destroy
 				Actions.error 		"Error opening file", false
 			end
+		else
+			chooser.destroy
 		end
 
-		chooser.run
+		if db
+			db
+		end
 	end
 
 	def self.insert db, store, tree
@@ -917,7 +926,7 @@ class Gtk_Ui < Gtk_Window
 				end
 
 				if key == "o"
-					Actions.open 	@db, @store, @tree, @settings, self
+					@db 	= Actions.open 	@store, @tree, @settings, self
 				end
 
 				cursor, column 		= @tree.cursor
@@ -950,7 +959,7 @@ class Gtk_Ui < Gtk_Window
 		edit_copy.use_underline 	= true
 		edit_insert	 		= Gtk::MenuItem.new "_Insert"
 		edit_insert.use_underline 	= true
-		edit_edit	 		= Gtk::MenuItem.new "E_dit"
+		edit_edit	 		= Gtk::MenuItem.new "_Edit"
 		edit_edit.use_underline 	= true
 		edit_delete	 		= Gtk::MenuItem.new "_Delete"
 		edit_delete.use_underline 	= true
@@ -979,7 +988,7 @@ class Gtk_Ui < Gtk_Window
 		help_menu.append		help_about
 
 		file_open.signal_connect "activate" do
-			Actions.open 		@db, @store, @tree, @settings, self
+			@db 	= Actions.open @store, @tree, @settings, self
 		end
 
 		file_exit.signal_connect "activate" do
