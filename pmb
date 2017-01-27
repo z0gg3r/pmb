@@ -205,8 +205,8 @@ class Actions
 			,:parent => window \
 			,:action => :save \
 			,:buttons => [ \
-				[Gtk::Stock::CANCEL, Gtk::ResponseType::CANCEL] \
-				,[Gtk::Stock::OPEN, Gtk::ResponseType::ACCEPT]]
+				[Gtk::Stock::CANCEL, :cancel] \
+				,[Gtk::Stock::OPEN, :accept]]
 
 		db 	= nil
 
@@ -926,7 +926,27 @@ class Gtk_Ui < Gtk_Window
 				end
 
 				if key == "o"
-					@db 	= Actions.open 	@store, @tree, @settings, self
+					ret 	= Actions.open 	@store, @tree, @settings, self
+
+					if ret
+						@db = ret
+					end
+				end
+
+				if key == "i"
+					Actions.insert 	@db ,@store, @tree
+				end
+
+				if key == "t"
+					Actions.edit 	@db ,@store, @tree
+				end
+
+				if key == "d"
+					Actions.delete 	@db ,@store, @tree
+				end
+
+				if key == "s"
+					Actions.settings @settings, @tree
 				end
 
 				cursor, column 		= @tree.cursor
@@ -988,7 +1008,11 @@ class Gtk_Ui < Gtk_Window
 		help_menu.append		help_about
 
 		file_open.signal_connect "activate" do
-			@db 	= Actions.open @store, @tree, @settings, self
+			ret 	= Actions.open @store, @tree, @settings, self
+
+			if ret
+				@db = ret
+			end
 		end
 
 		file_exit.signal_connect "activate" do
