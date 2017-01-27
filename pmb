@@ -119,7 +119,8 @@ class Settings
 			,"tag_bg" 		=> String.new \
 			,"tag_font" 		=> String.new \
 			,"show_expanders" 	=> false \
-			,"search_column" 	=> 1]
+			,"search_column" 	=> 1 \
+			,"xclip" 		=> true]
 
 		if !(File.exists? "#{@s['dir']}")
 			Dir.mkdir "#{@s['dir']}"
@@ -167,18 +168,29 @@ class Settings
 end
 
 class Actions
-	def self.clipboard store, tree
+	def self.clipboard store, tree, xclip
 		url 	= store.get_value \
 				(tree.selection).selected, 2
 
-		Process.detach spawn \
-			"echo #{url} | xclip -i -selection 'primary']"
+		if xclip
+			Process.detach spawn \
+				"echo #{url} | xclip -i -selection 'primary'"
 
-		Process.detach spawn \
-			"echo #{url} | xclip -i -selection 'secoundary']"
+			Process.detach spawn \
+				"echo #{url} | xclip -i -selection 'secoundary'"
 
-		Process.detach spawn \
-			"echo #{url} | xclip -i -selection 'clipboard']"
+			Process.detach spawn \
+				"echo #{url} | xclip -i -selection 'clipboard'"
+		else
+			clip_p = Gtk::Clipboard.get Gdk::Selection::PRIMARY
+			clip_c = Gtk::Clipboard.get Gdk::Selection::CLIPBOARD
+
+			clip_p.text = url
+			clip_c.text = url
+
+			clip_p.store
+			clip_c.store
+		end
 	end
 
 	def self.store_feed db, store, tree
@@ -256,98 +268,42 @@ class Tree < Gtk::TreeView
 		@render_tag 		= Gtk::CellRendererText.new
 	end
 
-	def load_colors s
-		if !s['id_fg'].empty?
-			@render_id.foreground_gdk 	= Gdk::Color.parse s['id_fg']
+	def parse_color render, color_fg, color_bg
+		if !color_fg.empty?
+			render.foreground_gdk 	= Gdk::Color.parse color_fg
 		else
-			@render_id.foreground 		= nil
+			render.foreground 	= nil
 		end
 
-		if !s['id_bg'].empty?
-			@render_id.background_gdk 	= Gdk::Color.parse s['id_bg']
+		if !color_bg.empty?
+			render.background_gdk 	= Gdk::Color.parse color_bg
 		else
-			@render_id.background 		= nil
-		end
-
-		if !s['name_fg'].empty?
-			@render_name.foreground_gdk 	= Gdk::Color.parse s['name_fg'] 
-		else
-			@render_name.foreground 	= nil
-		end
-
-		if !s['name_bg'].empty?
-			@render_name.background_gdk 	= Gdk::Color.parse s['name_bg']
-		else
-			@render_name.background 	= nil
-		end
-
-		if !s['url_fg'].empty?
-			@render_url.foreground_gdk 	= Gdk::Color.parse s['url_fg'] 
-		else
-			@render_url.foreground 		= nil
-		end
-
-		if !s['url_bg'].empty?
-			@render_url.background_gdk 	= Gdk::Color.parse s['url_bg'] 
-		else
-			@render_url.background  	= nil
-		end
-
-		if !s['comment_fg'].empty?
-			@render_comment.foreground_gdk 	= Gdk::Color.parse s['comment_fg']
-		else
-			@render_comment.foreground 	= nil
-		end
-
-		if !s['comment_bg'].empty?
-			@render_comment.background_gdk 	= Gdk::Color.parse s['comment_bg'] 
-		else
-			@render_comment.background 	= nil
-		end
-
-		if !s['tag_fg'].empty?
-			@render_tag.foreground_gdk	= Gdk::Color.parse s['tag_fg'] 
-		else
-			@render_tag.foreground		= nil
-		end
-
-		if !s['tag_bg'].empty?
-			@render_tag.background_gdk 	= Gdk::Color.parse s['tag_bg'] 
-		else
-			@render_tag.background 		= nil
+			render.background 	= nil
 		end
 	end
 
-	def load_font s
-		if !s['id_font'].empty?
-			@render_id.font 	= s['id_font']
+	def parse_font render, font
+		if !font.empty?
+			render.font 	= font
 		else
-			@render_id.font 	= nil
+			render.font 	= nil
 		end
+	end
 
-		if !s['name_font'].empty?
-			@render_name.font 	= s['name_font']
-		else
-			@render_name.font 	= nil
-		end
+	def load_settings s
+		parse_color 	@render_id, s['id_fg'], s['id_bg']
+		parse_color 	@render_name, s['name_fg'], s['name_bg']
+		parse_color 	@render_url, s['url_fg'], s['url_bg']
+		parse_color 	@render_comment, s['comment_fg'], s['comment_bg']
+		parse_color 	@render_tag, s['tag_fg'], s['tag_bg']
 
-		if !s['url_font'].empty?
-			@render_url.font 	= s['url_font']
-		else
-			@render_url.font 	= nil
-		end
+		parse_font 	@render_id, s['id_font']
+		parse_font 	@render_name, s['name_font']
+		parse_font 	@render_url, s['url_font']
+		parse_font 	@render_comment, s['comment_font']
+		parse_font 	@render_tag, s['tag_font']
 
-		if !s['comment_font'].empty?
-			@render_comment.font 	= s['comment_font']
-		else
-			@render_comment.font 	= nil
-		end
-
-		if !s['tag_font'].empty?
-			@render_tag.font 	= s['tag_font']
-		else
-			@render_tag.font 	= nil
-		end
+		columns_autosize
 	end
 
 	attr_reader \
@@ -675,53 +631,22 @@ class Gtk_Settings < Gtk_Window
 		set_title 		title + " - Options"
 
 		s 			= settings.s
-
-		id_fg 			= Gtk::ColorButton.new 
-		id_bg 			= Gtk::ColorButton.new 
-		name_fg 		= Gtk::ColorButton.new 
-		name_bg 		= Gtk::ColorButton.new 
-		url_fg			= Gtk::ColorButton.new 
-		url_bg			= Gtk::ColorButton.new 
-		comment_fg 		= Gtk::ColorButton.new 
-		comment_bg 		= Gtk::ColorButton.new 
-		tag_fg 			= Gtk::ColorButton.new
-		tag_bg 			= Gtk::ColorButton.new 
-
 		id_font_button 		= Gtk::FontButton.new s['id_font']
 		name_font_button 	= Gtk::FontButton.new s['name_font']
 		url_font_button 	= Gtk::FontButton.new s['url_font']
 		comment_font_button 	= Gtk::FontButton.new s['comment_font']
 		tag_font_button 	= Gtk::FontButton.new s['tag_font']
 
-		id_fg.color 		= Gdk::Color.parse s['id_fg'] \
-						if !s['id_fg'].empty?
-
-		id_bg.color 		= Gdk::Color.parse s['id_bg'] \
-						if !s['id_bg'].empty?
-
-		name_fg.color 		= Gdk::Color.parse s['name_fg'] \
-						if !s['name_fg'].empty?
-
-		name_bg.color 		= Gdk::Color.parse s['name_bg'] \
-						if !s['name_bg'].empty?
-
-		url_fg.color 		= Gdk::Color.parse s['url_fg'] \
-						if !s['url_fg'].empty?
-
-		url_bg.color 		= Gdk::Color.parse s['url_bg'] \
-						if !s['url_bg'].empty?
-
-		comment_fg.color 	= Gdk::Color.parse s['comment_fg'] \
-						if !s['comment_fg'].empty?
-
-		comment_bg.color 	= Gdk::Color.parse s['comment_bg'] \
-						if !s['comment_bg'].empty?
-
-		tag_fg.color 		= Gdk::Color.parse s['tag_fg'] \
-						if !s['tag_fg'].empty?
-
-		tag_bg.color 		= Gdk::Color.parse s['tag_bg'] \
-						if !s['tag_bg'].empty?
+		id_fg 			= color_button s['id_fg']
+		id_bg 			= color_button s['id_bg']
+		name_fg 		= color_button s['name_fg']
+		name_bg 		= color_button s['name_bg']
+		url_fg 			= color_button s['url_fg']
+		url_bg 			= color_button s['url_bg']
+		comment_fg 		= color_button s['comment_fg']
+		comment_bg 		= color_button s['comment_bg']
+		tag_fg 			= color_button s['tag_fg']
+		tag_bg 			= color_button s['tag_bg']
 
 		t_id_fg 		= String.new
 		t_id_bg 		= String.new
@@ -735,43 +660,43 @@ class Gtk_Settings < Gtk_Window
 		t_tag_bg 		= String.new
 
 		id_fg.signal_connect "color-set" do
-			t_id_fg = id_fg.color.to_s
+			t_id_fg 	= id_fg.color.to_s
 		end
 
 		id_bg.signal_connect "color-set" do
-			t_id_bg = id_bg.color.to_s
+			t_id_bg 	= id_bg.color.to_s
 		end
 
 		name_fg.signal_connect "color-set" do
-			t_name_fg = name_fg.color.to_s
+			t_name_fg 	= name_fg.color.to_s
 		end
 
 		name_bg.signal_connect "color-set" do
-			t_name_bg = name_bg.color.to_s
+			t_name_bg 	= name_bg.color.to_s
 		end
 
 		url_fg.signal_connect "color-set" do
-			t_url_fg = url_fg.color.to_s
+			t_url_fg 	= url_fg.color.to_s
 		end
 
 		url_bg.signal_connect "color-set" do
-			t_url_bg = url_bg.color.to_s
+			t_url_bg 	= url_bg.color.to_s
 		end
 
 		comment_fg.signal_connect "color-set" do
-			t_comment_fg = comment_fg.color.to_s
+			t_comment_fg 	= comment_fg.color.to_s
 		end
 
 		comment_bg.signal_connect "color-set" do
-			t_comment_bg = comment_bg.color.to_s
+			t_comment_bg 	= comment_bg.color.to_s
 		end
 
 		tag_fg.signal_connect "color-set" do
-			t_tag_fg = tag_fg.color.to_s
+			t_tag_fg 	= tag_fg.color.to_s
 		end
 
 		tag_bg.signal_connect "color-set" do
-			t_tag_bg = tag_bg.color.to_s
+			t_tag_bg 	= tag_bg.color.to_s
 		end
 
 		grid 			= Grid.new
@@ -849,14 +774,22 @@ class Gtk_Settings < Gtk_Window
 			s['tag_font']     	= tag_font_button.font_name
 
 			settings.save_config
-			tree.load_colors 	s
-			tree.load_font	 	s
-			tree.columns_autosize
+			tree.load_settings	s
 			destroy
 		end
 
 		add 			vbox
 		show_all
+	end
+
+	def color_button color
+		button 			= Gtk::ColorButton.new 
+
+		if !color.empty?
+			button.color	= Gdk::Color.parse color 
+		end
+
+		button
 	end
 end
 
@@ -971,11 +904,14 @@ class Gtk_Ui < Gtk_Window
 	def make_menu
 		file_item 			= Gtk::MenuItem.new "_File"
 		file_item.use_underline 	= true
+		file_open 			= Gtk::MenuItem.new "_Open"
+		file_open.use_underline 	= true
 		file_exit 			= Gtk::MenuItem.new "_Exit"
 		file_exit.use_underline 	= true
 
 		file_menu 			= Gtk::Menu.new
 		file_item.set_submenu 		file_menu
+		#file_menu.append 		file_open
 		file_menu.append 		file_exit
 
 		edit_item 			= Gtk::MenuItem.new "_Edit"
@@ -1023,7 +959,7 @@ class Gtk_Ui < Gtk_Window
 		end
 
 		edit_copy.signal_connect "activate" do
-			Actions.clipboard 	@store, @tree
+			Actions.clipboard 	@store, @tree, @s['xclip']
 		end
 
 		edit_insert.signal_connect "activate" do
@@ -1040,6 +976,18 @@ class Gtk_Ui < Gtk_Window
 
 		edit_preferences.signal_connect "activate" do
 			Actions.settings 	@settings, @tree
+		end
+
+		help_about.signal_connect "activate" do
+			about 			= Gtk::AboutDialog.new
+			about.name 		= "poor man's bookmark"
+			about.program_name 	= "pmb"
+			about.version  		= "0.1"
+			about.license		= "GNU GPL 2.0"
+			about.website 		= "https://github.com/neoncortex/poor-man-s-bookmark"
+			
+			about.run
+			about.destroy
 		end
 
 		menu_items = Hash[\
@@ -1068,8 +1016,7 @@ class Gtk_Ui < Gtk_Window
 
 	def make_tree 
 		tree			= Tree.new @store
-		tree.load_font		@s
-		tree.load_colors	@s
+		tree.load_settings	@s
 
 		tree.insert_column 	0, "tag" \
 						,tree.render_tag, {:text => 3}
@@ -1097,7 +1044,7 @@ class Gtk_Ui < Gtk_Window
 					tree.expand_row path, nil
 				end
 			else
-				Actions.clipboard @store, @tree
+				Actions.clipboard @store, @tree, @s['xclip']
 			end
 		end
 
@@ -1114,47 +1061,6 @@ class Gtk_Ui < Gtk_Window
 		end
 
 		tree
-	end
-
-	def make_action_box 
-		insert_button 			= Gtk::Button.new :label => "_Insert"
-		insert_button.use_underline 	= true
-		insert_button.signal_connect "clicked" do
-			Actions.insert 		@db, @store, @tree
-		end
-
-		edit_button 			= Gtk::Button.new :label => "_Edit"
-		edit_button.use_underline 	= true
-		edit_button.signal_connect "clicked" do
-			Actions.edit 		@db, @store, @tree
-		end
-
-		delete_button 			= Gtk::Button.new :label => "_Delete"
-		delete_button.use_underline 	= true
-		delete_button.signal_connect "clicked" do
-			Actions.delete 		@db, @store, @tree
-		end
-
-		fetch_button 			= Gtk::Button.new :label => "_Fetch"
-		fetch_button.use_underline 	= true
-		fetch_button.signal_connect "clicked" do
-			Actions.store_feed 	@db, @store, @tree
-		end
-
-		settings_button 		= Gtk::Button.new \
-							:label => "_Settings"
-		settings_button.use_underline 	= true
-		settings_button.signal_connect "clicked" do
-			Actions.settings 	@settings, @tree
-		end
-
-		action_box 			= Gtk::Box.new :horizontal, 2
-		action_box.pack_start 		insert_button
-		action_box.pack_start 		edit_button 
-		action_box.pack_start 		delete_button 
-		action_box.pack_start 		fetch_button 
-		action_box.pack_start 		settings_button 
-		action_box
 	end
 
 	def make_filter_box
