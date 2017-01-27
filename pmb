@@ -17,7 +17,7 @@ class Db
 					",name text" \
 					",url text" \
 					",comment text" \
-					",tag tex)"
+					",tag text)"
 	end
 
 	def insert data
@@ -201,10 +201,10 @@ class Actions
 
 	def self.open store, tree, settings, window
 		chooser = Gtk::FileChooserDialog.new \
-			:title => "Open" \
-			,:parent => window \
-			,:action => :save \
-			,:buttons => [ \
+			:title 		=> "Open" \
+			,:parent 	=> window \
+			,:action 	=> :save \
+			,:buttons 	=> [ \
 				[Gtk::Stock::CANCEL, :cancel] \
 				,[Gtk::Stock::OPEN, :accept]]
 
@@ -232,13 +232,41 @@ class Actions
 		end
 	end
 
+	def self.import db_ex, window
+		chooser = Gtk::FileChooserDialog.new \
+			:title 		=> "Open" \
+			,:parent 	=> window \
+			,:action 	=> :open \
+			,:buttons 	=> [ \
+				[Gtk::Stock::CANCEL, :cancel] \
+				,[Gtk::Stock::OPEN, :accept]]
+
+		if chooser.run == Gtk::ResponseType::ACCEPT
+			begin
+				db 		= Db.new chooser.filename
+				r 		= db.fetch nil
+
+				for i in r do
+					db_ex.insert [i[1], i[2], i[3], i[4]]
+				end
+
+				chooser.destroy
+			rescue
+				chooser.destroy
+				Actions.error 	"Error importing file", false
+			end
+		else
+			chooser.destroy
+		end
+	end
+
 	def self.insert db, store, tree
 		Gtk_Insert.new 		db, store, tree
 	end
 
 	def self.edit db, store, tree
 		if tree.model.iter_first
-			Gtk_Edit.new 		db, store, tree
+			Gtk_Edit.new 	db, store, tree
 		else
 			error "Nothing to edit.", false
 		end
@@ -246,7 +274,7 @@ class Actions
 
 	def self.delete db, store, tree
 		if tree.model.iter_first
-			Gtk_Delete.new 		db, store, tree
+			Gtk_Delete.new 	db, store, tree
 		else
 			error "Nothing to delete.", false
 		end
@@ -922,13 +950,10 @@ class Gtk_Ui < Gtk_Window
 							,0.0 \
 							,0.0
 					end
-
 				end
 
 				if key == "o"
-					ret 	= Actions.open 	@store, @tree, @settings, self
-
-					if ret
+					if (ret = Actions.open @store, @tree, @settings, self)
 						@db = ret
 					end
 				end
@@ -963,12 +988,15 @@ class Gtk_Ui < Gtk_Window
 		file_item.use_underline 	= true
 		file_open 			= Gtk::MenuItem.new "_Open"
 		file_open.use_underline 	= true
+		file_import 			= Gtk::MenuItem.new "_Import"
+		file_import.use_underline 	= true
 		file_exit 			= Gtk::MenuItem.new "_Exit"
 		file_exit.use_underline 	= true
 
 		file_menu 			= Gtk::Menu.new
 		file_item.set_submenu 		file_menu
 		file_menu.append 		file_open
+		file_menu.append 		file_import
 		file_menu.append 		file_exit
 
 		edit_item 			= Gtk::MenuItem.new "_Edit"
@@ -1008,11 +1036,14 @@ class Gtk_Ui < Gtk_Window
 		help_menu.append		help_about
 
 		file_open.signal_connect "activate" do
-			ret 	= Actions.open @store, @tree, @settings, self
-
-			if ret
+			if (ret = Actions.open @store, @tree, @settings, self)
 				@db = ret
 			end
+		end
+
+		file_import.signal_connect "activate" do
+			Actions.import 		@db, self
+			Actions.store_feed 	@db, @store, @tree
 		end
 
 		file_exit.signal_connect "activate" do
