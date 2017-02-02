@@ -118,7 +118,6 @@ class Settings
 			,"tag_fg" 		=> String.new \
 			,"tag_bg" 		=> String.new \
 			,"tag_font" 		=> String.new \
-			,"show_expanders" 	=> false \
 			,"search_column" 	=> 1 \
 			,"xclip" 		=> true]
 
@@ -153,11 +152,6 @@ class Settings
 					if l[/^search_column/]
 						@s[l[/(^.*?\s)/][0...-1]] \
 							= l[/(?<==\s).*/].to_i
-					end
-
-					if l[/^show_expanders/] \
-					and l[/(?<==\s).*/] == "false"
-						@s[l[/(^.*?\s)/][0...-1]] = false
 					end
 				end
 			end
@@ -292,18 +286,60 @@ end
 class Store < Gtk::TreeStore
 	attr_accessor :filter
 
+	def search_toplevel entry
+		each do |s, tp, it|
+			if entry == (get_value it, 3) \
+			and !it.parent
+				return it
+			end
+		end
+
+		false
+	end
+
+	def search_children entry, parent
+		each do |s, tp, it|
+			if entry == (get_value it, 3) \
+			and parent == (get_value it.parent, 3)
+				return it
+			end
+		end
+
+		false
+	end
+
 	def feed result
-		last 			= nil
 		number_of_items 	= 0
 
 		for i in result do
-			if !last or i[4] != last
-				iter = insert nil, number_of_items \
-					+= 1 \
-					,[" " \
-					," " \
-					," " \
+			dirs = i[4].split '/'
+
+			if !(r = search_toplevel dirs[0])
+				iter = insert nil, number_of_items += 1 \
+					,["" \
+					,"" \
+					,"" \
+					,"#{dirs[0]}" \
+					,"" \
 					,"#{i[4]}"]
+			else
+				iter = r	
+			end
+
+			1.step(dirs.size, 1) do |j|
+				if !(c = search_children dirs[j], dirs[j - 1]) 
+					if dirs[j]
+						iter = insert iter, number_of_items += 1 \
+							,["" \
+							,"" \
+							,"" \
+							,"#{dirs[j]}" \
+							,"" \
+							,"#{i[4]}"]
+					end
+				else
+					iter = c
+				end
 			end
 
 			insert iter, number_of_items += 1 \
@@ -311,14 +347,39 @@ class Store < Gtk::TreeStore
 				,"#{i[1]}" \
 				,"#{i[2]}" \
 				,"" \
-				,"#{i[3]}"]
+				,"#{i[3]}" \
+				,"#{i[4]}"]
+		end
+	end
+
+	def feed_simple result
+		last 			= nil
+		number_of_items 	= 0
+
+		for i in result do
+			if !last or i[4] != last
+				iter = insert nil, number_of_items += 1 \
+					,["" \
+					,"" \
+					,"" \
+					,"#{i[4]}" \
+					,"" \
+					,"#{i[4]}"]
+			
+			end
+				insert iter, number_of_items += 1 \
+					,["#{i[0]}" \
+					,"#{i[1]}" \
+					,"#{i[2]}" \
+					,"" \
+					,"#{i[3]}" \
+					,"#{i[4]}"]
 
 			last 		= i[4]
 		end
 	end
 end
 
-	
 class Tree < Gtk::TreeView
 	def initialize store
 		super store
@@ -456,7 +517,7 @@ class Gtk_Insert < Gtk_Window
 
 		if tree.selection.selected
 			tag_entry.set_text store.get_value \
-				(tree.selection).selected, 3
+				(tree.selection.selected), 5
 		end
 
 		insert_button.signal_connect "clicked" do
@@ -529,30 +590,33 @@ class Gtk_Edit < Gtk_Window
 
 		grid 			= Grid.new
 
-		rs 			= db.find (store.get_value \
-						(tree.selection).selected, 0)
+		if "#{(store.get_value (tree.selection).selected, 3)}".empty?
+			id 		= store.get_value (tree.selection).selected, 0
+			name 		= store.get_value (tree.selection).selected, 1
+			url  		= store.get_value (tree.selection).selected, 2
+			comment 	= store.get_value (tree.selection).selected, 4
+			tag 		= store.get_value (tree.selection).selected, 5
 
-		if n = rs.next
-			name_entry.set_text 	n[1]
-			url_entry.set_text 	n[2]
-			comment_entry.set_text 	n[3]
-			tag_entry.set_text 	n[4]
+			name_entry.set_text 	name
+			url_entry.set_text 	url
+			comment_entry.set_text 	comment
+			tag_entry.set_text 	tag
 
 			edit_button.signal_connect "clicked" do
-				if n[1] != name_entry.text 
-					db.edit n[0], "name", name_entry.text
+				if name != name_entry.text 
+					db.edit id, "name", name_entry.text
 				end
 
-				if n[2] != url_entry.text 
-					db.edit n[0], "url", url_entry.text
+				if url != url_entry.text 
+					db.edit id, "url", url_entry.text
 				end
 
-				if n[3] != comment_entry.text 
-					db.edit n[0], "comment", comment_entry.text
+				if comment != comment_entry.text 
+					db.edit id, "comment", comment_entry.text
 				end
 
-				if n[4] != tag_entry.text
-					db.edit n[0], "tag", tag_entry.text
+				if tag != tag_entry.text
+					db.edit id, "tag", tag_entry.text
 				end
 
 				Actions.store_feed 	db, store, tree
@@ -572,7 +636,7 @@ class Gtk_Edit < Gtk_Window
 		else
 			set_title 	"Poor man's bookmark - Edit tag"
 			old_tag 	= store.get_value \
-						(tree.selection).selected, 3
+						(tree.selection).selected, 5
 
 			tag_entry.set_text old_tag
 			
@@ -621,7 +685,7 @@ class Gtk_Delete < Gtk_Window
 					(tree.selection).selected, 4
 
 		tag 		= store.get_value \
-					(tree.selection).selected, 3
+					(tree.selection).selected, 5
 
 		name_entry 			= Gtk::Entry.new
 		name_entry.set_text 		name
@@ -868,7 +932,7 @@ class Gtk_Ui < Gtk_Window
 		@s 			= @settings.s
 		@db 			= Db.new @s['db']
 		@store 			= Store.new String, String \
-						,String, String, String
+						,String, String, String, String
 		@tree 			= make_tree 
 
 		Actions.store_feed 	@db, @store, @tree
@@ -1130,18 +1194,16 @@ class Gtk_Ui < Gtk_Window
 						,tree.render_comment, {:text => 4}
 
 		tree.search_column 	= @s['search_column']
-		tree.show_expanders 	= @s['show_expanders']
+		tree.enable_tree_lines  = false
 
 		tree.signal_connect "row-activated" do |tree, path, col|
-			if path.depth <= 1
-				if tree.row_expanded? path
-					tree.collapse_row path
-				else
-					tree.expand_row path, nil
-				end
+			if tree.row_expanded? path
+				tree.collapse_row path
 			else
-				Actions.clipboard @store, @tree, @s['xclip']
+				tree.expand_row path, nil
 			end
+
+			Actions.clipboard @store, @tree, @s['xclip']
 		end
 
 		menu			= make_tree_menu make_menu
