@@ -17,11 +17,12 @@ class Db
 					",name text" \
 					",url text" \
 					",comment text" \
-					",tag text)"
+					",tag text" \
+					",UNIQUE(url))"
 	end
 
 	def insert data
-		stm 		= @db.prepare "INSERT INTO bookmark " \
+		stm 		= @db.prepare "INSERT OR IGNORE INTO bookmark " \
 					"(name, url, comment, tag) VALUES(?,?,?,?)"
 	
 		stm.bind_param 	1, data[0]
