@@ -22,6 +22,22 @@ class Db
 	end
 
 	def insert data
+		stm 		= @db.prepare "INSERT INTO bookmark " \
+					"(name, url, comment, tag) VALUES(?,?,?,?)"
+	
+		stm.bind_param 	1, data[0]
+		stm.bind_param 	2, data[1]
+		stm.bind_param 	3, data[2]
+		stm.bind_param 	4, data[3]
+
+		begin
+			rs 		= stm.execute
+		rescue
+			Actions.error "url already exists", false
+		end
+	end
+
+	def import data
 		stm 		= @db.prepare "INSERT OR IGNORE INTO bookmark " \
 					"(name, url, comment, tag) VALUES(?,?,?,?)"
 	
@@ -29,7 +45,6 @@ class Db
 		stm.bind_param 	2, data[1]
 		stm.bind_param 	3, data[2]
 		stm.bind_param 	4, data[3]
-		rs 		= stm.execute
 	end
 
 	def delete id
@@ -119,6 +134,7 @@ class Settings
 			,"tag_fg" 		=> String.new \
 			,"tag_bg" 		=> String.new \
 			,"tag_font" 		=> String.new \
+			,"style"		=> "0" \
 			,"search_column" 	=> 1 \
 			,"xclip" 		=> true]
 
@@ -190,7 +206,13 @@ class Actions
 
 	def self.store_feed db, store, tree
 		store.clear
-		store.feed 		(db.fetch store.filter)
+		
+		if store.style.to_i == 0
+			store.feed_tree		(db.fetch store.filter)
+		else
+			store.feed_tag		(db.fetch store.filter)
+		end
+
 		tree.expand_all
 	end
 
@@ -242,7 +264,7 @@ class Actions
 				r 		= db.fetch nil
 
 				for i in r do
-					db_ex.insert [i[1], i[2], i[3], i[4]]
+					db_ex.import [i[1], i[2], i[3], i[4]]
 				end
 
 				chooser.destroy
@@ -279,13 +301,18 @@ class Actions
 		Gtk_Error.new 		message, fatal
 	end
 
-	def self.settings settings, tree
-		Gtk_Settings.new 	settings, tree
+	def self.settings settings, db, store, tree
+		Gtk_Settings.new 	settings, db, store, tree
 	end
 end
 
 class Store < Gtk::TreeStore
-	attr_accessor :filter
+	attr_accessor :filter, :style
+
+	def initialize *args
+		super(*args[1..-1])
+		@style = args[0].to_i
+	end
 
 	def search_toplevel entry
 		each do |s, tp, it|
@@ -309,37 +336,40 @@ class Store < Gtk::TreeStore
 		false
 	end
 
-	def feed result
-		number_of_items 	= 0
+	def feed_tree result
+		number_of_items = 0
 
 		for i in result do
-			dirs = i[4].split '/'
+			dirs 	= i[4].split '/'
+			iter 	= nil
 
-			if !(r = search_toplevel dirs[0])
-				iter = insert nil, number_of_items += 1 \
-					,["" \
-					,"" \
-					,"" \
-					,"#{dirs[0]}" \
-					,"" \
-					,"#{i[4]}"]
-			else
-				iter = r	
-			end
-
-			1.step(dirs.size, 1) do |j|
-				if !(c = search_children dirs[j], dirs[j - 1]) 
-					if dirs[j]
-						iter = insert iter, number_of_items += 1 \
+			dirs.each_with_index do |d, j|
+				if j == 0
+					if !(r = search_toplevel d)
+						iter = insert nil, number_of_items += 1 \
 							,["" \
 							,"" \
 							,"" \
-							,"#{dirs[j]}" \
+							,"#{d}" \
 							,"" \
 							,"#{i[4]}"]
+					else
+						iter = r	
 					end
 				else
-					iter = c
+					if !(c = search_children d, dirs[j - 1]) 
+						if dirs[j]
+							iter = insert iter, number_of_items += 1 \
+								,["" \
+								,"" \
+								,"" \
+								,"#{d}" \
+								,"" \
+								,"#{i[4]}"]
+						end
+					else
+						iter = c
+					end
 				end
 			end
 
@@ -353,7 +383,7 @@ class Store < Gtk::TreeStore
 		end
 	end
 
-	def feed_simple result
+	def feed_tag result
 		last 			= nil
 		number_of_items 	= 0
 
@@ -366,15 +396,15 @@ class Store < Gtk::TreeStore
 					,"#{i[4]}" \
 					,"" \
 					,"#{i[4]}"]
-			
 			end
-				insert iter, number_of_items += 1 \
-					,["#{i[0]}" \
-					,"#{i[1]}" \
-					,"#{i[2]}" \
-					,"" \
-					,"#{i[3]}" \
-					,"#{i[4]}"]
+
+			insert iter, number_of_items += 1 \
+				,["#{i[0]}" \
+				,"#{i[1]}" \
+				,"#{i[2]}" \
+				,"" \
+				,"#{i[3]}" \
+				,"#{i[4]}"]
 
 			last 		= i[4]
 		end
@@ -452,7 +482,6 @@ class Gtk_Window < Gtk::Window
 		set_title 		"Poor man's bookmark"
 		set_type_hint 		:dialog
 
-
 		signal_connect "destroy" do
 			destroy
 		end
@@ -514,7 +543,6 @@ class Gtk_Insert < Gtk_Window
 		cancel_button 			= Gtk::Button.new :label => "_Cancel"
 		insert_button.use_underline 	= true
 		cancel_button.use_underline 	= true
-
 
 		if tree.selection.selected
 			tag_entry.set_text store.get_value \
@@ -752,7 +780,7 @@ class Gtk_Delete < Gtk_Window
 end
 
 class Gtk_Settings < Gtk_Window
-	def initialize settings, tree
+	def initialize settings, db, store, tree
 		super()
 		set_title 		title + " - Options"
 
@@ -825,6 +853,17 @@ class Gtk_Settings < Gtk_Window
 			t_tag_bg 	= tag_bg.color.to_s
 		end
 
+		tree_style		= Gtk::ComboBoxText.new 
+		tree_style.insert_text 	0, "Tree"
+		tree_style.insert_text 	1, "Tag"
+		tree_style.set_active 	s['style'].to_i
+
+		t_tree_style 		= s['style']
+
+		tree_style.signal_connect "changed" do |s|
+			t_tree_style = s.active
+		end
+
 		grid 			= Grid.new
 
 								#e   #t   #l   #a
@@ -857,10 +896,15 @@ class Gtk_Settings < Gtk_Window
 		frame.add 	grid
 
 		vbox 			= Gtk::Box.new :vertical, 2
+		vbox.pack_start 	tree_style \
+						,:expand 	=> false \
+						,:fill 		=> false \
+						,:padding 	=> 0
+
 		vbox.pack_start 	frame \
 						,:expand 	=> false \
 						,:fill 		=> false \
-						,:padding 	=> 0 \
+						,:padding 	=> 0
 
 		apply_button 			= Gtk::Button.new :label => "_Apply"
 		apply_button.use_underline 	= true
@@ -875,7 +919,7 @@ class Gtk_Settings < Gtk_Window
 		vbox.pack_start 	button_box \
 						,:expand 	=> true \
 						,:fill 		=> false \
-						,:padding 	=> 0 \
+						,:padding 	=> 0
 
 		cancel_button.signal_connect "clicked" do
 			destroy
@@ -893,6 +937,8 @@ class Gtk_Settings < Gtk_Window
 			s['tag_fg'] 		= t_tag_fg 	if !t_tag_fg.empty?
 			s['tag_bg'] 		= t_tag_bg 	if !t_tag_bg.empty?
 
+			s['style'] 		= t_tree_style
+
 			s['id_font'] 		= id_font_button.font_name
 			s['name_font']    	= name_font_button.font_name
 			s['url_font']     	= url_font_button.font_name
@@ -900,6 +946,8 @@ class Gtk_Settings < Gtk_Window
 			s['tag_font']     	= tag_font_button.font_name
 
 			settings.save_config
+			store.style 		= s['style'].to_i
+			Actions.store_feed	db, store, tree
 			tree.load_settings	s
 			destroy
 		end
@@ -932,7 +980,7 @@ class Gtk_Ui < Gtk_Window
 		@settings 		= Settings.new
 		@s 			= @settings.s
 		@db 			= Db.new @s['db']
-		@store 			= Store.new String, String \
+		@store 			= Store.new @s['style'], String, String \
 						,String, String, String, String
 		@tree 			= make_tree 
 
@@ -950,7 +998,8 @@ class Gtk_Ui < Gtk_Window
 
 		vbox.pack_start 	sw 
 
-		vbox.pack_start 	make_filter_box \
+		filter_box 		= make_filter_box
+		vbox.pack_start 	filter_box \
 						,:expand 	=> false \
 						,:fill 		=> false
 
@@ -961,6 +1010,10 @@ class Gtk_Ui < Gtk_Window
 
 		signal_connect "key-press-event" do |w, e|
 			key = "#{Gdk::Keyval.to_name e.keyval}"
+
+			if key == "Escape"
+				@tree.grab_focus
+			end
 
 			if e.state.control_mask?
 				if key == "a" 
@@ -1027,6 +1080,15 @@ class Gtk_Ui < Gtk_Window
 					Actions.insert 	@db ,@store, @tree
 				end
 
+				if key == "y"
+					filter_box.each do |item|
+						if item.class == Gtk::Entry
+							item.grab_focus	
+							break
+						end
+					end
+				end
+
 				if key == "t"
 					Actions.edit 	@db ,@store, @tree
 				end
@@ -1036,7 +1098,7 @@ class Gtk_Ui < Gtk_Window
 				end
 
 				if key == "s"
-					Actions.settings @settings, @tree
+					Actions.settings @settings, @db, @store, @tree
 				end
 
 				cursor, column 		= @tree.cursor
@@ -1136,7 +1198,7 @@ class Gtk_Ui < Gtk_Window
 		end
 
 		edit_preferences.signal_connect "activate" do
-			Actions.settings 	@settings, @tree
+			Actions.settings 	@settings, @db, @store, @tree
 		end
 
 		help_about.signal_connect "activate" do
