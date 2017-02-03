@@ -135,7 +135,7 @@ class Settings
 			,"tag_bg" 		=> String.new \
 			,"tag_font" 		=> String.new \
 			,"style"		=> "0" \
-			,"search_column" 	=> 1 \
+			,"search_column" 	=> "1" \
 			,"xclip" 		=> true]
 
 		if !(File.exists? "#{@s['dir']}")
@@ -231,7 +231,6 @@ class Actions
 			begin
 				db 			= Db.new chooser.filename
 				settings.s['db'] 	= chooser.filename
-
 				chooser.destroy
 
 				Actions.store_feed 	db, store, tree
@@ -319,7 +318,7 @@ class Store < Gtk::TreeStore
 			if entry == (get_value it, 3) \
 			and !it.parent
 				return it
-			end
+			 end
 		end
 
 		false
@@ -345,7 +344,7 @@ class Store < Gtk::TreeStore
 
 			dirs.each_with_index do |d, j|
 				if j == 0
-					if !(r = search_toplevel d)
+					if !(iter = search_toplevel d)
 						iter = insert nil, number_of_items += 1 \
 							,["" \
 							,"" \
@@ -353,11 +352,9 @@ class Store < Gtk::TreeStore
 							,"#{d}" \
 							,"" \
 							,"#{i[4]}"]
-					else
-						iter = r	
 					end
 				else
-					if !(c = search_children d, dirs[j - 1]) 
+					if !(r = search_children d, dirs[j - 1]) 
 						if dirs[j]
 							iter = insert iter, number_of_items += 1 \
 								,["" \
@@ -368,7 +365,7 @@ class Store < Gtk::TreeStore
 								,"#{i[4]}"]
 						end
 					else
-						iter = c
+						iter = r
 					end
 				end
 			end
@@ -791,73 +788,28 @@ class Gtk_Settings < Gtk_Window
 		comment_font_button 	= Gtk::FontButton.new s['comment_font']
 		tag_font_button 	= Gtk::FontButton.new s['tag_font']
 
-		id_fg 			= color_button s['id_fg']
-		id_bg 			= color_button s['id_bg']
-		name_fg 		= color_button s['name_fg']
-		name_bg 		= color_button s['name_bg']
-		url_fg 			= color_button s['url_fg']
-		url_bg 			= color_button s['url_bg']
-		comment_fg 		= color_button s['comment_fg']
-		comment_bg 		= color_button s['comment_bg']
-		tag_fg 			= color_button s['tag_fg']
-		tag_bg 			= color_button s['tag_bg']
+		color_buttons = [ \
+			[(color_button s['id_fg'])	  ,String.new] \
+			,[(color_button s['id_bg'])	  ,String.new] \
+			,[(color_button s['name_fg'])	  ,String.new] \
+			,[(color_button s['name_bg'])	  ,String.new] \
+			,[(color_button s['url_fg'])	  ,String.new] \
+			,[(color_button s['url_bg'])	  ,String.new] \
+			,[(color_button s['comment_fg'])  ,String.new] \
+			,[(color_button s['comment_bg'])  ,String.new] \
+			,[(color_button s['tag_fg'])	  ,String.new] \
+			,[(color_button s['tag_bg'])	  ,String.new]] 
 
-		t_id_fg 		= String.new
-		t_id_bg 		= String.new
-		t_name_fg 		= String.new
-		t_name_bg 		= String.new
-		t_url_fg 		= String.new
-		t_url_bg 		= String.new
-		t_comment_fg 		= String.new
-		t_comment_bg 		= String.new
-		t_tag_fg 		= String.new
-		t_tag_bg 		= String.new
-
-		id_fg.signal_connect "color-set" do
-			t_id_fg 	= id_fg.color.to_s
-		end
-
-		id_bg.signal_connect "color-set" do
-			t_id_bg 	= id_bg.color.to_s
-		end
-
-		name_fg.signal_connect "color-set" do
-			t_name_fg 	= name_fg.color.to_s
-		end
-
-		name_bg.signal_connect "color-set" do
-			t_name_bg 	= name_bg.color.to_s
-		end
-
-		url_fg.signal_connect "color-set" do
-			t_url_fg 	= url_fg.color.to_s
-		end
-
-		url_bg.signal_connect "color-set" do
-			t_url_bg 	= url_bg.color.to_s
-		end
-
-		comment_fg.signal_connect "color-set" do
-			t_comment_fg 	= comment_fg.color.to_s
-		end
-
-		comment_bg.signal_connect "color-set" do
-			t_comment_bg 	= comment_bg.color.to_s
-		end
-
-		tag_fg.signal_connect "color-set" do
-			t_tag_fg 	= tag_fg.color.to_s
-		end
-
-		tag_bg.signal_connect "color-set" do
-			t_tag_bg 	= tag_bg.color.to_s
+		0.step(color_buttons.size - 1, 1) do |i|
+			color_buttons[i][0].signal_connect "color-set" do
+				color_buttons[i][1] = color_buttons[i][0].color.to_s
+			end
 		end
 
 		tree_style		= Gtk::ComboBoxText.new 
 		tree_style.insert_text 	0, "Tree"
 		tree_style.insert_text 	1, "Tag"
 		tree_style.set_active 	s['style'].to_i
-
 		t_tree_style 		= s['style']
 
 		tree_style.signal_connect "changed" do |s|
@@ -867,39 +819,38 @@ class Gtk_Settings < Gtk_Window
 		grid 			= Grid.new
 
 								#e   #t   #l   #a
-		grid.attach (Gtk::Label.new "Column"),   	0,   0,   5,   1
-		grid.attach (Gtk::Label.new "Foreground"),     	5,   0,   5,   1
-		grid.attach (Gtk::Label.new "Background"),     	10,  0,   5,   1
-		grid.attach (Gtk::Label.new "Font"),     	15,  0,   5,   1
-		grid.attach (Gtk::Label.new "Id"),		0,   1,   5,   1
-		grid.attach id_fg,				5,   1,   5,   1
-		grid.attach id_bg,				10,  1,   5,   1
-		grid.attach id_font_button,			15,  1,   5,   1
-		grid.attach (Gtk::Label.new "Name"),		0,   2,   5,   1
-		grid.attach name_fg,				5,   2,   5,   1
-		grid.attach name_bg,				10,  2,   5,   1
-		grid.attach name_font_button,			15,  2,   5,   1
-		grid.attach (Gtk::Label.new "Url"), 		0,   3,   5,   1
-		grid.attach url_fg,				5,   3,   5,   1
-		grid.attach url_bg,				10,  3,   5,   1
-		grid.attach url_font_button,			15,  3,   5,   1
-		grid.attach (Gtk::Label.new "Comment"),		0,   4,   5,   1
-		grid.attach comment_fg,				5,   4,   5,   1
-		grid.attach comment_bg,				10,  4,   5,   1
-		grid.attach comment_font_button,		15,  4,   5,   1
-		grid.attach (Gtk::Label.new "Tag"), 		0,   5,   5,   1
-		grid.attach tag_fg,				5,   5,   5,   1
-		grid.attach tag_bg,				10,  5,   5,   1
-		grid.attach tag_font_button,			15,  5,   5,   1
+		grid.attach (Gtk::Label.new "Style"),		0,   0,   5,   1
+		grid.attach (tree_style),   			5,   0,   5,   1
+		grid.attach (Gtk::Label.new ""),   		0,   1,   5,   1
+		grid.attach (Gtk::Label.new "Column"),   	0,   2,   5,   1
+		grid.attach (Gtk::Label.new "Foreground"),     	5,   2,   5,   1
+		grid.attach (Gtk::Label.new "Background"),     	10,  2,   5,   1
+		grid.attach (Gtk::Label.new "Font"),     	15,  2,   5,   1
+		grid.attach (Gtk::Label.new "Id"),		0,   3,   5,   1
+		grid.attach color_buttons[0][0],		5,   3,   5,   1
+		grid.attach color_buttons[1][0],		10,  3,   5,   1
+		grid.attach id_font_button,			15,  3,   5,   1
+		grid.attach (Gtk::Label.new "Name"),		0,   4,   5,   1
+		grid.attach color_buttons[2][0],		5,   4,   5,   1
+		grid.attach color_buttons[3][0],		10,  4,   5,   1
+		grid.attach name_font_button,			15,  4,   5,   1
+		grid.attach (Gtk::Label.new "Url"), 		0,   5,   5,   1
+		grid.attach color_buttons[4][0],		5,   5,   5,   1
+		grid.attach color_buttons[5][0],		10,  5,   5,   1
+		grid.attach url_font_button,			15,  5,   5,   1
+		grid.attach (Gtk::Label.new "Comment"),		0,   6,   5,   1
+		grid.attach color_buttons[6][0],		5,   6,   5,   1
+		grid.attach color_buttons[7][0],		10,  6,   5,   1
+		grid.attach comment_font_button,		15,  6,   5,   1
+		grid.attach (Gtk::Label.new "Tag"), 		0,   7,   5,   1
+		grid.attach color_buttons[8][0],		5,   7,   5,   1
+		grid.attach color_buttons[9][0],		10,  7,   5,   1
+		grid.attach tag_font_button,			15,  7,   5,   1
 
-		frame 		= Gtk::Frame.new "Appearance"
-		frame.add 	grid
+		frame 			= Gtk::Frame.new "Appearance"
+		frame.add 		grid
 
 		vbox 			= Gtk::Box.new :vertical, 2
-		vbox.pack_start 	tree_style \
-						,:expand 	=> false \
-						,:fill 		=> false \
-						,:padding 	=> 0
 
 		vbox.pack_start 	frame \
 						,:expand 	=> false \
@@ -926,16 +877,16 @@ class Gtk_Settings < Gtk_Window
 		end
 
 		apply_button.signal_connect "clicked" do
-			s['id_fg'] 		= t_id_fg 	if !t_id_fg.empty?
-			s['id_bg'] 		= t_id_bg 	if !t_id_bg.empty?
-			s['name_fg'] 		= t_name_fg 	if !t_name_fg.empty?
-			s['name_bg'] 		= t_name_bg 	if !t_name_bg.empty?
-			s['url_fg'] 		= t_url_fg 	if !t_url_fg.empty?
-			s['url_bg'] 		= t_url_bg 	if !t_url_bg.empty?
-			s['comment_fg'] 	= t_comment_fg 	if !t_comment_fg.empty?
-			s['comemnt_bg'] 	= t_comment_bg 	if !t_comment_bg.empty?
-			s['tag_fg'] 		= t_tag_fg 	if !t_tag_fg.empty?
-			s['tag_bg'] 		= t_tag_bg 	if !t_tag_bg.empty?
+			s['id_fg'] 		= color_buttons[0][1] if !color_buttons[0][1].empty?
+			s['id_bg'] 		= color_buttons[1][1] if !color_buttons[1][1].empty?
+			s['name_fg'] 		= color_buttons[2][1] if !color_buttons[2][1].empty?
+			s['name_bg'] 		= color_buttons[3][1] if !color_buttons[3][1].empty?
+			s['url_fg'] 		= color_buttons[4][1] if !color_buttons[4][1].empty?
+			s['url_bg'] 		= color_buttons[5][1] if !color_buttons[5][1].empty?
+			s['comment_fg'] 	= color_buttons[6][1] if !color_buttons[6][1].empty?
+			s['comemnt_bg'] 	= color_buttons[7][1] if !color_buttons[7][1].empty?
+			s['tag_fg'] 		= color_buttons[8][1] if !color_buttons[8][1].empty?
+			s['tag_bg'] 		= color_buttons[9][1] if !color_buttons[9][1].empty?
 
 			s['style'] 		= t_tree_style
 
