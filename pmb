@@ -186,13 +186,13 @@ class Actions
 
 		if xclip == "true"
 			Process.detach spawn \
-				"echo #{url} | xclip -i -selection 'primary'"
+				"echo '#{url}' | xclip -i -selection 'primary'"
 
 			Process.detach spawn \
-				"echo #{url} | xclip -i -selection 'secoundary'"
+				"echo '#{url}' | xclip -i -selection 'secoundary'"
 
 			Process.detach spawn \
-				"echo #{url} | xclip -i -selection 'clipboard'"
+				"echo '#{url}' | xclip -i -selection 'clipboard'"
 		else
 			clip_p = Gtk::Clipboard.get Gdk::Selection::PRIMARY
 			clip_c = Gtk::Clipboard.get Gdk::Selection::CLIPBOARD
@@ -215,6 +215,11 @@ class Actions
 		end
 
 		tree.expand_all
+
+		if tree.selected_row
+			tree.set_cursor tree.selected_row, nil, false
+			tree.scroll_to_cell tree.selected_row, nil, true, 0.5, 0.0
+		end
 	end
 
 	def self.open store, tree, settings, window
@@ -278,12 +283,14 @@ class Actions
 	end
 
 	def self.insert db, store, tree
+		tree.selected_row 	= tree.selection.selected.path
 		Gtk_Insert.new 		db, store, tree
 	end
 
 	def self.edit db, store, tree
 		if tree.model.iter_first
-			Gtk_Edit.new 	db, store, tree
+			tree.selected_row 	= tree.selection.selected.path
+			Gtk_Edit.new 		db, store, tree
 		else
 			error "Nothing to edit.", false
 		end
@@ -291,7 +298,8 @@ class Actions
 
 	def self.delete db, store, tree
 		if tree.model.iter_first
-			Gtk_Delete.new 	db, store, tree
+			tree.selected_row 	= tree.selection.selected.path
+			Gtk_Delete.new 		db, store, tree
 		else
 			error "Nothing to delete.", false
 		end
@@ -302,6 +310,7 @@ class Actions
 	end
 
 	def self.settings settings, db, store, tree
+		tree.selected_row 	= tree.selection.selected.path
 		Gtk_Settings.new 	settings, db, store, tree
 	end
 end
@@ -417,7 +426,7 @@ class Tree < Gtk::TreeView
 		@render_url 		= Gtk::CellRendererText.new
 		@render_comment		= Gtk::CellRendererText.new
 		@render_tag 		= Gtk::CellRendererText.new
-		@tree_lines 		= nil
+		@selected_row 		= nil
 	end
 
 	def parse_color render, color_fg, color_bg
@@ -471,7 +480,7 @@ class Tree < Gtk::TreeView
 		,:render_comment \
 		,:render_tag 
 
-	attr_accessor :tree_lines
+	attr_accessor :tree_lines, :selected_row
 end
 
 class Grid < Gtk::Grid
@@ -507,8 +516,8 @@ class Gtk_Error < Gtk_Window
 						"Error \n" \
 						"</span>"
 
-		error 				= Gtk::Label.new message
-		close_button 			= Gtk::Button.new :stock_id => Gtk::Stock::CLOSE
+		error 			= Gtk::Label.new message
+		close_button 		= Gtk::Button.new :stock_id => Gtk::Stock::CLOSE
 
 		close_button.signal_connect "clicked" do
 			if fatal
@@ -942,9 +951,8 @@ class Gtk_Ui < Gtk_Window
 		end
 
 		@settings 		= Settings.new
-		@s 			= @settings.s
-		@db 			= Db.new @s['db']
-		@store 			= Store.new @s, String, String \
+		@db 			= Db.new @settings.s['db']
+		@store 			= Store.new @settings.s, String, String \
 						,String, String, String, String
 		@tree 			= make_tree 
 
@@ -1138,7 +1146,7 @@ class Gtk_Ui < Gtk_Window
 		end
 
 		edit_copy.signal_connect "activate" do
-			Actions.clipboard 	@store, @tree, @s['xclip']
+			Actions.clipboard 	@store, @tree, @settings['xclip']
 		end
 
 		edit_insert.signal_connect "activate" do
@@ -1194,7 +1202,7 @@ class Gtk_Ui < Gtk_Window
 
 	def make_tree 
 		tree			= Tree.new @store
-		tree.load_settings	@s
+		tree.load_settings	@settings.s
 
 		tree.insert_column 	0, "tag" \
 						,tree.render_tag, {:text => 3}
@@ -1203,7 +1211,7 @@ class Gtk_Ui < Gtk_Window
 						,tree.render_id, {:text => 0}
 
 		tree.insert_column 	2, "name" \
-						,tree.render_name,{:text => 1}
+						,tree.render_name, {:text => 1}
 
 		tree.insert_column 	3, "url" \
 						,tree.render_url, {:text => 2}
@@ -1211,7 +1219,7 @@ class Gtk_Ui < Gtk_Window
 		tree.insert_column 	4, "comment" \
 						,tree.render_comment, {:text => 4}
 
-		tree.search_column 	= @s['search_column']
+		tree.search_column 	= @settings.s['search_column']
 
 		tree.signal_connect "row-activated" do |tree, path, col|
 			if tree.row_expanded? path
@@ -1220,7 +1228,7 @@ class Gtk_Ui < Gtk_Window
 				tree.expand_row path, nil
 			end
 
-			Actions.clipboard @store, @tree, @s['xclip']
+			Actions.clipboard @store, @tree, @settings.s['xclip']
 		end
 
 		menu		= make_tree_menu make_menu
