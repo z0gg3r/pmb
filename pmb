@@ -1,7 +1,15 @@
 #!/usr/bin/env ruby
 
 require 'gtk3'
+require 'net/http'
+require 'nokogiri'
+require 'open-uri'	
 require 'sqlite3'
+
+#favicons
+#import from firefox bookmarks.html
+#export to firefox bookmarks.html
+#session and tabs
 
 class Db
 	def initialize path
@@ -143,6 +151,10 @@ class Settings
 			Dir.mkdir "#{@s['dir']}"
 		end
 
+		if !(File.exists? "#{@s['dir']}/favicon")
+			Dir.mkdir "#{@s['dir']}/favicon"
+		end
+
 		if !(File.exists? "#{@s['dir']}/#{@s['config']}")
 			save_config
 		else
@@ -165,12 +177,6 @@ class Settings
 			while l = f.gets do
 				if @s[l[/(^.*?\s)/][0...-1]]
 					@s[l[/(^.*?\s)/][0...-1]] = l[/(?<==\s).*/]
-
-					#special cases ..
-					if l[/^search_column/]
-						@s[l[/(^.*?\s)/][0...-1]] \
-							= l[/(?<==\s).*/].to_i
-					end
 				end
 			end
 		end
@@ -179,10 +185,103 @@ class Settings
 	attr_accessor :s
 end
 
+class Web_Data
+	def self.favicon_exist? path
+		if (File.exists? "#{path}/favicon.ico")
+			return true
+		end
+
+		nil
+	end
+
+	def self.favicon_download url, file
+		uri 	= URI url
+
+		begin 
+			http 	= Net::HTTP.start uri.host \
+					,:read_timeout 	=> 1.000 \
+					,:use_https 	=> uri.scheme == 'https'
+
+			if file
+				if file[0] == '/'
+					icon 	= http.get file
+				elsif file[0] == '/'and file[1] == '/'
+					icon 	= http.get file[2..-1]
+				else
+					icon 	= http.get "/#{file}"
+				end
+			else
+				file 	= url[/[^(http|https):\/\/"#{uri.host}"\/].*/]
+				icon 	= http.get "/#{file}"
+			end
+
+			if icon.message == "Redirect" \
+			or icon.message == "Moved Permanently" \
+			or icon.message == "Moved Temporarily" 
+				return (Net::HTTP.get (URI icon['location']))
+			elsif icon.message == "Not Found"
+				nil
+			else
+				return icon.body
+			end
+		rescue Exception => e #ugly, anyway ..
+			nil
+		end
+	end
+
+	def self.favicon_fetch url
+		begin
+			uri 	= URI url
+			page 	= Net::HTTP.get uri
+			page_p  = Nokogiri page
+			link 	= page_p.css("link")
+
+			for i in link do
+				if i['rel']
+					if i['rel'].downcase == "shortcut icon" \
+					or i['rel'].downcase == "icon" \
+					or i['rel'].downcase == "apple-touch-icon" 
+						if i['href'][/^(http|https)/]
+							return (Net::HTTP.get (URI i['href']))
+						elsif i['href'][/^\./]
+							return (favicon_download url, "favicon.ico")
+						else
+							return (favicon_download url, i['href'])
+						end
+					end
+				end
+			end
+
+			return (favicon_download url, "favicon.ico")
+		rescue Exception => e
+			nil
+		end
+	end
+
+	def self.favicon_write path, icon
+		png 	= Regexp.new("\x89PNG".force_encoding("binary"))
+		jpg 	= Regexp.new("\xff\xd8\xff\xe0\x00\x10JFIF".force_encoding("binary"))
+		jpg2	= Regexp.new("\xff\xd8\xff\xe1(.*){2}Exif".force_encoding("binary"))
+
+		if icon[0,4] == "\x00\x00\x01\x00" \
+		or icon[/^#{png}/] \
+		or icon[/^#{jpg}/] \
+		or icon[/^#{jpg2}/]
+			if !(File.exists? path)
+				Dir.mkdir path
+			end
+
+			File.open("#{path}/favicon.ico", "wb") do |f|
+				f.write icon
+			end
+		end
+	end
+end
+
 class Actions
 	def self.clipboard store, tree, xclip
 		url 	= store.get_value \
-				(tree.selection).selected, 2
+				(tree.selection).selected, 3
 
 		if xclip == "true"
 			Process.detach spawn \
@@ -217,8 +316,8 @@ class Actions
 		tree.expand_all
 
 		if tree.selected_row
-			tree.set_cursor tree.selected_row, nil, false
-			tree.scroll_to_cell tree.selected_row, nil, true, 0.5, 0.0
+			tree.set_cursor 	tree.selected_row, nil, false
+			tree.scroll_to_cell 	tree.selected_row, nil, true, 0.5, 0.0
 		end
 	end
 
@@ -282,24 +381,24 @@ class Actions
 		end
 	end
 
-	def self.insert db, store, tree
+	def self.insert db, store, tree, s
 		tree.selected_row 	= tree.selection.selected.path
-		Gtk_Insert.new 		db, store, tree
+		Gtk_Insert.new 		db, store, tree, s
 	end
 
-	def self.edit db, store, tree
+	def self.edit db, store, tree, s
 		if tree.model.iter_first
 			tree.selected_row 	= tree.selection.selected.path
-			Gtk_Edit.new 		db, store, tree
+			Gtk_Edit.new 		db, store, tree, s
 		else
 			error "Nothing to edit.", false
 		end
 	end
 
-	def self.delete db, store, tree
+	def self.delete db, store, tree, s
 		if tree.model.iter_first
 			tree.selected_row 	= tree.selection.selected.path
-			Gtk_Delete.new 		db, store, tree
+			Gtk_Delete.new 		db, store, tree, s
 		else
 			error "Nothing to delete.", false
 		end
@@ -320,12 +419,13 @@ class Store < Gtk::TreeStore
 
 	def initialize *args
 		super(*args[1..-1])
-		@style 		= args[0]['style'].to_i
+		@s		= args[0]
+		@style 		= @s['style'].to_i
 	end
 
 	def search_toplevel entry
 		each do |s, tp, it|
-			if entry == (get_value it, 3) \
+			if entry == (get_value it, 4) \
 			and !it.parent
 				return it
 			 end
@@ -336,8 +436,8 @@ class Store < Gtk::TreeStore
 
 	def search_children entry, parent
 		each do |s, tp, it|
-			if entry == (get_value it, 3) \
-			and parent == (get_value it.parent, 3)
+			if entry == (get_value it, 4) \
+			and parent == (get_value it.parent, 4)
 				return it
 			end
 		end
@@ -358,6 +458,7 @@ class Store < Gtk::TreeStore
 						iter = insert nil, number_of_items += 1 \
 							,["" \
 							,"" \
+							,nil \
 							,"" \
 							,"#{d}" \
 							,"" \
@@ -369,6 +470,7 @@ class Store < Gtk::TreeStore
 							iter = insert iter, number_of_items += 1 \
 								,["" \
 								,"" \
+								,nil \
 								,"" \
 								,"#{d}" \
 								,"" \
@@ -380,13 +482,30 @@ class Store < Gtk::TreeStore
 				end
 			end
 
+			if i[2] and i[2][/^(http|https)/]
+				uri 	= URI i[2]
+				path	= "#{@s['dir']}/favicon/#{uri.host}"
+
+				if Web_Data.favicon_exist? path
+					begin
+						icon = Gdk::Pixbuf.new "#{path}/favicon.ico", 20, 20
+					rescue
+						icon = nil
+					end
+				end
+			end
+
 			insert iter, number_of_items += 1 \
 				,["#{i[0]}" \
 				,"#{i[1]}" \
+				,icon \
 				,"#{i[2]}" \
 				,"." \
 				,"#{i[3]}" \
 				,"#{i[4]}"]
+
+			file = nil
+			icon = nil
 		end
 	end
 
@@ -399,21 +518,37 @@ class Store < Gtk::TreeStore
 				iter = insert nil, number_of_items += 1 \
 					,["" \
 					,"" \
+					,nil \
 					,"" \
 					,"#{i[4]}" \
 					,"" \
 					,"#{i[4]}"]
 			end
 
+			if i[2] and i[2][/^(http|https)/]
+				uri 	= URI i[2]
+				path	= "#{@s['dir']}/favicon/#{uri.host}"
+
+				if Web_Data.favicon_exist? path
+					begin
+						icon = Gdk::Pixbuf.new "#{path}/favicon.ico", 20, 20
+					rescue
+						icon = nil
+					end
+				end
+			end
+
 			insert iter, number_of_items += 1 \
 				,["#{i[0]}" \
 				,"#{i[1]}" \
+				,icon \
 				,"#{i[2]}" \
 				,"" \
 				,"#{i[3]}" \
 				,"#{i[4]}"]
 
-			last 		= i[4]
+			last	= i[4]
+			icon	= nil
 		end
 	end
 end
@@ -502,6 +637,18 @@ class Gtk_Window < Gtk::Window
 			destroy
 		end
 	end
+
+	def search_icon icon
+		icon_theme 	= Gtk::IconTheme.default
+
+		if icon_theme.has_icon? icon
+			r = icon_theme.load_icon icon \
+				,16, Gtk::IconTheme::LookupFlags::FORCE_SIZE
+			return r
+		end
+
+		nil
+	end
 end
 
 class Gtk_Error < Gtk_Window
@@ -546,7 +693,7 @@ class Gtk_Error < Gtk_Window
 end
 
 class Gtk_Insert < Gtk_Window
-	def initialize db, store, tree
+	def initialize db, store, tree, s
 		super()
 		set_title 			title + " - Insert"
 
@@ -557,9 +704,29 @@ class Gtk_Insert < Gtk_Window
 		insert_button 			= Gtk::Button.new :stock_id => Gtk::Stock::ADD
 		cancel_button 			= Gtk::Button.new :stock_id => Gtk::Stock::CANCEL
 
+		if (icon = search_icon "starred-symbolic")
+			name_entry.primary_icon_pixbuf = icon
+			name_entry.primary_icon_activatable = false
+		end
+
+		if (icon = search_icon "insert-text-symbolic")
+			url_entry.primary_icon_pixbuf = icon
+			url_entry.primary_icon_activatable = false
+		end
+
+		if (icon = search_icon "insert-text-symbolic")
+			comment_entry.primary_icon_pixbuf = icon
+			comment_entry.primary_icon_activatable = false
+		end
+
+		if (icon = search_icon "insert-text-symbolic")
+			tag_entry.primary_icon_pixbuf = icon
+			tag_entry.primary_icon_activatable = false
+		end
+
 		if tree.selection.selected
 			tag_entry.set_text store.get_value \
-				(tree.selection.selected), 5
+				(tree.selection.selected), 6
 		end
 
 		insert_button.signal_connect "clicked" do
@@ -577,6 +744,15 @@ class Gtk_Insert < Gtk_Window
 					tag 		= "none"
 				else
 					tag 		= tag_entry.text
+				end
+
+				uri 	= URI url
+				path	= "#{s['dir']}/favicon/#{uri.host}"
+
+				if !Web_Data.favicon_exist? path
+					if (icon = Web_Data.favicon_fetch url)
+						Web_Data.favicon_write path, icon
+					end
 				end
 
 				db.insert 		[name, url, comment, tag]
@@ -617,29 +793,90 @@ class Gtk_Insert < Gtk_Window
 end
 
 class Gtk_Edit < Gtk_Window
-	def initialize db, store, tree
+	def initialize db, store, tree, s
 		super()
 		set_title 		title + " - Edit"
 
-		name_entry 		= Gtk::Entry.new
-		url_entry 		= Gtk::Entry.new
-		comment_entry 		= Gtk::Entry.new
+		id 			= store.get_value (tree.selection).selected, 0
+		name 			= store.get_value (tree.selection).selected, 1
+		url  			= store.get_value (tree.selection).selected, 3
+		comment 		= store.get_value (tree.selection).selected, 5
+		tag 			= store.get_value (tree.selection).selected, 6
+
+
 		tag_entry 		= Gtk::Entry.new
+		tag_entry.set_text 	tag
+
+		if (icon = search_icon "insert-text-symbolic")
+			tag_entry.primary_icon_pixbuf = icon
+			tag_entry.primary_icon_activatable = false
+		end
+
 		edit_button 		= Gtk::Button.new :stock_id => Gtk::Stock::APPLY
 		cancel_button 		= Gtk::Button.new :stock_id => Gtk::Stock::CANCEL
 		grid 			= Grid.new
 
-		if !"#{(store.get_value (tree.selection).selected, 2)}".empty?
-			id 		= store.get_value (tree.selection).selected, 0
-			name 		= store.get_value (tree.selection).selected, 1
-			url  		= store.get_value (tree.selection).selected, 2
-			comment 	= store.get_value (tree.selection).selected, 4
-			tag 		= store.get_value (tree.selection).selected, 5
+		if url.empty?
+			set_title 	title + " - Edit tag"
+			old_tag 	= store.get_value \
+							(tree.selection).selected, 6
 
+			tag_entry.set_text old_tag
+
+			tag_entry.signal_connect "activate" do
+				db.edit_tag 		old_tag, tag_entry.text
+				Actions.store_feed 	db, store, tree
+				destroy
+			end
+			
+			edit_button.signal_connect "clicked" do
+				db.edit_tag 		old_tag, tag_entry.text
+				Actions.store_feed 	db, store, tree
+				destroy
+			end
+								#e   #t   #l    #a
+			grid.attach (Gtk::Label.new "Tag"),	0,   1,   20,   1
+			grid.attach tag_entry, 			20,  1,   20,   1
+			grid.attach edit_button,		0,   2,   20,   1
+			grid.attach cancel_button,		20,  2,   20,   1
+
+		else
+			name_entry 		= Gtk::Entry.new
 			name_entry.set_text 	name
-			url_entry.set_text 	url
-			comment_entry.set_text 	comment
-			tag_entry.set_text 	tag
+
+			if (icon = search_icon "starred-symbolic")
+				name_entry.primary_icon_pixbuf = icon
+				name_entry.primary_icon_activatable = false
+			end
+
+			url_entry 		= Gtk::Entry.new
+			url_entry.set_text	url
+
+			if url and url[/^(http|https)/]
+				uri 	= URI url
+				path	= "#{s['dir']}/favicon/#{uri.host}"
+
+				if Web_Data.favicon_exist? path
+					begin
+						favicon = Gdk::Pixbuf.new "#{path}/favicon.ico", 20, 20
+					rescue
+						favicon = nil
+					end
+				end
+			end
+
+			if favicon
+				url_entry.primary_icon_pixbuf = favicon
+				url_entry.primary_icon_activatable = false
+			end
+
+			comment_entry 		= Gtk::Entry.new
+			comment_entry.set_text	comment
+
+			if (icon = search_icon "insert-text-symbolic")
+				comment_entry.primary_icon_pixbuf = icon
+				comment_entry.primary_icon_activatable = false
+			end
 
 			edit_button.signal_connect "clicked" do
 				if name != name_entry.text 
@@ -661,34 +898,18 @@ class Gtk_Edit < Gtk_Window
 				Actions.store_feed 	db, store, tree
 				destroy
 			end
-								#e   #t   #l    #a
-			grid.attach (Gtk::Label.new "Name"),	0,   0,   20,   1
-			grid.attach name_entry, 		20,  0,   20,   1
-			grid.attach (Gtk::Label.new "Url"), 	0,   1,   20,   1
-			grid.attach url_entry,			20,  1,   20,   1
-			grid.attach (Gtk::Label.new "Comment"),	0,   2,   20,   1
-			grid.attach comment_entry,		20,  2,   20,   1
-			grid.attach (Gtk::Label.new "Tag"), 	0,   3,   20,   1
-			grid.attach tag_entry,			20,  3,   20,   1
-			grid.attach edit_button,		0,   4,   20,   1
-			grid.attach cancel_button,		20,  4,   20,   1
-		else
-			set_title 	title + " - Edit tag"
-			old_tag 	= store.get_value \
-						(tree.selection).selected, 5
 
-			tag_entry.set_text old_tag
-			
-			edit_button.signal_connect "clicked" do
-				db.edit_tag 		old_tag, tag_entry.text
-				Actions.store_feed 	db, store, tree
-				destroy
-			end
 								#e   #t   #l    #a
-			grid.attach (Gtk::Label.new "Tag"),	0,   0,   20,   1
-			grid.attach tag_entry, 			20,  0,   20,   1
-			grid.attach edit_button,		0,   1,   20,   1
-			grid.attach cancel_button,		20,  1,   20,   1
+			grid.attach (Gtk::Label.new "Name"),	0,   1,   20,   1
+			grid.attach name_entry, 		20,  1,   20,   1
+			grid.attach (Gtk::Label.new "Url"), 	0,   2,   20,   1
+			grid.attach url_entry,			20,  2,   20,   1
+			grid.attach (Gtk::Label.new "Comment"),	0,   3,   20,   1
+			grid.attach comment_entry,		20,  3,   20,   1
+			grid.attach (Gtk::Label.new "Tag"), 	0,   4,   20,   1
+			grid.attach tag_entry,			20,  4,   20,   1
+			grid.attach edit_button,		0,   5,   20,   1
+			grid.attach cancel_button,		20,  5,   20,   1
 		end
 
 		cancel_button.signal_connect "clicked" do
@@ -707,46 +928,89 @@ class Gtk_Edit < Gtk_Window
 end
 
 class Gtk_Delete < Gtk_Window
-	def initialize db, store, tree
+	def initialize db, store, tree, s
 		super()
 		set_title 			title + " - Delete?"
 
-		id 		= store.get_value \
-					(tree.selection).selected, 0
-
-		name 		= store.get_value \
-					(tree.selection).selected, 1
-
-		url 		= store.get_value \
-					(tree.selection).selected, 2
-
-		comment 	= store.get_value \
-					(tree.selection).selected, 4
-
-		tag 		= store.get_value \
-					(tree.selection).selected, 5
-
-		name_entry 			= Gtk::Entry.new
-		name_entry.set_text 		name
-		name_entry.set_editable 	false
-
-		url_entry 			= Gtk::Entry.new
-		url_entry.set_text 		url
-		url_entry.set_editable 		false
-
-		comment_entry 			= Gtk::Entry.new
-		comment_entry.set_text 		comment
-		comment_entry.set_editable 	false
+		id 		= store.get_value (tree.selection).selected, 0
+		name 		= store.get_value (tree.selection).selected, 1
+		url 		= store.get_value (tree.selection).selected, 3
+		comment 	= store.get_value (tree.selection).selected, 5
+		tag 		= store.get_value (tree.selection).selected, 6
 
 		tag_entry 			= Gtk::Entry.new
 		tag_entry.set_text 		tag
 		tag_entry.set_editable 		false
 
+		if (icon = search_icon "insert-text-symbolic")
+			tag_entry.primary_icon_pixbuf = icon
+			tag_entry.primary_icon_activatable = false
+		end
+
 		delete_button 			= Gtk::Button.new :stock_id => Gtk::Stock::DELETE
 		cancel_button 			= Gtk::Button.new :stock_id => Gtk::Stock::CANCEL
+		grid 				= Grid.new
+
+		if url.empty?
+			grid.attach (Gtk::Label.new "Tag"), 	0,   0,   20,   1
+			grid.attach tag_entry, 			20,  0,   20,   1
+			grid.attach delete_button,		0,   1,   20,   1
+			grid.attach cancel_button,		20,  1,   20,   1
+		else
+			name_entry 			= Gtk::Entry.new
+			name_entry.set_text 		name
+			name_entry.set_editable 	false
+
+			if (icon = search_icon "starred-symbolic")
+				name_entry.primary_icon_pixbuf = icon
+				name_entry.primary_icon_activatable = false
+			end
+
+			url_entry 			= Gtk::Entry.new
+			url_entry.set_text 		url
+			url_entry.set_editable 		false
+
+			if url and url[/^(http|https)/]
+				uri 	= URI url
+				path	= "#{s['dir']}/favicon/#{uri.host}"
+
+				if Web_Data.favicon_exist? path
+					begin
+						favicon = Gdk::Pixbuf.new "#{path}/favicon.ico", 20, 20
+					rescue
+						favicon = nil
+					end
+				end
+			end
+
+			if favicon
+				url_entry.primary_icon_pixbuf = favicon
+				url_entry.primary_icon_activatable = false
+			end
+
+			comment_entry 			= Gtk::Entry.new
+			comment_entry.set_text 		comment
+			comment_entry.set_editable 	false
+
+			if (icon = search_icon "insert-text-symbolic")
+				comment_entry.primary_icon_pixbuf = icon
+				comment_entry.primary_icon_activatable = false
+			end
+
+			grid.attach (Gtk::Label.new "Name"), 	0,   0,   20,   1
+			grid.attach name_entry, 		20,  0,   20,   1
+			grid.attach (Gtk::Label.new "Url"), 	0,   1,   20,   1
+			grid.attach url_entry,			20,  1,   20,   1
+			grid.attach (Gtk::Label.new "Comment"),	0,   2,   20,   1
+			grid.attach comment_entry,		20,  2,   20,   1
+			grid.attach (Gtk::Label.new "Tag"), 	0,   3,   20,   1
+			grid.attach tag_entry,			20,  3,   20,   1
+			grid.attach delete_button,		0,   4,   20,   1
+			grid.attach cancel_button,		20,  4,   20,   1
+		end
 
 		delete_button.signal_connect "clicked" do
-			if id.size < 2
+			if url.empty?
 				db.delete_tag 		tag
 			else
 				db.delete 		id
@@ -760,21 +1024,9 @@ class Gtk_Delete < Gtk_Window
 			destroy
 		end
 
-		grid 			= Grid.new
-
-								#e   #t   #l    #a
-		grid.attach (Gtk::Label.new "Name"), 		0,   0,   20,   1
-		grid.attach name_entry, 			20,  0,   20,   1
-		grid.attach (Gtk::Label.new "Url"), 		0,   1,   20,   1
-		grid.attach url_entry,				20,  1,   20,   1
-		grid.attach (Gtk::Label.new "Comment"),		0,   2,   20,   1
-		grid.attach comment_entry,			20,  2,   20,   1
-		grid.attach (Gtk::Label.new "Tag"), 		0,   3,   20,   1
-		grid.attach tag_entry,				20,  3,   20,   1
-		grid.attach delete_button,			0,   4,   20,   1
-		grid.attach cancel_button,			20,  4,   20,   1
-
 		vbox 			= Gtk::Box.new :vertical, 2
+
+
 		vbox.pack_start 	grid \
 						,:expand 	=> false \
 						,:fill 		=> false \
@@ -953,7 +1205,7 @@ class Gtk_Ui < Gtk_Window
 		@settings 		= Settings.new
 		@db 			= Db.new @settings.s['db']
 		@store 			= Store.new @settings.s, String, String \
-						,String, String, String, String
+						,Gdk::Pixbuf, String, String, String, String
 		@tree 			= make_tree 
 
 		Actions.store_feed 	@db, @store, @tree
@@ -1035,7 +1287,7 @@ class Gtk_Ui < Gtk_Window
 					if sel = @tree.selection.selected
 						@tree.scroll_to_cell \
 							sel.path \
-							,(@tree.get_column 4) \
+							,(@tree.get_column 5) \
 							,false \
 							,0.0 \
 							,0.0
@@ -1049,7 +1301,7 @@ class Gtk_Ui < Gtk_Window
 				end
 
 				if key == "i"
-					Actions.insert 	@db ,@store, @tree
+					Actions.insert 	@db ,@store, @tree, @settings.s
 				end
 
 				if key == "y"
@@ -1062,11 +1314,11 @@ class Gtk_Ui < Gtk_Window
 				end
 
 				if key == "t"
-					Actions.edit 	@db ,@store, @tree
+					Actions.edit 	@db ,@store, @tree, @settings.s
 				end
 
 				if key == "d"
-					Actions.delete 	@db ,@store, @tree
+					Actions.delete 	@db ,@store, @tree, @settings.s
 				end
 
 				if key == "s"
@@ -1098,8 +1350,10 @@ class Gtk_Ui < Gtk_Window
 
 		edit_item 			= Gtk::ImageMenuItem.new :stock_id => Gtk::Stock::EDIT
 		edit_item.image 		= nil
-		edit_fetch	 		= Gtk::MenuItem.new "_Fetch"
-		edit_fetch.use_underline 	= true
+		edit_fetch_db	 		= Gtk::MenuItem.new "_Fetch database"
+		edit_fetch_db.use_underline 	= true
+		edit_fetch_fv	 		= Gtk::MenuItem.new "Fetch fa_vicons"
+		edit_fetch_fv.use_underline 	= true
 		edit_copy	 		= Gtk::ImageMenuItem.new :stock_id => Gtk::Stock::COPY
 		edit_insert	 		= Gtk::ImageMenuItem.new :stock_id => Gtk::Stock::ADD
 		edit_edit	 		= Gtk::ImageMenuItem.new :stock_id => Gtk::Stock::EDIT
@@ -1112,7 +1366,8 @@ class Gtk_Ui < Gtk_Window
 		edit_menu.append 		edit_insert
 		edit_menu.append 		edit_edit
 		edit_menu.append 		edit_delete
-		edit_menu.append 		edit_fetch
+		edit_menu.append 		edit_fetch_db
+		edit_menu.append 		edit_fetch_fv
 		edit_menu.append 		edit_preferences
 
 		help_item 			= Gtk::ImageMenuItem.new :stock_id => Gtk::Stock::HELP
@@ -1141,7 +1396,26 @@ class Gtk_Ui < Gtk_Window
 			Gtk.main_quit
 		end
 
-		edit_fetch.signal_connect "activate" do
+		edit_fetch_db.signal_connect "activate" do
+			Actions.store_feed 	@db, @store, @tree
+		end
+
+		edit_fetch_fv.signal_connect "activate" do
+			r = @db.fetch nil
+
+			for i in r do
+				if i[2][/(http|https)/]
+					uri  = URI i[2]
+					path = "#{@settings.s['dir']}/favicon/#{uri.host}"
+
+					if !Web_Data.favicon_exist? path
+						if (icon = Web_Data.favicon_fetch i[2])
+							Web_Data.favicon_write path, icon
+						end
+					end
+				end
+			end
+
 			Actions.store_feed 	@db, @store, @tree
 		end
 
@@ -1150,15 +1424,15 @@ class Gtk_Ui < Gtk_Window
 		end
 
 		edit_insert.signal_connect "activate" do
-			Actions.insert 		@db, @store, @tree
+			Actions.insert 		@db, @store, @tree, @settings.s
 		end
 
 		edit_delete.signal_connect "activate" do
-			Actions.delete 		@db, @store, @tree
+			Actions.delete 		@db, @store, @tree, @settings.s
 		end
 
 		edit_edit.signal_connect "activate" do
-			Actions.edit 		@db, @store, @tree
+			Actions.edit 		@db, @store, @tree, @settings.s
 		end
 
 		edit_preferences.signal_connect "activate" do
@@ -1177,7 +1451,7 @@ class Gtk_Ui < Gtk_Window
 			about.destroy
 		end
 
-		menu_items = Hash[\
+		menu_items = Hash[ \
 			"file" => file_item \
 			,"edit" => edit_item \
 			,"help" => help_item]
@@ -1205,21 +1479,24 @@ class Gtk_Ui < Gtk_Window
 		tree.load_settings	@settings.s
 
 		tree.insert_column 	0, "tag" \
-						,tree.render_tag, {:text => 3}
+						,tree.render_tag, {:text => 4}
 
 		tree.insert_column 	1, "id" \
 						,tree.render_id, {:text => 0}
 
-		tree.insert_column 	2, "name" \
+		tree.insert_column 	2, "ico" \
+						,Gtk::CellRendererPixbuf.new, {:pixbuf => 2}
+
+		tree.insert_column 	3, "name" \
 						,tree.render_name, {:text => 1}
 
-		tree.insert_column 	3, "url" \
-						,tree.render_url, {:text => 2}
+		tree.insert_column 	4, "url" \
+						,tree.render_url, {:text => 3}
 
-		tree.insert_column 	4, "comment" \
-						,tree.render_comment, {:text => 4}
+		tree.insert_column 	5, "comment" \
+						,tree.render_comment, {:text => 5}
 
-		tree.search_column 	= @settings.s['search_column']
+		tree.search_column 	= @settings.s['search_column'].to_i
 
 		tree.signal_connect "row-activated" do |tree, path, col|
 			if tree.row_expanded? path
@@ -1251,7 +1528,17 @@ class Gtk_Ui < Gtk_Window
 		filter_entry 			= Gtk::Entry.new
 		filter_button 			= Gtk::Button.new :stock_id => Gtk::Stock::APPLY
 
+		if (icon = search_icon "edit-find-symbolic")
+			filter_entry.primary_icon_pixbuf = icon
+			filter_entry.primary_icon_activatable = false
+		end
+
 		filter_button.signal_connect "clicked" do
+			@store.filter 		= filter_entry.text
+			Actions.store_feed 	@db, @store, @tree
+		end
+
+		filter_entry.signal_connect "activate" do
 			@store.filter 		= filter_entry.text
 			Actions.store_feed 	@db, @store, @tree
 		end
