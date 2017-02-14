@@ -3,7 +3,6 @@
 require 'gtk3'
 require 'net/http'
 require 'nokogiri'
-require 'open-uri'	
 require 'sqlite3'
 
 class Db
@@ -657,7 +656,7 @@ class Gtk_Window < Gtk::Window
 	end
 
 	def create_name_entry
-		name_entry 			= Gtk::Entry.new
+		name_entry 		= Gtk::Entry.new
 
 		if (icon = Actions.search_icon "insert-text-symbolic")
 			name_entry.primary_icon_pixbuf = icon
@@ -668,7 +667,7 @@ class Gtk_Window < Gtk::Window
 	end
 
 	def create_url_entry favicon
-		url_entry 			= Gtk::Entry.new
+		url_entry 		= Gtk::Entry.new
 
 		if favicon
 			url_entry.primary_icon_pixbuf = favicon
@@ -683,7 +682,7 @@ class Gtk_Window < Gtk::Window
 	end
 
 	def create_comment_entry
-		comment_entry 			= Gtk::Entry.new
+		comment_entry 		= Gtk::Entry.new
 
 		if (icon = Actions.search_icon "insert-text-symbolic")
 			comment_entry.primary_icon_pixbuf = icon
@@ -694,7 +693,7 @@ class Gtk_Window < Gtk::Window
 	end
 
 	def create_tag_entry
-		tag_entry 			= Gtk::Entry.new
+		tag_entry 		= Gtk::Entry.new
 
 		if (icon = Actions.search_icon "insert-text-symbolic")
 			tag_entry.primary_icon_pixbuf = icon
@@ -758,6 +757,9 @@ class Gtk_Insert < Gtk_Window
 		insert_button 			= Gtk::Button.new :stock_id => Gtk::Stock::ADD
 		cancel_button 			= Gtk::Button.new :stock_id => Gtk::Stock::CANCEL
 
+		if !(tag = store.get_value (tree.selection).selected, 6).empty?
+			tag_entry.set_text tag
+		end 
 		insert_button.signal_connect "clicked" do
 			if (name_entry.text).size > 0 and (url_entry.text).size > 0
 				name		= name_entry.text
