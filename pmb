@@ -6,11 +6,6 @@ require 'nokogiri'
 require 'open-uri'	
 require 'sqlite3'
 
-#favicons
-#import from firefox bookmarks.html
-#export to firefox bookmarks.html
-#session and tabs
-
 class Db
 	def initialize path
 		begin
@@ -412,6 +407,18 @@ class Actions
 		tree.selected_row 	= tree.selection.selected.path
 		Gtk_Settings.new 	settings, db, store, tree
 	end
+
+	def self.search_icon icon
+		icon_theme 	= Gtk::IconTheme.default
+
+		if icon_theme.has_icon? icon
+			r = icon_theme.load_icon icon \
+				,16, Gtk::IconTheme::LookupFlags::FORCE_SIZE
+			return r
+		end
+
+		nil
+	end
 end
 
 class Store < Gtk::TreeStore
@@ -428,7 +435,7 @@ class Store < Gtk::TreeStore
 			if entry == (get_value it, 4) \
 			and !it.parent
 				return it
-			 end
+			end
 		end
 
 		false
@@ -443,6 +450,27 @@ class Store < Gtk::TreeStore
 		end
 
 		false
+	end
+
+	def set_icon url
+		if url and url[/^(http|https)/]
+			uri 	= URI url
+			path	= "#{@s['dir']}/favicon/#{uri.host}"
+
+			if Web_Data.favicon_exist? path
+				begin
+					icon = Gdk::Pixbuf.new "#{path}/favicon.ico", 20, 20
+				rescue
+					icon = Actions.search_icon "starred-symbolic"
+				end
+			else
+				icon = Actions.search_icon "starred-symbolic"
+			end
+		
+			return icon
+		end
+
+		nil
 	end
 
 	def feed_tree result
@@ -482,29 +510,15 @@ class Store < Gtk::TreeStore
 				end
 			end
 
-			if i[2] and i[2][/^(http|https)/]
-				uri 	= URI i[2]
-				path	= "#{@s['dir']}/favicon/#{uri.host}"
-
-				if Web_Data.favicon_exist? path
-					begin
-						icon = Gdk::Pixbuf.new "#{path}/favicon.ico", 20, 20
-					rescue
-						icon = nil
-					end
-				end
-			end
-
 			insert iter, number_of_items += 1 \
 				,["#{i[0]}" \
 				,"#{i[1]}" \
-				,icon \
+				,(set_icon i[2]) \
 				,"#{i[2]}" \
 				,"." \
 				,"#{i[3]}" \
 				,"#{i[4]}"]
 
-			file = nil
 			icon = nil
 		end
 	end
@@ -525,23 +539,10 @@ class Store < Gtk::TreeStore
 					,"#{i[4]}"]
 			end
 
-			if i[2] and i[2][/^(http|https)/]
-				uri 	= URI i[2]
-				path	= "#{@s['dir']}/favicon/#{uri.host}"
-
-				if Web_Data.favicon_exist? path
-					begin
-						icon = Gdk::Pixbuf.new "#{path}/favicon.ico", 20, 20
-					rescue
-						icon = nil
-					end
-				end
-			end
-
 			insert iter, number_of_items += 1 \
 				,["#{i[0]}" \
 				,"#{i[1]}" \
-				,icon \
+				,(set_icon i[2]) \
 				,"#{i[2]}" \
 				,"" \
 				,"#{i[3]}" \
@@ -638,16 +639,69 @@ class Gtk_Window < Gtk::Window
 		end
 	end
 
-	def search_icon icon
-		icon_theme 	= Gtk::IconTheme.default
+	def search_favicon url, s
+		if url and url[/^(http|https)/]
+			uri 	= URI url
+			path	= "#{s['dir']}/favicon/#{uri.host}"
 
-		if icon_theme.has_icon? icon
-			r = icon_theme.load_icon icon \
-				,16, Gtk::IconTheme::LookupFlags::FORCE_SIZE
-			return r
+			if Web_Data.favicon_exist? path
+				begin
+					return (Gdk::Pixbuf.new "#{path}/favicon.ico", 20, 20)
+				rescue
+					return nil
+				end
+			end
 		end
 
 		nil
+	end
+
+	def create_name_entry
+		name_entry 			= Gtk::Entry.new
+
+		if (icon = Actions.search_icon "insert-text-symbolic")
+			name_entry.primary_icon_pixbuf = icon
+			name_entry.primary_icon_activatable = false
+		end
+
+		name_entry
+	end
+
+	def create_url_entry favicon
+		url_entry 			= Gtk::Entry.new
+
+		if favicon
+			url_entry.primary_icon_pixbuf = favicon
+		else
+			if (icon = Actions.search_icon "starred-symbolic")
+				url_entry.primary_icon_pixbuf = icon
+			end
+		end
+
+		url_entry.primary_icon_activatable = false
+		url_entry
+	end
+
+	def create_comment_entry
+		comment_entry 			= Gtk::Entry.new
+
+		if (icon = Actions.search_icon "insert-text-symbolic")
+			comment_entry.primary_icon_pixbuf = icon
+			comment_entry.primary_icon_activatable = false
+		end
+
+		comment_entry
+	end
+
+	def create_tag_entry
+		tag_entry 			= Gtk::Entry.new
+
+		if (icon = Actions.search_icon "insert-text-symbolic")
+			tag_entry.primary_icon_pixbuf = icon
+			tag_entry.primary_icon_activatable = false
+		end
+
+		tag_entry
 	end
 end
 
@@ -697,37 +751,12 @@ class Gtk_Insert < Gtk_Window
 		super()
 		set_title 			title + " - Insert"
 
-		name_entry 			= Gtk::Entry.new
-		url_entry 			= Gtk::Entry.new
-		comment_entry 			= Gtk::Entry.new
-		tag_entry 			= Gtk::Entry.new
+		name_entry 			= create_name_entry
+		url_entry 			= create_url_entry nil
+		comment_entry 			= create_comment_entry
+		tag_entry 			= create_tag_entry
 		insert_button 			= Gtk::Button.new :stock_id => Gtk::Stock::ADD
 		cancel_button 			= Gtk::Button.new :stock_id => Gtk::Stock::CANCEL
-
-		if (icon = search_icon "starred-symbolic")
-			name_entry.primary_icon_pixbuf = icon
-			name_entry.primary_icon_activatable = false
-		end
-
-		if (icon = search_icon "insert-text-symbolic")
-			url_entry.primary_icon_pixbuf = icon
-			url_entry.primary_icon_activatable = false
-		end
-
-		if (icon = search_icon "insert-text-symbolic")
-			comment_entry.primary_icon_pixbuf = icon
-			comment_entry.primary_icon_activatable = false
-		end
-
-		if (icon = search_icon "insert-text-symbolic")
-			tag_entry.primary_icon_pixbuf = icon
-			tag_entry.primary_icon_activatable = false
-		end
-
-		if tree.selection.selected
-			tag_entry.set_text store.get_value \
-				(tree.selection.selected), 6
-		end
 
 		insert_button.signal_connect "clicked" do
 			if (name_entry.text).size > 0 and (url_entry.text).size > 0
@@ -804,13 +833,8 @@ class Gtk_Edit < Gtk_Window
 		tag 			= store.get_value (tree.selection).selected, 6
 
 
-		tag_entry 		= Gtk::Entry.new
+		tag_entry 		= create_tag_entry
 		tag_entry.set_text 	tag
-
-		if (icon = search_icon "insert-text-symbolic")
-			tag_entry.primary_icon_pixbuf = icon
-			tag_entry.primary_icon_activatable = false
-		end
 
 		edit_button 		= Gtk::Button.new :stock_id => Gtk::Stock::APPLY
 		cancel_button 		= Gtk::Button.new :stock_id => Gtk::Stock::CANCEL
@@ -841,42 +865,19 @@ class Gtk_Edit < Gtk_Window
 			grid.attach cancel_button,		20,  2,   20,   1
 
 		else
-			name_entry 		= Gtk::Entry.new
+			name_entry 		= create_name_entry
 			name_entry.set_text 	name
 
-			if (icon = search_icon "starred-symbolic")
-				name_entry.primary_icon_pixbuf = icon
-				name_entry.primary_icon_activatable = false
+			if (favicon = search_favicon url, s)
+				url_entry 	= create_url_entry favicon
+			else
+				url_entry 	= create_url_entry nil
 			end
 
-			url_entry 		= Gtk::Entry.new
 			url_entry.set_text	url
 
-			if url and url[/^(http|https)/]
-				uri 	= URI url
-				path	= "#{s['dir']}/favicon/#{uri.host}"
-
-				if Web_Data.favicon_exist? path
-					begin
-						favicon = Gdk::Pixbuf.new "#{path}/favicon.ico", 20, 20
-					rescue
-						favicon = nil
-					end
-				end
-			end
-
-			if favicon
-				url_entry.primary_icon_pixbuf = favicon
-				url_entry.primary_icon_activatable = false
-			end
-
-			comment_entry 		= Gtk::Entry.new
+			comment_entry 		= create_comment_entry
 			comment_entry.set_text	comment
-
-			if (icon = search_icon "insert-text-symbolic")
-				comment_entry.primary_icon_pixbuf = icon
-				comment_entry.primary_icon_activatable = false
-			end
 
 			edit_button.signal_connect "clicked" do
 				if name != name_entry.text 
@@ -938,14 +939,9 @@ class Gtk_Delete < Gtk_Window
 		comment 	= store.get_value (tree.selection).selected, 5
 		tag 		= store.get_value (tree.selection).selected, 6
 
-		tag_entry 			= Gtk::Entry.new
+		tag_entry 			= create_tag_entry
 		tag_entry.set_text 		tag
 		tag_entry.set_editable 		false
-
-		if (icon = search_icon "insert-text-symbolic")
-			tag_entry.primary_icon_pixbuf = icon
-			tag_entry.primary_icon_activatable = false
-		end
 
 		delete_button 			= Gtk::Button.new :stock_id => Gtk::Stock::DELETE
 		cancel_button 			= Gtk::Button.new :stock_id => Gtk::Stock::CANCEL
@@ -957,45 +953,22 @@ class Gtk_Delete < Gtk_Window
 			grid.attach delete_button,		0,   1,   20,   1
 			grid.attach cancel_button,		20,  1,   20,   1
 		else
-			name_entry 			= Gtk::Entry.new
+			name_entry 			= create_name_entry
 			name_entry.set_text 		name
 			name_entry.set_editable 	false
 
-			if (icon = search_icon "starred-symbolic")
-				name_entry.primary_icon_pixbuf = icon
-				name_entry.primary_icon_activatable = false
+			if (favicon = search_favicon url, s)
+				url_entry 	= create_url_entry favicon
+			else
+				url_entry 	= create_url_entry nil
 			end
 
-			url_entry 			= Gtk::Entry.new
 			url_entry.set_text 		url
 			url_entry.set_editable 		false
 
-			if url and url[/^(http|https)/]
-				uri 	= URI url
-				path	= "#{s['dir']}/favicon/#{uri.host}"
-
-				if Web_Data.favicon_exist? path
-					begin
-						favicon = Gdk::Pixbuf.new "#{path}/favicon.ico", 20, 20
-					rescue
-						favicon = nil
-					end
-				end
-			end
-
-			if favicon
-				url_entry.primary_icon_pixbuf = favicon
-				url_entry.primary_icon_activatable = false
-			end
-
-			comment_entry 			= Gtk::Entry.new
+			comment_entry 			= create_comment_entry
 			comment_entry.set_text 		comment
 			comment_entry.set_editable 	false
-
-			if (icon = search_icon "insert-text-symbolic")
-				comment_entry.primary_icon_pixbuf = icon
-				comment_entry.primary_icon_activatable = false
-			end
 
 			grid.attach (Gtk::Label.new "Name"), 	0,   0,   20,   1
 			grid.attach name_entry, 		20,  0,   20,   1
@@ -1025,8 +998,6 @@ class Gtk_Delete < Gtk_Window
 		end
 
 		vbox 			= Gtk::Box.new :vertical, 2
-
-
 		vbox.pack_start 	grid \
 						,:expand 	=> false \
 						,:fill 		=> false \
@@ -1528,7 +1499,7 @@ class Gtk_Ui < Gtk_Window
 		filter_entry 			= Gtk::Entry.new
 		filter_button 			= Gtk::Button.new :stock_id => Gtk::Stock::APPLY
 
-		if (icon = search_icon "edit-find-symbolic")
+		if (icon = Actions.search_icon "edit-find-symbolic")
 			filter_entry.primary_icon_pixbuf = icon
 			filter_entry.primary_icon_activatable = false
 		end
