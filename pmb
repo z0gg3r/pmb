@@ -210,7 +210,14 @@ class Web_Data
 			if icon.message == "Redirect" \
 			or icon.message == "Moved Permanently" \
 			or icon.message == "Moved Temporarily" 
-				return (Net::HTTP.get (URI icon['location']))
+				i = (Net::HTTP.get (URI icon['location']))
+
+				if !is_image? i
+					return (Net::HTTP.get \
+						(URI "#{uri.scheme}://#{uri.host}#{uri.path}#{file}"))
+				end
+
+				return i
 			elsif icon.message == "Not Found"
 				nil
 			else
@@ -256,6 +263,18 @@ class Web_Data
 	end
 
 	def self.favicon_write path, icon
+		if is_image? icon
+			if !(File.exists? path)
+				Dir.mkdir path
+			end
+
+			File.open("#{path}/favicon.ico", "wb") do |f|
+				f.write icon
+			end
+		end
+	end
+
+	def self.is_image? icon
 		png 	= Regexp.new("\x89PNG".force_encoding("binary"))
 		jpg 	= Regexp.new("\xff\xd8\xff\xe0\x00\x10JFIF".force_encoding("binary"))
 		jpg2	= Regexp.new("\xff\xd8\xff\xe1(.*){2}Exif".force_encoding("binary"))
@@ -265,14 +284,10 @@ class Web_Data
 		or icon[/^#{png}/] \
 		or icon[/^#{jpg}/] \
 		or icon[/^#{jpg2}/]
-			if !(File.exists? path)
-				Dir.mkdir path
-			end
-
-			File.open("#{path}/favicon.ico", "wb") do |f|
-				f.write icon
-			end
+			return true
 		end
+
+		nil
 	end
 end
 
