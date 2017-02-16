@@ -234,16 +234,16 @@ class Web_Data
 					or i['rel'].downcase == "icon" \
 					or i['rel'].downcase == "apple-touch-icon" 
 						if i['href'][/^(\/\/)/]
-							u = "#{uri.scheme}:#{i['href']}"
-							return (Net::HTTP.get (URI u))
+							u 	= "#{uri.scheme}:#{i['href']}"
+							return 	(Net::HTTP.get (URI u))
 						end
 
 						if i['href'][/^(http|https)/]
-							return (Net::HTTP.get (URI i['href']))
+							return 	(Net::HTTP.get (URI i['href']))
 						elsif i['href'][/^\./]
-							return (favicon_download url, "favicon.ico")
+							return 	(favicon_download url, "favicon.ico")
 						else
-							return (favicon_download url, i['href'])
+							return 	(favicon_download url, i['href'])
 						end
 					end
 				end
@@ -291,11 +291,11 @@ class Actions
 			Process.detach spawn \
 				"echo '#{url}' | xclip -i -selection 'clipboard'"
 		else
-			clip_p = Gtk::Clipboard.get Gdk::Selection::PRIMARY
-			clip_c = Gtk::Clipboard.get Gdk::Selection::CLIPBOARD
+			clip_p 		= Gtk::Clipboard.get Gdk::Selection::PRIMARY
+			clip_c 		= Gtk::Clipboard.get Gdk::Selection::CLIPBOARD
 
-			clip_p.text = url
-			clip_c.text = url
+			clip_p.text 	= url
+			clip_c.text 	= url
 
 			clip_p.store
 			clip_c.store
@@ -362,8 +362,8 @@ class Actions
 
 		if chooser.run == Gtk::ResponseType::ACCEPT
 			begin
-				db 		= Db.new chooser.filename
-				r 		= db.fetch nil
+				db 	= Db.new chooser.filename
+				r 	= db.fetch nil
 
 				for i in r do
 					db_ex.import [i[1], i[2], i[3], i[4]]
@@ -380,7 +380,10 @@ class Actions
 	end
 
 	def self.insert db, store, tree, s
-		tree.selected_row 	= tree.selection.selected.path
+		if (tree.selection.selected)
+			tree.selected_row 	= tree.selection.selected.path
+		end
+
 		Gtk_Insert.new 		db, store, tree, s
 	end
 
@@ -403,7 +406,7 @@ class Actions
 	end
 
 	def self.download_favicon db, store, tree, s
-		Gtk_Favicon.new db, store, tree, s
+		Gtk_Favicon.new 	db, store, tree, s
 	end
 
 	def self.error message, fatal
@@ -630,17 +633,17 @@ end
 class Grid < Gtk::Grid
 	def initialize
 		super
-		set_property 		"row-homogeneous"	,true
-		set_property 		"column-homogeneous"	,true
+		set_property 	"row-homogeneous"	,true
+		set_property 	"column-homogeneous"	,true
 	end
 end
 
 class Gtk_Window < Gtk::Window
 	def initialize 
 		super
-		set_wmclass 		"Poor man's bookmark"	,"Pmb"
-		set_title 		"Poor man's bookmark"
-		set_type_hint 		:dialog
+		set_wmclass 	"Poor man's bookmark"	,"Pmb"
+		set_title 	"Poor man's bookmark"
+		set_type_hint 	:dialog
 
 		signal_connect "destroy" do
 			destroy
@@ -856,15 +859,19 @@ class Gtk_Insert < Gtk_Window
 
 		name_entry 		= create_name_entry nil
 		url_entry 		= create_url_entry nil, (Actions.set_icon nil \
-						,"starred-symbolic", s), s
+						,"non-starred-symbolic", s), s
 		comment_entry 		= create_comment_entry nil
 		tag_entry 		= create_tag_entry nil
 		insert_button 		= Gtk::Button.new :stock_id => Gtk::Stock::ADD
 		cancel_button 		= Gtk::Button.new :stock_id => Gtk::Stock::CANCEL
 
-		if !(tag = store.get_value (tree.selection).selected, 6).empty?
+		url_entry.primary_icon_activatable = false
+
+		if tree.selection.selected \
+		and !(tag = store.get_value (tree.selection).selected, 6).empty?
 			tag_entry.set_text tag
 		end 
+
 		insert_button.signal_connect "clicked" do
 			if (name_entry.text).size > 0 and (url_entry.text).size > 0
 				name		= name_entry.text
@@ -1027,20 +1034,20 @@ end
 class Gtk_Delete < Gtk_Window
 	def initialize db, store, tree, s
 		super()
-		set_title 			title + " - Delete?"
+		set_title 		title + " - Delete?"
 
-		id 		= store.get_value (tree.selection).selected, 0
-		name 		= store.get_value (tree.selection).selected, 1
-		url 		= store.get_value (tree.selection).selected, 3
-		comment 	= store.get_value (tree.selection).selected, 5
-		tag 		= store.get_value (tree.selection).selected, 6
+		id 			= store.get_value (tree.selection).selected, 0
+		name 			= store.get_value (tree.selection).selected, 1
+		url 			= store.get_value (tree.selection).selected, 3
+		comment 		= store.get_value (tree.selection).selected, 5
+		tag 			= store.get_value (tree.selection).selected, 6
 
-		tag_entry 			= create_tag_entry tag
-		tag_entry.set_editable 		false
+		tag_entry 		= create_tag_entry tag
+		tag_entry.set_editable 	false
 
-		delete_button 			= Gtk::Button.new :stock_id => Gtk::Stock::DELETE
-		cancel_button 			= Gtk::Button.new :stock_id => Gtk::Stock::CANCEL
-		grid 				= Grid.new
+		delete_button 		= Gtk::Button.new :stock_id => Gtk::Stock::DELETE
+		cancel_button 		= Gtk::Button.new :stock_id => Gtk::Stock::CANCEL
+		grid 			= Grid.new
 
 		if url.empty?
 			grid.attach (Gtk::Label.new "Tag"), 	0,   0,   20,   1
@@ -1054,6 +1061,7 @@ class Gtk_Delete < Gtk_Window
 			url_entry 		= create_url_entry url, (Actions.set_icon url \
 							,"starred-symbolic", s), s
 			url_entry.set_editable 	false
+			url_entry.primary_icon_activatable = false
 
 			comment_entry 			= create_comment_entry comment
 			comment_entry.set_editable 	false
@@ -1072,9 +1080,9 @@ class Gtk_Delete < Gtk_Window
 
 		delete_button.signal_connect "clicked" do
 			if url.empty?
-				db.delete_tag 		tag
+				db.delete_tag 	tag
 			else
-				db.delete 		id
+				db.delete 	id
 			end
 
 			Actions.store_feed 	db, store, tree
