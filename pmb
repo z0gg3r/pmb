@@ -7,8 +7,6 @@ require 'net/http'
 require 'nokogiri'
 require 'sqlite3'
 
-mutex = Mutex.new
-
 class Db
 	def initialize path
 		begin
@@ -370,7 +368,7 @@ class Actions
 
 		if tree.selected_row
 			tree.set_cursor 	tree.selected_row, nil, false
-			tree.scroll_to_cell 	tree.selected_row, nil, true, 0.5, 0.0
+			#tree.scroll_to_cell 	tree.selected_row, nil, true, 0.5, 0.0
 		end
 	end
 
@@ -854,10 +852,6 @@ class Gtk_Insert < Gtk_Window
 				else
 					tag 		= tag_entry.text
 				end
-
-				uri 	= URI url
-				path	= "#{s['dir']}/favicon/#{uri.host}#{uri.path}"
-				Web_Data.webkit_favicon_fetch url, path, tree, store
 
 				db.insert 		[name, url, comment, tag]
 				Actions.store_feed 	db, store, tree
@@ -1360,6 +1354,7 @@ class Gtk_Ui < Gtk_Window
 				cursor, column 		= @tree.cursor
 
 				if cursor
+					@tree.selected_row	= cursor
 					@tree.set_cursor 	cursor, nil, false
 				end
 			end
