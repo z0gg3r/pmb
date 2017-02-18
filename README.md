@@ -8,6 +8,7 @@ Dependencies:
 * ruby-gdk3
 * ruby-sqlite3
 * ruby-nokogiri
+* ruby-webkit-gtk
 
 Basically, you have a interface Gtk to add/delete/edit bookmarks, grouped by tags. When you click in a bookmark, it will be copied
 to you clipboard.
