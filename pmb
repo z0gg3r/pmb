@@ -7,6 +7,8 @@ require 'net/http'
 require 'nokogiri'
 require 'sqlite3'
 
+mutex = Mutex.new
+
 class Db
 	def initialize path
 		begin
@@ -190,7 +192,7 @@ class Web_Data
 		nil
 	end
 
-	def self.favicon_fetch url, path
+	def self.favicon_fetch url, path, file
 		uri 	= URI url
 
 		begin 
@@ -198,7 +200,7 @@ class Web_Data
 					,:read_timeout 	=> 0.500 \
 					,:use_https 	=> uri.scheme == 'https'
 
-			icon 	= http.get "/favicon.ico"
+			icon 	= http.get file
 
 			if icon.message == "Redirect" \
 			or icon.message == "Moved Permanently" \
@@ -206,8 +208,7 @@ class Web_Data
 				icon = (Net::HTTP.get (URI icon['location']))
 
 				if !is_image? icon
-					icon = (Net::HTTP.get \
-						(URI "#{uri.scheme}://#{uri.host}#{uri.path}#{file}"))
+					icon = (Net::HTTP.get (URI file))
 				end
 
 				if !is_image? icon
@@ -231,7 +232,6 @@ class Web_Data
 
 	def self.webkit_favicon_fetch url, path, tree, store
 		view 		= WebKitGtk::WebView.new
-		#favicon_db 	= WebKitGtk::FaviconDatabase.new
 
 		view.settings.enable_scripts = false
 		view.settings.enable_plugins = false
@@ -262,7 +262,7 @@ class Web_Data
 
 				f.save "#{path}/icon", "png", nil
 
-				tree.model.each do |model, path, iter|
+				tree.model.each do |model, tpath, iter|
 					s_url = store.get_value iter, 3
 
 					if s_url == url
@@ -270,14 +270,14 @@ class Web_Data
 					end
 				end
 			else
-				favicon_fetch url, path
+				favicon_fetch url, path, view.icon_uri
 
-				tree.model.each do |model, path, iter|
+				tree.model.each do |model, tpath, iter|
 					s_url = store.get_value iter, 3
 
-					if s_url == url and File.exist? "#{path}/icon"
+					if (s_url == url) and (File.exist? "#{path}/icon")
 						store.set_value iter, 2, (Gdk::Pixbuf.new \
-							(File.open "#{path}/icon"), 20, 20)
+							"#{path}/icon", 20, 20)
 					end
 				end		
 			end
@@ -321,7 +321,7 @@ class Web_Data
 	def self.favicon_write path, icon
 		if is_image? icon
 			if !(File.exists? path)
-				Dir.mkdir path
+				FileUtils.mkdir_p path
 			end
 
 			File.open("#{path}/icon", "wb") do |f|
@@ -460,11 +460,7 @@ class Actions
 		end
 	end
 
-	def self.download_favicon db, store, tree, s
-		Gtk_Favicon.new 	db, store, tree, s
-	end
-
-	def self.download_favicon! store, tree, s
+	def self.download_favicon store, tree, s
 		if tree.selection
 			url 		= store.get_value tree.selection.selected, 3
 			uri  		= URI url
@@ -1421,8 +1417,7 @@ class Gtk_Ui < Gtk_Window
 		end
 
 		edit_fetch_fv.signal_connect "activate" do
-			#Actions.download_favicon @db, @store, @tree, @settings.s
-			Actions.download_favicon! @store, @tree, @settings.s
+			Actions.download_favicon @store, @tree, @settings.s
 		end
 
 		edit_copy.signal_connect "activate" do
