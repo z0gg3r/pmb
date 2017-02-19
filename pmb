@@ -1,6 +1,5 @@
 #!/usr/bin/env ruby
 
-#require 'gtk3'
 require 'fileutils'
 require 'webkit-gtk'
 require 'net/http'
@@ -141,7 +140,8 @@ class Settings
 			,"style"		=> "0" \
 			,"search_column" 	=> "1" \
 			,"xclip" 		=> "true" \
-			,"tree_lines" 		=> "true"]
+			,"tree_lines" 		=> "true" \
+			,"user_agent"		=> "Mozilla/5.0 (X11; Linux i686; rv:45.0) Gecko/20100101 Firefox/45.0"]
 
 		if !(File.exists? "#{@s['dir']}")
 			Dir.mkdir "#{@s['dir']}"
@@ -228,7 +228,7 @@ class Web_Data
 		end
 	end
 
-	def self.webkit_favicon_fetch url, path, tree, store
+	def self.webkit_favicon_fetch url, path, store, tree, s
 		view 		= WebKitGtk::WebView.new
 
 		view.settings.enable_scripts = false
@@ -246,12 +246,12 @@ class Web_Data
 		view.settings.enable_webgl = false
 		view.settings.enable_webaudio = false
 		view.settings.enable_mediasource = false
-		view.settings.user_agent = "user_agent = Mozilla/5.0 (compatible; MSIE 10.6; Windows NT 6.1; Trident/5.0; InfoPath.2; SLCC1; .NET CLR 3.0.4506.2152; .NET CLR 3.5.30729; .NET CLR 2.0.50727) 3gpp-gba UNTRUSTED/1.0"
-		
+		view.settings.user_agent = s['user_agent']	
+
 		view.load_uri 	url
 		
 		view.signal_connect "icon-loaded" do
-			f 	= (view.try_get_favicon_pixbuf 20, 20) 
+			f = (view.try_get_favicon_pixbuf 20, 20) 
 
 			if f
 				if !(File.exists? path)
@@ -261,9 +261,7 @@ class Web_Data
 				f.save "#{path}/icon", "png", nil
 
 				tree.model.each do |model, tpath, iter|
-					s_url = store.get_value iter, 3
-
-					if s_url == url
+					if (store.get_value iter, 3) == url
 						store.set_value iter, 2, f 
 					end
 				end
@@ -271,9 +269,8 @@ class Web_Data
 				favicon_fetch url, path, view.icon_uri
 
 				tree.model.each do |model, tpath, iter|
-					s_url = store.get_value iter, 3
-
-					if (s_url == url) and (File.exist? "#{path}/icon")
+					if (store.get_value iter, 3) == url \
+					and (File.exist? "#{path}/icon")
 						store.set_value iter, 2, (Gdk::Pixbuf.new \
 							"#{path}/icon", 20, 20)
 					end
@@ -281,8 +278,6 @@ class Web_Data
 			end
 
 			view 		= nil
-			favicon_db 	= nil
-			settings 	= nil
 		end
 	end
 
@@ -463,7 +458,7 @@ class Actions
 			url 		= store.get_value tree.selection.selected, 3
 			uri  		= URI url
 			path 		= "#{s['dir']}/favicon/#{uri.host}#{uri.path}"
-			Web_Data.webkit_favicon_fetch url, path, tree, store
+			Web_Data.webkit_favicon_fetch url, path, store, tree, s
 		end
 	end
 
@@ -532,7 +527,9 @@ class Store < Gtk::TreeStore
 
 	def search_children entry, parent
 		each do |s, tp, it|
-			if entry == (get_value it, 4) \
+			if it \
+			and entry == (get_value it, 4) \
+			and it.parent \
 			and parent == (get_value it.parent, 4)
 				return it
 			end
@@ -733,10 +730,7 @@ class Gtk_Window < Gtk::Window
 
 		url_entry.signal_connect "icon-press" do
 			if url_entry.text and url_entry.text[/(http|https)/]
-				uri  		= URI url_entry.text
-				path 		= "#{s['dir']}/favicon/#{uri.host}#{uri.path}"
-
-				Web_Data.webkit_favicon_fetch url_entry.text, path, tree, store
+				Actions.download_favicon store, tree, s
 			end
 		end
 
@@ -855,6 +849,14 @@ class Gtk_Insert < Gtk_Window
 
 				db.insert 		[name, url, comment, tag]
 				Actions.store_feed 	db, store, tree
+
+				tree.model.each do |model, tpath, iter|
+					if (store.get_value iter, 3) == url
+						tree.set_cursor tpath, nil, false
+						Actions.download_favicon store, tree, s
+					end
+				end		
+
 				destroy
 			else
 				Actions.error "Need at least name and url", false
