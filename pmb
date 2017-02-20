@@ -543,6 +543,19 @@ class Store < Gtk::TreeStore
 		end
 	end
 
+	def insert_dir iter, name, tag, number_of_items
+		it = insert iter, number_of_items += 1 \
+			,["" \
+			,"" \
+			,nil \
+			,"" \
+			,"#{name}" \
+			,"" \
+			,"#{tag}"]
+
+		it
+	end
+
 	def feed_tree result
 		number_of_items = 0
 		root		= nil
@@ -554,42 +567,19 @@ class Store < Gtk::TreeStore
 			dirs.each_with_index do |d, j|
 				if j == 0
 					if !(iter = search_toplevel d)
-						iter = insert nil, number_of_items += 1 \
-							,["" \
-							,"" \
-							,nil \
-							,"" \
-							,"#{d}" \
-							,"" \
-							,"#{i[4]}"]
-
-						root = iter
+						root, iter = insert_dir nil, d, i[4], number_of_items
 					end
 				else
-					if !(r = search_children d, dirs[j - 1]) 
+					if dirs[j - 1] \
+					and !(r = search_children d, dirs[j - 1]) 
 						if dirs[j]
-							iter = insert iter, number_of_items += 1 \
-								,["" \
-								,"" \
-								,nil \
-								,"" \
-								,"#{d}" \
-								,"" \
-								,"#{i[4]}"]
+							iter = insert_dir iter, d, i[4], number_of_items
 						end
 					else
 						if root == (get_iter_root r) 
 							iter = r
 						else
-							iter = insert iter, number_of_items += 1 \
-								,["" \
-								,"" \
-								,nil \
-								,"" \
-								,"#{d}" \
-								,"" \
-								,"#{i[4]}"]
-
+							iter = insert_dir iter, d, i[4], number_of_items
 						end
 					end
 				end
@@ -614,14 +604,7 @@ class Store < Gtk::TreeStore
 
 		for i in result do
 			if !last or i[4] != last
-				iter = insert nil, number_of_items += 1 \
-					,["" \
-					,"" \
-					,nil \
-					,"" \
-					,"#{i[4]}" \
-					,"" \
-					,"#{i[4]}"]
+				iter = insert_dir nil, i[4], i[4], number_of_items
 			end
 
 			insert iter, number_of_items += 1 \
@@ -1643,6 +1626,8 @@ class Gtk_Ui < Gtk_Window
 	def make_tree 
 		tree			= Tree.new @store
 		tree.load_settings	@settings.s
+		tree.search_column 	= @settings.s['search_column'].to_i
+		tree.selection.mode	= :multiple
 
 		tree.insert_column 	0, "tag" \
 						,tree.render_tag, {:text => 4}
@@ -1661,9 +1646,6 @@ class Gtk_Ui < Gtk_Window
 
 		tree.insert_column 	5, "comment" \
 						,tree.render_comment, {:text => 5}
-
-		tree.search_column 	= @settings.s['search_column'].to_i
-		tree.selection.mode	= :multiple
 
 		tree.signal_connect "row-activated" do |tree, path, col|
 			if tree.row_expanded? path
