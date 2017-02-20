@@ -536,9 +536,13 @@ class Store < Gtk::TreeStore
 	def get_iter_root iter
 		parent = iter.parent
 		
+		if !parent
+			return iter
+		end
+
 		if parent and parent.parent
 			get_iter_root parent
-		else
+		elsif parent and !parent.parent
 			return parent
 		end
 	end
@@ -567,19 +571,24 @@ class Store < Gtk::TreeStore
 			dirs.each_with_index do |d, j|
 				if j == 0
 					if !(iter = search_toplevel d)
-						root, iter = insert_dir nil, d, i[4], number_of_items
+						iter = insert_dir nil, d, i[4] \
+							,number_of_items
+					
+						root = iter
 					end
 				else
 					if dirs[j - 1] \
 					and !(r = search_children d, dirs[j - 1]) 
 						if dirs[j]
-							iter = insert_dir iter, d, i[4], number_of_items
+							iter = insert_dir iter, d, i[4] \
+								,number_of_items
 						end
 					else
-						if root == (get_iter_root r) 
-							iter = r
+						if !root == (get_iter_root r)
+							iter = insert_dir iter, d, i[4] \
+								,number_of_items
 						else
-							iter = insert_dir iter, d, i[4], number_of_items
+							iter = r
 						end
 					end
 				end
@@ -590,7 +599,7 @@ class Store < Gtk::TreeStore
 				,"#{i[1]}" \
 				,(Actions.set_icon i[2], "starred-symbolic", @s) \
 				,"#{i[2]}" \
-				,"." \
+				,"-" \
 				,"#{i[3]}" \
 				,"#{i[4]}"]
 
