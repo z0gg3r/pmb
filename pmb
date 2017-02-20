@@ -327,7 +327,7 @@ end
 class Actions
 	def self.clipboard store, tree, xclip
 		url 	= store.get_value \
-				(tree.selection).selected, 3
+				(tree.model.get_iter tree.selection.selected_rows[0]), 3
 
 		if xclip == "true"
 			Process.detach spawn \
@@ -428,16 +428,12 @@ class Actions
 	end
 
 	def self.insert db, store, tree, s
-		if (tree.selection.selected)
-			tree.selected_row 	= tree.selection.selected.path
-		end
-
 		Gtk_Insert.new 		db, store, tree, s
 	end
 
 	def self.edit db, store, tree, s
 		if tree.model.iter_first
-			tree.selected_row 	= tree.selection.selected.path
+			tree.selected_row 	= tree.selection.selected_rows[0]
 			Gtk_Edit.new 		db, store, tree, s
 		else
 			error "Nothing to edit.", false
@@ -446,7 +442,7 @@ class Actions
 
 	def self.delete db, store, tree, s
 		if tree.model.iter_first
-			tree.selected_row 	= tree.selection.selected.path
+			tree.selected_row 	= tree.selection.selected_rows[0]
 			Gtk_Delete.new 		db, store, tree, s
 		else
 			error "Nothing to delete.", false
@@ -455,7 +451,9 @@ class Actions
 
 	def self.download_favicon store, tree, s
 		if tree.selection
-			url 		= store.get_value tree.selection.selected, 3
+			url 	= store.get_value \
+					(tree.model.get_iter tree.selection.selected_rows[0]), 3
+
 			Web_Data.webkit_favicon_fetch url, store, tree, s
 		end
 	end
@@ -465,7 +463,7 @@ class Actions
 	end
 
 	def self.settings settings, db, store, tree
-		tree.selected_row 	= tree.selection.selected.path
+		tree.selected_row 	= tree.selection.selected_rows[0]
 		Gtk_Settings.new 	settings, db, store, tree
 	end
 
@@ -817,13 +815,15 @@ class Gtk_Insert < Gtk_Window
 						,"non-starred-symbolic", s), s, tree, store
 		comment_entry 		= create_comment_entry nil
 		tag_entry 		= create_tag_entry nil
+		row 			= tree.selection.selected_rows[0]
+
 		insert_button 		= Gtk::Button.new :stock_id => Gtk::Stock::ADD
 		cancel_button 		= Gtk::Button.new :stock_id => Gtk::Stock::CANCEL
 
 		url_entry.primary_icon_activatable = false
 
-		if tree.selection.selected \
-		and !(tag = store.get_value (tree.selection).selected, 6).empty?
+		if tree.model.iter_first \
+		and !(tag = store.get_value (tree.model.get_iter row), 6).empty?
 			tag_entry.set_text tag
 		end 
 
@@ -897,106 +897,140 @@ class Gtk_Edit < Gtk_Window
 		super()
 		set_title 		title + " - Edit"
 
-		id 			= store.get_value (tree.selection).selected, 0
-		name 			= store.get_value (tree.selection).selected, 1
-		url  			= store.get_value (tree.selection).selected, 3
-		comment 		= store.get_value (tree.selection).selected, 5
-		tag 			= store.get_value (tree.selection).selected, 6
-
-		tag_entry 		= create_tag_entry tag
-
 		edit_button 		= Gtk::Button.new :stock_id => Gtk::Stock::APPLY
 		cancel_button 		= Gtk::Button.new :stock_id => Gtk::Stock::CANCEL
 		grid 			= Grid.new
+		rows			= tree.selection.selected_rows
+		
+		cancel_button.signal_connect "clicked" do
+			destroy
+		end
 
-		if url.empty?
-			set_title 	title + " - Edit tag"
-			old_tag 	= store.get_value \
-							(tree.selection).selected, 6
+		if rows.size > 1
+			set_title 	title + " - Edit multiple tags"
+			tag_entry 	= create_name_entry nil
 
-			tag_entry.set_text old_tag
-
-			tag_entry.signal_connect "activate" do
-				db.edit_tag 		old_tag, tag_entry.text
-				Actions.store_feed 	db, store, tree
-				destroy
-			end
-			
-			edit_button.signal_connect "clicked" do
-				db.edit_tag 		old_tag, tag_entry.text
-				Actions.store_feed 	db, store, tree
-				destroy
-			end
 								#e   #t   #l    #a
 			grid.attach (Gtk::Label.new "Tag"),	0,   1,   20,   1
 			grid.attach tag_entry, 			20,  1,   20,   1
 			grid.attach edit_button,		0,   2,   20,   1
 			grid.attach cancel_button,		20,  2,   20,   1
 
-		else
-			name_entry 		= create_name_entry name
-			url_entry 		= create_url_entry url, (Actions.set_icon url \
-							,"starred-symbolic", s), s, tree, store
-			comment_entry 		= create_comment_entry comment
-
 			edit_button.signal_connect "clicked" do
-				if name != name_entry.text 
-					db.edit id, "name", name_entry.text
-				end
-
-				if url != url_entry.text 
-					db.edit id, "url", url_entry.text
-				end
-
-				if comment != comment_entry.text 
-					db.edit id, "comment", comment_entry.text
-				end
-
-				if tag != tag_entry.text
-					db.edit id, "tag", tag_entry.text
+				for i in rows do
+					id 		= store.get_value (tree.model.get_iter i), 0
+					db.edit id	,"tag", tag_entry.text
 				end
 
 				Actions.store_feed 	db, store, tree
-
-				if url != url_entry.text 
-					tree.model.each do |model, tpath, iter|
-						if (store.get_value iter, 3) == url_entry.text
-							tree.set_cursor tpath, nil, false
-
-							if !(Web_Data.favicon_exist? url_entry.text, s)
-								Actions.download_favicon store, tree, s
-							end
-						end
-					end		
-				end
-
 				destroy
 			end
+			
+			vbox 		= Gtk::Box.new :vertical, 2
 
-								#e   #t   #l    #a
-			grid.attach (Gtk::Label.new "Name"),	0,   1,   20,   1
-			grid.attach name_entry, 		20,  1,   20,   1
-			grid.attach (Gtk::Label.new "Url"), 	0,   2,   20,   1
-			grid.attach url_entry,			20,  2,   20,   1
-			grid.attach (Gtk::Label.new "Comment"),	0,   3,   20,   1
-			grid.attach comment_entry,		20,  3,   20,   1
-			grid.attach (Gtk::Label.new "Tag"), 	0,   4,   20,   1
-			grid.attach tag_entry,			20,  4,   20,   1
-			grid.attach edit_button,		0,   5,   20,   1
-			grid.attach cancel_button,		20,  5,   20,   1
+			vbox.pack_start grid \
+					,:expand 	=> false \
+					,:fill 		=> false \
+					,:padding 	=> 0 \
+
+			add 	vbox	
+		else
+			row			= rows[0]
+			id 			= store.get_value (tree.model.get_iter row), 0
+			name 			= store.get_value (tree.model.get_iter row), 1
+			url  			= store.get_value (tree.model.get_iter row), 3
+			comment 		= store.get_value (tree.model.get_iter row), 5
+			tag 			= store.get_value (tree.model.get_iter row), 6
+
+			tag_entry 		= create_tag_entry tag
+
+			if url.empty?
+				set_title 	title + " - Edit tag"
+				old_tag 	= store.get_value (tree.model.get_iter row), 6
+
+				tag_entry.set_text old_tag
+
+				tag_entry.signal_connect "activate" do
+					db.edit_tag 		old_tag, tag_entry.text
+					Actions.store_feed 	db, store, tree
+					destroy
+				end
+				
+				edit_button.signal_connect "clicked" do
+					db.edit_tag 		old_tag, tag_entry.text
+					Actions.store_feed 	db, store, tree
+					destroy
+				end
+									#e   #t   #l    #a
+				grid.attach (Gtk::Label.new "Tag"),	0,   1,   20,   1
+				grid.attach tag_entry, 			20,  1,   20,   1
+				grid.attach edit_button,		0,   2,   20,   1
+				grid.attach cancel_button,		20,  2,   20,   1
+
+			else
+				name_entry 	= create_name_entry name
+				url_entry 	= create_url_entry url, (Actions.set_icon url \
+							,"starred-symbolic", s), s, tree, store
+				comment_entry 	= create_comment_entry comment
+
+				edit_button.signal_connect "clicked" do
+					if name != name_entry.text 
+						db.edit id, "name", name_entry.text
+					end
+
+					if url != url_entry.text 
+						db.edit id, "url", url_entry.text
+					end
+
+					if comment != comment_entry.text 
+						db.edit id, "comment", comment_entry.text
+					end
+
+					if tag != tag_entry.text
+						db.edit id, "tag", tag_entry.text
+					end
+
+					Actions.store_feed 	db, store, tree
+
+					if url != url_entry.text 
+						tree.model.each do |model, tpath, iter|
+							if (store.get_value iter, 3) == url_entry.text
+								tree.set_cursor tpath, nil, false
+
+								if !(Web_Data.favicon_exist? url_entry.text, s)
+									Actions.download_favicon \
+										store, tree, s
+								end
+							end
+						end		
+					end
+
+					destroy
+				end
+
+									#e   #t   #l    #a
+				grid.attach (Gtk::Label.new "Name"),	0,   1,   20,   1
+				grid.attach name_entry, 		20,  1,   20,   1
+				grid.attach (Gtk::Label.new "Url"), 	0,   2,   20,   1
+				grid.attach url_entry,			20,  2,   20,   1
+				grid.attach (Gtk::Label.new "Comment"),	0,   3,   20,   1
+				grid.attach comment_entry,		20,  3,   20,   1
+				grid.attach (Gtk::Label.new "Tag"), 	0,   4,   20,   1
+				grid.attach tag_entry,			20,  4,   20,   1
+				grid.attach edit_button,		0,   5,   20,   1
+				grid.attach cancel_button,		20,  5,   20,   1
+			end
+
+
+			vbox 			= Gtk::Box.new :vertical, 2
+			vbox.pack_start 	grid \
+							,:expand 	=> false \
+							,:fill 		=> false \
+							,:padding 	=> 0 \
+
+			add 			vbox
 		end
 
-		cancel_button.signal_connect "clicked" do
-			destroy
-		end
-
-		vbox 			= Gtk::Box.new :vertical, 2
-		vbox.pack_start 	grid \
-						,:expand 	=> false \
-						,:fill 		=> false \
-						,:padding 	=> 0 \
-
-		add 			vbox
 		show_all
 	end
 end
@@ -1004,73 +1038,127 @@ end
 class Gtk_Delete < Gtk_Window
 	def initialize db, store, tree, s
 		super()
-		set_title 		title + " - Delete?"
-
-		id 			= store.get_value (tree.selection).selected, 0
-		name 			= store.get_value (tree.selection).selected, 1
-		url 			= store.get_value (tree.selection).selected, 3
-		comment 		= store.get_value (tree.selection).selected, 5
-		tag 			= store.get_value (tree.selection).selected, 6
-
-		tag_entry 		= create_tag_entry tag
-		tag_entry.set_editable 	false
+		set_title 		title + " - Delete"
 
 		delete_button 		= Gtk::Button.new :stock_id => Gtk::Stock::DELETE
 		cancel_button 		= Gtk::Button.new :stock_id => Gtk::Stock::CANCEL
 		grid 			= Grid.new
-
-		if url.empty?
-			grid.attach (Gtk::Label.new "Tag"), 	0,   0,   20,   1
-			grid.attach tag_entry, 			20,  0,   20,   1
-			grid.attach delete_button,		0,   1,   20,   1
-			grid.attach cancel_button,		20,  1,   20,   1
-		else
-			name_entry 		= create_name_entry name
-			name_entry.set_editable false
-
-			url_entry 		= create_url_entry url, (Actions.set_icon url \
-							,"starred-symbolic", s), s, tree, store
-			url_entry.set_editable 	false
-			url_entry.primary_icon_activatable = false
-
-			comment_entry 			= create_comment_entry comment
-			comment_entry.set_editable 	false
-
-			grid.attach (Gtk::Label.new "Name"), 	0,   0,   20,   1
-			grid.attach name_entry, 		20,  0,   20,   1
-			grid.attach (Gtk::Label.new "Url"), 	0,   1,   20,   1
-			grid.attach url_entry,			20,  1,   20,   1
-			grid.attach (Gtk::Label.new "Comment"),	0,   2,   20,   1
-			grid.attach comment_entry,		20,  2,   20,   1
-			grid.attach (Gtk::Label.new "Tag"), 	0,   3,   20,   1
-			grid.attach tag_entry,			20,  3,   20,   1
-			grid.attach delete_button,		0,   4,   20,   1
-			grid.attach cancel_button,		20,  4,   20,   1
-		end
-
-		delete_button.signal_connect "clicked" do
-			if url.empty?
-				db.delete_tag 	tag
-			else
-				db.delete 	id
-			end
-
-			Actions.store_feed 	db, store, tree
-			destroy
-		end
+		rows			= tree.selection.selected_rows
 
 		cancel_button.signal_connect "clicked" do
 			destroy
 		end
 
-		vbox 			= Gtk::Box.new :vertical, 2
-		vbox.pack_start 	grid \
-						,:expand 	=> false \
-						,:fill 		=> false \
-						,:padding 	=> 0 \
+		if rows.size > 1
+			set_title 	title + " - Delete multiple"
+			vbox 		= Gtk::Box.new :vertical, 2
+			hbox 		= Gtk::Box.new :horizontal, 2
+			
+			vbox.pack_start	(Gtk::Label.new "delete bookmarks:")
+			hbox.pack_start delete_button
+			hbox.pack_start cancel_button
+			
+			rows.each_with_index do |t, i|
+				id 		= store.get_value (tree.model.get_iter t), 0
+				name 		= store.get_value (tree.model.get_iter t), 1
+				url  		= store.get_value (tree.model.get_iter t), 3
+				comment 	= store.get_value (tree.model.get_iter t), 5
+				tag 		= store.get_value (tree.model.get_iter t), 6
+
+				name_entry 		= create_name_entry name
+				name_entry.set_editable false
+
+				url_entry 		= create_url_entry url, (Actions.set_icon url \
+								,"starred-symbolic", s), s, tree, store
+				url_entry.set_editable 	false
+				url_entry.primary_icon_activatable = false
+
+				grid.attach name_entry,		0,  i,  20,   1
+				grid.attach url_entry,		20, i,  20,   1
+			end
+
+			delete_button.signal_connect "clicked" do
+				for i in rows do
+					id 		= store.get_value (tree.model.get_iter i), 0
+					db.delete 	id
+				end
+
+				Actions.store_feed 	db, store, tree
+				destroy
+			end
+			
+			vbox.pack_start grid \
+					,:expand 	=> false \
+					,:fill 		=> false \
+					,:padding 	=> 0 \
+
+			vbox.pack_start hbox \
+					,:expand 	=> false \
+					,:fill 		=> false \
+					,:padding 	=> 0 \
+
+			add 	vbox	
+		else	
+			row			= rows[0]
+			id 			= store.get_value (tree.model.get_iter row), 0
+			name 			= store.get_value (tree.model.get_iter row), 1
+			url  			= store.get_value (tree.model.get_iter row), 3
+			comment 		= store.get_value (tree.model.get_iter row), 5
+			tag 			= store.get_value (tree.model.get_iter row), 6
+
+			tag_entry 		= create_tag_entry tag
+			tag_entry.set_editable 	false
+
+			if url.empty?
+				grid.attach (Gtk::Label.new "Tag"), 	0,   0,   20,   1
+				grid.attach tag_entry, 			20,  0,   20,   1
+				grid.attach delete_button,		0,   1,   20,   1
+				grid.attach cancel_button,		20,  1,   20,   1
+			else
+				name_entry 		= create_name_entry name
+				name_entry.set_editable false
+
+				url_entry 		= create_url_entry url, (Actions.set_icon url \
+								,"starred-symbolic", s), s, tree, store
+				url_entry.set_editable 	false
+				url_entry.primary_icon_activatable = false
+
+				comment_entry 			= create_comment_entry comment
+				comment_entry.set_editable 	false
+
+				grid.attach (Gtk::Label.new "Name"), 	0,   0,   20,   1
+				grid.attach name_entry, 		20,  0,   20,   1
+				grid.attach (Gtk::Label.new "Url"), 	0,   1,   20,   1
+				grid.attach url_entry,			20,  1,   20,   1
+				grid.attach (Gtk::Label.new "Comment"),	0,   2,   20,   1
+				grid.attach comment_entry,		20,  2,   20,   1
+				grid.attach (Gtk::Label.new "Tag"), 	0,   3,   20,   1
+				grid.attach tag_entry,			20,  3,   20,   1
+				grid.attach delete_button,		0,   4,   20,   1
+				grid.attach cancel_button,		20,  4,   20,   1
+			end
+
+			delete_button.signal_connect "clicked" do
+				if url.empty?
+					db.delete_tag 	tag
+				else
+					db.delete 	id
+				end
+
+				Actions.store_feed 	db, store, tree
+				destroy
+			end
+
+			vbox 			= Gtk::Box.new :vertical, 2
+			vbox.pack_start 	grid \
+							,:expand 	=> false \
+							,:fill 		=> false \
+							,:padding 	=> 0 \
+
+			add 			vbox
+		end
 
 		cancel_button.grab_focus
-		add 			vbox
 		show_all
 	end
 end
@@ -1277,7 +1365,7 @@ class Gtk_Ui < Gtk_Window
 			end
 
 			if e.state.control_mask?
-				if key == "a" 
+				if key == "v" 
 					@tree.expand_all
 				end
 
@@ -1310,7 +1398,7 @@ class Gtk_Ui < Gtk_Window
 				end
 
 				if key == "h" or key == "a"
-					if sel = @tree.selection.selected
+					if sel = (@tree.model.get_iter @tree.selection.selected_rows[0])
 						@tree.scroll_to_cell \
 							sel.path \
 							,(@tree.get_column 0) \
@@ -1321,7 +1409,7 @@ class Gtk_Ui < Gtk_Window
 				end
 
 				if key == "l" or key == "e"
-					if sel = @tree.selection.selected
+					if sel = (@tree.model.get_iter @tree.selection.selected_rows[0])
 						@tree.scroll_to_cell \
 							sel.path \
 							,(@tree.get_column 5) \
@@ -1463,18 +1551,18 @@ class Gtk_Ui < Gtk_Window
 		end
 
 		menu_items = Hash[ \
-			"file_open" => file_open \
-			,"file_import" => file_import \
-			,"file_exit" => file_exit \
-			,"edit_copy" => edit_copy \
-			,"edit_insert" => edit_insert \
-			,"edit_edit" => edit_edit \
-			,"edit_delete" => edit_delete \
-			,"edit_fetch_db" => edit_fetch_db \
-			,"edit_fetch_fv" => edit_fetch_fv \
-			,"edit_preferences" => edit_preferences \
-			,"help_doc" => help_doc \
-			,"help_about" => help_about]
+			"file_open" 		=> file_open \
+			,"file_import" 		=> file_import \
+			,"file_exit" 		=> file_exit \
+			,"edit_copy" 		=> edit_copy \
+			,"edit_insert" 		=> edit_insert \
+			,"edit_edit" 		=> edit_edit \
+			,"edit_delete" 		=> edit_delete \
+			,"edit_fetch_db" 	=> edit_fetch_db \
+			,"edit_fetch_fv" 	=> edit_fetch_fv \
+			,"edit_preferences" 	=> edit_preferences \
+			,"help_doc" 		=> help_doc \
+			,"help_about" 		=> help_about]
 	end
 
 	def make_menubar items
@@ -1520,6 +1608,7 @@ class Gtk_Ui < Gtk_Window
 		menu.append 		items['edit_fetch_db']
 		menu.append 		items['edit_fetch_fv']
 		menu.append 		items['edit_preferences']
+		menu.append 		Gtk::SeparatorMenuItem.new
 		menu.append 		items['file_open']
 		menu.append 		items['file_import']
 		menu.append 		items['file_exit']
@@ -1550,6 +1639,7 @@ class Gtk_Ui < Gtk_Window
 						,tree.render_comment, {:text => 5}
 
 		tree.search_column 	= @settings.s['search_column'].to_i
+		tree.selection.mode	= :multiple
 
 		tree.signal_connect "row-activated" do |tree, path, col|
 			if tree.row_expanded? path
