@@ -525,7 +525,7 @@ class Store < Gtk::TreeStore
 			if it \
 			and entry == (get_value it, 4) \
 			and it.parent \
-			and parent == (get_value it.parent, 4)
+			and parent == (get_value it.parent, 4) 
 				return it
 			end
 		end
@@ -533,8 +533,19 @@ class Store < Gtk::TreeStore
 		false
 	end
 
+	def get_iter_root iter
+		parent = iter.parent
+		
+		if parent and parent.parent
+			get_iter_root parent
+		else
+			return parent
+		end
+	end
+
 	def feed_tree result
 		number_of_items = 0
+		root		= nil
 
 		for i in result do
 			dirs 	= i[4].split '/'
@@ -551,6 +562,8 @@ class Store < Gtk::TreeStore
 							,"#{d}" \
 							,"" \
 							,"#{i[4]}"]
+
+						root = iter
 					end
 				else
 					if !(r = search_children d, dirs[j - 1]) 
@@ -565,7 +578,19 @@ class Store < Gtk::TreeStore
 								,"#{i[4]}"]
 						end
 					else
-						iter = r
+						if root == (get_iter_root r) 
+							iter = r
+						else
+							iter = insert iter, number_of_items += 1 \
+								,["" \
+								,"" \
+								,nil \
+								,"" \
+								,"#{d}" \
+								,"" \
+								,"#{i[4]}"]
+
+						end
 					end
 				end
 			end
@@ -933,7 +958,7 @@ class Gtk_Edit < Gtk_Window
 					,:fill 		=> false \
 					,:padding 	=> 0 \
 
-			add 	vbox	
+			add 		vbox	
 		else
 			row			= rows[0]
 			id 			= store.get_value (tree.model.get_iter row), 0
@@ -1020,7 +1045,6 @@ class Gtk_Edit < Gtk_Window
 				grid.attach edit_button,		0,   5,   20,   1
 				grid.attach cancel_button,		20,  5,   20,   1
 			end
-
 
 			vbox 			= Gtk::Box.new :vertical, 2
 			vbox.pack_start 	grid \
