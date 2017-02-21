@@ -512,7 +512,9 @@ class Store < Gtk::TreeStore
 
 	def search_toplevel entry
 		each do |s, tp, it|
-			if entry == (get_value it, 4) \
+			if it \
+			and entry \
+			and entry == (get_value it, 4) \
 			and !it.parent
 				return it
 			end
@@ -524,6 +526,7 @@ class Store < Gtk::TreeStore
 	def search_children entry, parent
 		each do |s, tp, it|
 			if it \
+			and entry \
 			and entry == (get_value it, 4) \
 			and it.parent \
 			and parent == (get_value it.parent, 4) 
