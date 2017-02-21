@@ -141,6 +141,7 @@ class Settings
 			,"search_column" 	=> "1" \
 			,"xclip" 		=> "true" \
 			,"tree_lines" 		=> "true" \
+			,"auto_favicon" 	=> "true" \
 			,"user_agent"		=> "Mozilla/5.0 (X11; Linux i686; rv:45.0) Gecko/20100101 Firefox/45.0"]
 
 		if !(File.exists? "#{@s['dir']}")
@@ -549,13 +550,7 @@ class Store < Gtk::TreeStore
 
 	def insert_dir iter, name, tag, number_of_items
 		it = insert iter, number_of_items += 1 \
-			,["" \
-			,"" \
-			,nil \
-			,"" \
-			,"#{name}" \
-			,"" \
-			,"#{tag}"]
+			,["", "", nil, "", "#{name}", "", "#{tag}"]
 
 		it
 	end
@@ -684,6 +679,7 @@ class Tree < Gtk::TreeView
 		end
 
 		columns_autosize
+		self.search_column	= s['search_column'].to_i
 	end
 
 	attr_reader \
@@ -868,8 +864,10 @@ class Gtk_Insert < Gtk_Window
 					if (store.get_value iter, 3) == url
 						tree.set_cursor tpath, nil, false
 
-						if !(Web_Data.favicon_exist? url, s)
-							Actions.download_favicon store, tree, s
+						if s['auto_favicon'] == "true" \
+						and !(Web_Data.favicon_exist? url, s)
+							Actions.download_favicon \
+								store, tree, s
 						end
 					end
 				end		
@@ -1014,7 +1012,9 @@ class Gtk_Edit < Gtk_Window
 							if (store.get_value iter, 3) == url_entry.text
 								tree.set_cursor tpath, nil, false
 
-								if !(Web_Data.favicon_exist? url_entry.text, s)
+								if s['auto_favicon'] == "true" \
+								and !(Web_Data.favicon_exist? \
+									url_entry.text, s)
 									Actions.download_favicon \
 										store, tree, s
 								end
@@ -1227,55 +1227,97 @@ class Gtk_Settings < Gtk_Window
 			tree_lines.set_active	false
 		end
 
-		grid 			= Grid.new
+		user_agent_entry	= Gtk::Entry.new
+		user_agent_entry.text	= s['user_agent']
+
+		xclip 			= Gtk::CheckButton.new "xclip?", false
+
+		if s['xclip'] == "true"
+			xclip.set_active	true
+		else
+			xclip.set_active	false
+		end
+
+		search_column			= Gtk::ComboBoxText.new 
+		search_column.insert_text 	0, "id"
+		search_column.insert_text 	1, "name"
+		search_column.insert_text 	3, "url"
+		search_column.insert_text 	5, "comment"
+		search_column.insert_text 	6, "tag"
+		search_column.set_active 	s['search_column'].to_i
+		t_search_column 		= s['search_column']
+
+		search_column.signal_connect "changed" do |s|
+			t_search_column = s.active
+		end
+
+		auto_favicon 			= Gtk::CheckButton.new "auto download favicon?", false
+
+		if s['auto_favicon'] == "true"
+			auto_favicon.set_active	true
+		else
+			auto_favicon.set_active	false
+		end
+
+		apply_button 		= Gtk::Button.new :stock_id => Gtk::Stock::APPLY
+		cancel_button 		= Gtk::Button.new :stock_id => Gtk::Stock::CANCEL
+
+		ap_grid 		= Grid.new
 
 								#e   #t   #l   #a
-		grid.attach (Gtk::Label.new "List:"),		0,   0,   5,   1
-		grid.attach tree_lines,				5,   0,   5,   1
-		grid.attach (tree_style),   			10,  0,   5,   1
-		grid.attach (Gtk::Label.new ""),   		0,   1,   5,   1
-		grid.attach (Gtk::Label.new "Column"),   	0,   2,   5,   1
-		grid.attach (Gtk::Label.new "Foreground"),     	5,   2,   5,   1
-		grid.attach (Gtk::Label.new "Background"),     	10,  2,   5,   1
-		grid.attach (Gtk::Label.new "Font"),     	15,  2,   5,   1
-		grid.attach (Gtk::Label.new "Id"),		0,   3,   5,   1
-		grid.attach color_buttons[0][0],		5,   3,   5,   1
-		grid.attach color_buttons[1][0],		10,  3,   5,   1
-		grid.attach id_font_button,			15,  3,   5,   1
-		grid.attach (Gtk::Label.new "Name"),		0,   4,   5,   1
-		grid.attach color_buttons[2][0],		5,   4,   5,   1
-		grid.attach color_buttons[3][0],		10,  4,   5,   1
-		grid.attach name_font_button,			15,  4,   5,   1
-		grid.attach (Gtk::Label.new "Url"), 		0,   5,   5,   1
-		grid.attach color_buttons[4][0],		5,   5,   5,   1
-		grid.attach color_buttons[5][0],		10,  5,   5,   1
-		grid.attach url_font_button,			15,  5,   5,   1
-		grid.attach (Gtk::Label.new "Comment"),		0,   6,   5,   1
-		grid.attach color_buttons[6][0],		5,   6,   5,   1
-		grid.attach color_buttons[7][0],		10,  6,   5,   1
-		grid.attach comment_font_button,		15,  6,   5,   1
-		grid.attach (Gtk::Label.new "Tag"), 		0,   7,   5,   1
-		grid.attach color_buttons[8][0],		5,   7,   5,   1
-		grid.attach color_buttons[9][0],		10,  7,   5,   1
-		grid.attach tag_font_button,			15,  7,   5,   1
+		ap_grid.attach (Gtk::Label.new "List:"),	0,   0,   5,   1
+		ap_grid.attach tree_lines,			5,   0,   5,   1
+		ap_grid.attach (tree_style),   			10,  0,   5,   1
+		ap_grid.attach (Gtk::Label.new ""),   		0,   1,   5,   1
+		ap_grid.attach (Gtk::Label.new "Column"),   	0,   2,   5,   1
+		ap_grid.attach (Gtk::Label.new "Foreground"),   5,   2,   5,   1
+		ap_grid.attach (Gtk::Label.new "Background"),   10,  2,   5,   1
+		ap_grid.attach (Gtk::Label.new "Font"),     	15,  2,   5,   1
+		ap_grid.attach (Gtk::Label.new "Id"),		0,   3,   5,   1
+		ap_grid.attach color_buttons[0][0],		5,   3,   5,   1
+		ap_grid.attach color_buttons[1][0],		10,  3,   5,   1
+		ap_grid.attach id_font_button,			15,  3,   5,   1
+		ap_grid.attach (Gtk::Label.new "Name"),		0,   4,   5,   1
+		ap_grid.attach color_buttons[2][0],		5,   4,   5,   1
+		ap_grid.attach color_buttons[3][0],		10,  4,   5,   1
+		ap_grid.attach name_font_button,		15,  4,   5,   1
+		ap_grid.attach (Gtk::Label.new "Url"), 		0,   5,   5,   1
+		ap_grid.attach color_buttons[4][0],		5,   5,   5,   1
+		ap_grid.attach color_buttons[5][0],		10,  5,   5,   1
+		ap_grid.attach url_font_button,			15,  5,   5,   1
+		ap_grid.attach (Gtk::Label.new "Comment"),	0,   6,   5,   1
+		ap_grid.attach color_buttons[6][0],		5,   6,   5,   1
+		ap_grid.attach color_buttons[7][0],		10,  6,   5,   1
+		ap_grid.attach comment_font_button,		15,  6,   5,   1
+		ap_grid.attach (Gtk::Label.new "Tag"), 		0,   7,   5,   1
+		ap_grid.attach color_buttons[8][0],		5,   7,   5,   1
+		ap_grid.attach color_buttons[9][0],		10,  7,   5,   1
+		ap_grid.attach tag_font_button,			15,  7,   5,   1
 
-		frame 			= Gtk::Frame.new "Appearance"
-		frame.add 		grid
+		bh_grid			= Grid.new
+
+		bh_grid.attach (Gtk::Label.new "Search column:"),	0,   0,   5,   1
+		bh_grid.attach search_column,				5,   0,   5,   1
+		bh_grid.attach (Gtk::Label.new "Clipboard:"),		0,   1,   5,   1
+		bh_grid.attach xclip,					5,   1,   5,   1
+		bh_grid.attach (Gtk::Label.new "Favicon:"),		0,   2,   5,   1
+		bh_grid.attach auto_favicon,				5,   2,   5,   1
+		bh_grid.attach (Gtk::Label.new "User agent:"),		0,   3,   5,   1
+		bh_grid.attach user_agent_entry,			5,   3,   5,   1
+
+		tabs			= Gtk::Notebook.new
+		tabs.append_page 	bh_grid, (Gtk::Label.new "Options")
+		tabs.append_page 	ap_grid, (Gtk::Label.new "Appearance")
 
 		vbox 			= Gtk::Box.new :vertical, 2
-
-		vbox.pack_start 	frame \
+		vbox.pack_start 	tabs \
 						,:expand 	=> false \
 						,:fill 		=> false \
 						,:padding 	=> 0
 
-		apply_button 			= Gtk::Button.new :stock_id => Gtk::Stock::APPLY
-		cancel_button 			= Gtk::Button.new :stock_id => Gtk::Stock::CANCEL
-
 		button_box 		= Gtk::Box.new :horizontal, 2
 		button_box.pack_start 	apply_button 
 		button_box.pack_start 	cancel_button 
-
 		vbox.pack_start 	button_box \
 						,:expand 	=> true \
 						,:fill 		=> false \
@@ -1310,6 +1352,22 @@ class Gtk_Settings < Gtk_Window
 			s['url_font']     	= url_font_button.font_name
 			s['comment_font'] 	= comment_font_button.font_name
 			s['tag_font']     	= tag_font_button.font_name
+
+			s['user_agent'] 	= user_agent_entry.text
+
+			if xclip.active?
+				s['xclip'] = "true"
+			else
+				s['xclip'] = "false"
+			end
+
+			s['search_column'] 	= t_search_column
+
+			if auto_favicon.active?
+				s['auto_favicon'] = "true"
+			else
+				s['auto_favicon'] = "false"
+			end
 
 			settings.save_config
 			store.style 		= s['style'].to_i
