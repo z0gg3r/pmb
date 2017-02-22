@@ -362,7 +362,8 @@ class Actions
 
 		tree.expand_all
 
-		if tree.selected_row
+		if tree.selected_row \
+		and (tree.model.get_iter tree.selected_row)
 			tree.set_cursor 	tree.selected_row, nil, false
 			#tree.scroll_to_cell 	tree.selected_row, nil, true, 0.5, 0.0
 		end
