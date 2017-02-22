@@ -573,20 +573,23 @@ class Store < Gtk::TreeStore
 							,number_of_items
 					
 						root = iter
+					else
+						root = iter
 					end
 				else
-					if dirs[j - 1] \
-					and !(r = search_children d, dirs[j - 1]) 
-						if dirs[j]
-							iter = insert_dir iter, d, i[4] \
-								,number_of_items
-						end
-					else
-						if !root == (get_iter_root r)
-							iter = insert_dir iter, d, i[4] \
-								,number_of_items
+					if dirs[j - 1] 
+						if !(r = search_children d, dirs[j - 1]) 
+							if dirs[j]
+								iter = insert_dir iter, d, i[4] \
+									,number_of_items
+							end
 						else
-							iter = r
+							if !root == (get_iter_root r)
+								iter = insert_dir iter, d, i[4] \
+									,number_of_items
+							else
+								iter = r
+							end
 						end
 					end
 				end
@@ -709,7 +712,7 @@ class Gtk_Window < Gtk::Window
 		set_wmclass 	"Poor man's bookmark"	,"Pmb"
 		set_title 	"Poor man's bookmark"
 		set_type_hint 	:dialog
-
+		set_default_size 600, 0
 		signal_connect "destroy" do
 			destroy
 		end
