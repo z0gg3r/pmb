@@ -1422,7 +1422,13 @@ class Gtk_Ui < Gtk_Window
 
 		vbox 			= Gtk::Box.new :vertical, 2
 
+		action_bar 		= (make_actionbar make_tools) 
+
 		vbox.pack_start 	(make_menubar make_menu) \
+						,:expand 	=> false \
+						,:fill 		=> false
+
+		vbox.pack_start 	action_bar \
 						,:expand 	=> false \
 						,:fill 		=> false
 
@@ -1646,6 +1652,85 @@ class Gtk_Ui < Gtk_Window
 			,"help_about" 		=> help_about]
 	end
 
+	def make_tools
+		file_open 			= Gtk::ToolButton.new :stock_id => Gtk::Stock::OPEN
+
+		file_import 			= Gtk::ToolButton.new 
+		file_import.label 		= "Import"
+		file_import.icon_name 		= "insert-object"
+
+		file_exit 			= Gtk::ToolButton.new :stock_id => Gtk::Stock::QUIT
+
+		edit_fetch_db	 		= Gtk::ToolButton.new 
+		edit_fetch_db.label 		= "Reload"
+		edit_fetch_db.icon_name		= "reload"
+
+		edit_fetch_fv	 		= Gtk::ToolButton.new 
+		edit_fetch_fv.label	 	= "Fetch favicon"
+		edit_fetch_fv.icon_name		= "starred"
+
+		edit_copy	 		= Gtk::ToolButton.new :stock_id => Gtk::Stock::COPY
+		edit_insert	 		= Gtk::ToolButton.new :stock_id => Gtk::Stock::ADD
+		edit_edit	 		= Gtk::ToolButton.new :stock_id => Gtk::Stock::EDIT
+		edit_delete	 		= Gtk::ToolButton.new :stock_id => Gtk::Stock::DELETE
+		edit_preferences 		= Gtk::ToolButton.new :stock_id => Gtk::Stock::PREFERENCES
+
+		file_open.signal_connect "clicked" do
+			if (ret = Actions.open @store, @tree, @settings, self)
+				@db = ret
+			end
+		end
+
+		file_import.signal_connect "clicked" do
+			Actions.import 		@db, self
+			Actions.store_feed 	@db, @store, @tree
+		end
+
+		file_exit.signal_connect "clicked" do
+			Gtk.main_quit
+		end
+
+		edit_fetch_db.signal_connect "clicked" do
+			Actions.store_feed 	@db, @store, @tree
+		end
+
+		edit_fetch_fv.signal_connect "clicked" do
+			Actions.download_favicon @store, @tree, @settings.s
+		end
+
+		edit_copy.signal_connect "clicked" do
+			Actions.clipboard 	@store, @tree, @settings['xclip']
+		end
+
+		edit_insert.signal_connect "clicked" do
+			Actions.insert 		@db, @store, @tree, @settings.s
+		end
+
+		edit_delete.signal_connect "clicked" do
+			Actions.delete 		@db, @store, @tree, @settings.s
+		end
+
+		edit_edit.signal_connect "clicked" do
+			Actions.edit 		@db, @store, @tree, @settings.s
+		end
+
+		edit_preferences.signal_connect "clicked" do
+			Actions.settings 	@settings, @db, @store, @tree
+		end
+
+		tool_items = Hash[ \
+			"file_open" 		=> file_open \
+			,"file_import" 		=> file_import \
+			,"file_exit" 		=> file_exit \
+			,"edit_copy" 		=> edit_copy \
+			,"edit_insert" 		=> edit_insert \
+			,"edit_edit" 		=> edit_edit \
+			,"edit_delete" 		=> edit_delete \
+			,"edit_fetch_db" 	=> edit_fetch_db \
+			,"edit_fetch_fv" 	=> edit_fetch_fv \
+			,"edit_preferences" 	=> edit_preferences] 
+	end
+
 	def make_menubar items
 		file_item 			= Gtk::ImageMenuItem.new :stock_id => Gtk::Stock::FILE
 		file_item.image 		= nil
@@ -1653,6 +1738,7 @@ class Gtk_Ui < Gtk_Window
 		file_item.set_submenu 		file_menu
 		file_menu.append 		items['file_open']
 		file_menu.append 		items['file_import']
+		file_menu.append		Gtk::SeparatorMenuItem.new
 		file_menu.append 		items['file_exit']
 
 		edit_item 			= Gtk::ImageMenuItem.new :stock_id => Gtk::Stock::EDIT
@@ -1663,8 +1749,10 @@ class Gtk_Ui < Gtk_Window
 		edit_menu.append 		items['edit_insert']
 		edit_menu.append 		items['edit_edit']
 		edit_menu.append 		items['edit_delete']
+		file_menu.append		Gtk::SeparatorMenuItem.new
 		edit_menu.append 		items['edit_fetch_db']
 		edit_menu.append 		items['edit_fetch_fv']
+		edit_menu.append		Gtk::SeparatorMenuItem.new
 		edit_menu.append 		items['edit_preferences']
 
 		help_item 			= Gtk::ImageMenuItem.new :stock_id => Gtk::Stock::HELP
@@ -1674,10 +1762,30 @@ class Gtk_Ui < Gtk_Window
 		help_menu.append		items['help_doc']
 		help_menu.append		items['help_about']
 
-		menu_bar = Gtk::MenuBar.new
+		menu_bar 			= Gtk::MenuBar.new
 		menu_bar.append 		file_item
 		menu_bar.append 		edit_item
 		menu_bar
+	end
+
+	def make_actionbar items
+		tool_bar 		= Gtk::Toolbar.new
+		tool_bar.toolbar_style	= :both
+
+		number_of_items		= 0
+		tool_bar.insert 	items['file_open'], number_of_items
+		tool_bar.insert 	items['file_import'], number_of_items += 1
+		tool_bar.insert		Gtk::SeparatorToolItem.new, number_of_items += 1
+		tool_bar.insert 	items['edit_copy'], number_of_items += 1
+		tool_bar.insert		items['edit_insert'], number_of_items += 1
+		tool_bar.insert 	items['edit_edit'], number_of_items += 1
+		tool_bar.insert		items['edit_delete'], number_of_items += 1
+		tool_bar.insert		Gtk::SeparatorToolItem.new, number_of_items += 1
+		tool_bar.insert 	items['edit_fetch_db'], number_of_items += 1
+		tool_bar.insert		items['edit_fetch_fv'], number_of_items += 1
+		tool_bar.insert		Gtk::SeparatorToolItem.new, number_of_items += 1
+		tool_bar.insert		items['edit_preferences'], number_of_items += 1
+		tool_bar
 	end
 
 	def make_tree_menu items
