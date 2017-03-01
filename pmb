@@ -1436,109 +1436,125 @@ class Gtk_Ui < Gtk_Window
 				@tree.grab_focus
 			end
 
-			if @tree.has_focus? and !e.state.mod1_mask?
-				if key == "v" 
-					@tree.expand_all
-				end
-
-				if key == "x"
-					@tree.collapse_all
-				end
-
-				if key == "j" or key == "n"
-					@tree.move_cursor :display_lines, 1 
-				end
-
-				if key == "k" or key == "p"
-					@tree.move_cursor :display_lines, -1 
-				end
-
-				if key == "g"
-					@tree.move_cursor :buffer_ends, -1
-				end
-
-				if key == "G"
-					@tree.move_cursor :buffer_ends, 1
-				end
-
-				if key == "f"
-					@tree.move_cursor :pages, 1
-				end
-
-				if key == "b"
-					@tree.move_cursor :pages, -1
-				end
-
-				if key == "h"
-					if sel = (@tree.model.get_iter @tree.selection.selected_rows[0])
-						@tree.scroll_to_cell \
-							sel.path \
-							,(@tree.get_column 0) \
-							,false \
-							,0.0 \
-							,0.0
+			if @tree.has_focus? 
+				if !e.state.mod1_mask?
+					if key == "v" 
+						@tree.expand_all
 					end
-				end
 
-				if key == "l" 
-					if sel = (@tree.model.get_iter @tree.selection.selected_rows[0])
-						@tree.scroll_to_cell \
-							sel.path \
-							,(@tree.get_column 3) \
-							,false \
-							,0.0 \
-							,0.0
+					if key == "x"
+						@tree.collapse_all
 					end
-				end
 
-				if key == "o"
-					if (ret = Actions.open @store, @tree, @settings, self)
-						@db = ret
+					if key == "j" \
+					or key == "n" 
+					#or key == "Down"
+						@tree.move_cursor 	:display_lines, 1 
 					end
-				end
 
-				if key == "i"
-					Actions.insert 	@db ,@store, @tree, @settings.s
-				end
+					if key == "k" \
+					or key == "p" 
+					#or key == "Up"
+						@tree.move_cursor 	:display_lines, -1 
+					end
 
-				if key == "t"
-					@filter_bar.each do |item|
-						if item.class == Gtk::Entry
-							item.grab_focus	
-							break
+					if key == "g" \
+					or key == "Home"
+						@tree.move_cursor 	:buffer_ends, -1
+					end
+
+					if key == "G" \
+					or key == "End"
+						@tree.move_cursor 	:buffer_ends, 1
+					end
+
+					if key == "f" \
+					#or key == "Page_Down"
+						@tree.move_cursor 	:pages, 1
+					end
+
+					if key == "b" 
+					#or key == "Page_Up"
+						@tree.move_cursor 	:pages, -1
+					end
+
+					if key == "h" 
+					#or key == "Left"
+						sw.hadjustment.value 	= sw.hadjustment.value \
+							- sw.hadjustment.step_increment
+					end
+
+					if key == "l" 
+					#or key == "Right"
+						sw.hadjustment.value 	= sw.hadjustment.value \
+							+ sw.hadjustment.step_increment
+					end
+
+					if key == "0" \
+					or key == "bar"
+						sw.hadjustment.value	= sw.hadjustment.lower
+					end
+
+					if key == "dollar" 
+						sw.hadjustment.value 	= sw.hadjustment.upper
+					end
+
+					if key == "o"
+						if (ret = Actions.open 	@store, @tree, @settings, self)
+							@db = ret
 						end
 					end
+
+					if key == "i" \
+					or key == "Insert"
+						Actions.insert 		@db ,@store, @tree, @settings.s
+					end
+
+					if key == "t"
+						@filter_bar.each do |item|
+							if item.class == Gtk::Entry
+								item.grab_focus	
+								break
+							end
+						end
+					end
+
+					if key == "e"
+						Actions.edit 		@db ,@store, @tree, @settings.s
+					end
+
+					if key == "d" \
+					or key == "Delete"
+						Actions.delete 		@db ,@store, @tree, @settings.s
+					end
+
+					if key == "s"
+						Actions.settings 	@settings, @db, @store, @tree
+					end
+
+					if key == "r"
+						Actions.store_feed 	@db, @store, @tree
+					end
+
+					#if key == "Menu"
+					#	@tree.popup_menu
+					#end
+
+					cursor, column 			= @tree.cursor
+
+					#if cursor \
+					#and key == "Return"
+					#	@tree.row_activated	cursor, column
+					#end
+
+					if cursor
+						@tree.selected_row	= cursor
+						#@tree.set_cursor 	cursor, nil, false
+					end
 				end
 
-				if key == "e"
-					Actions.edit 	@db ,@store, @tree, @settings.s
-				end
-
-				if key == "d"
-					Actions.delete 	@db ,@store, @tree, @settings.s
-				end
-
-				if key == "s"
-					Actions.settings @settings, @db, @store, @tree
-				end
-
-				if key == "r"
-					Actions.store_feed 	@db, @store, @tree
-				end
-
-				if key == "Menu"
-					@tree.popup_menu
-				end
-
-				cursor, column 		= @tree.cursor
-
-				if cursor and key == "Return"
-					@tree.row_activated cursor, column
-				end
-
-				if cursor
-					@tree.selected_row	= cursor
-					@tree.set_cursor 	cursor, nil, false
+				if key == "Space" 
+					@tree.select_cursor_row
 				end
 			end
 		end
@@ -1579,13 +1595,13 @@ class Gtk_Ui < Gtk_Window
 		edit_preferences 		= Gtk::ImageMenuItem.new \
 							:stock_id => Gtk::Stock::PREFERENCES
 
-		edit_toolbar			= Gtk::ImageMenuItem.new :label => "Show _toolbar"
+		edit_toolbar			= Gtk::ImageMenuItem.new :label => "Show/hide _toolbar"
 		edit_toolbar.use_underline 	= true
 		edit_toolbar.image 		= Gtk::Image.new \
 							:pixbuf => (Actions.search_icon \
 								"gtk-properties")
 		
-		edit_filterbar			= Gtk::ImageMenuItem.new :label => "Show _filterbar"
+		edit_filterbar			= Gtk::ImageMenuItem.new :label => "Show/hide _filterbar"
 		edit_filterbar.use_underline 	= true
 		edit_filterbar.image 		= Gtk::Image.new \
 							:pixbuf => (Actions.search_icon \
@@ -1851,11 +1867,11 @@ class Gtk_Ui < Gtk_Window
 	end
 
 	def make_tree 
-		tree			= Tree.new @store
-		tree.load_settings	@settings.s
-		tree.search_column 	= @settings.s['search_column'].to_i
-		tree.selection.mode	= :multiple
-		tree.enable_search	= false
+		tree				= Tree.new @store
+		tree.load_settings		@settings.s
+		tree.search_column 		= @settings.s['search_column'].to_i
+		tree.selection.mode		= :multiple
+		tree.enable_search		= false
 
 		icon_render 			= Gtk::CellRendererPixbuf.new
 		favicon_render 			= Gtk::CellRendererPixbuf.new
@@ -1874,14 +1890,14 @@ class Gtk_Ui < Gtk_Window
 		url_column.pack_start 		tree.render_url, false
 		url_column.set_attributes 	tree.render_url, {:text => 3}
 
-		tree.append_column 	tag_column
-		tree.append_column 	url_column
+		tree.append_column 		tag_column
+		tree.append_column 		url_column
 
-		tree.insert_column 	2, "comment" \
-						,tree.render_comment, {:text => 5}
+		tree.insert_column 		2, "comment" \
+							,tree.render_comment, {:text => 5}
 
-		tree.insert_column 	3, "id" \
-						,tree.render_id, {:text => 0}
+		tree.insert_column 		3, "id" \
+							,tree.render_id, {:text => 0}
 
 		tree.signal_connect "row-activated" do |tree, path, col|
 			if tree.row_expanded? path
