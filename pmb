@@ -238,6 +238,8 @@ class Web_Data
 		path 		= "#{s['dir']}/favicon/#{uri.host}#{uri.path}"
 		view 		= WebKitGtk::WebView.new
 
+		puts url
+
 		view.settings.enable_scripts 				= false
 		view.settings.enable_plugins 				= false
 		view.settings.auto_shrink_images 			= true
@@ -255,8 +257,6 @@ class Web_Data
 		view.settings.enable_mediasource 			= false
 		view.settings.user_agent 				= s['user_agent']	
 
-		view.load_uri 	url
-		
 		view.signal_connect "icon-loaded" do
 			if (f = view.try_get_favicon_pixbuf 20, 20)
 				if !(File.exists? path)
@@ -270,6 +270,8 @@ class Web_Data
 						store.set_value iter, 2, f 
 					end
 				end
+
+				view 		= nil
 			else
 				favicon_fetch uri, path, view.icon_uri
 
@@ -280,9 +282,10 @@ class Web_Data
 							"#{path}/icon", 20, 20)
 					end
 				end		
+
+				view 		= nil
 			end
 
-			view 		= nil
 		end
 	end
 
@@ -455,7 +458,7 @@ class Actions
 	end
 
 	def self.download_favicon store, tree, s
-		if tree.selection
+		if !tree.selection.selected_rows.empty?
 			url 	= store.get_value \
 					(tree.model.get_iter tree.selection.selected_rows[0]), 3
 
