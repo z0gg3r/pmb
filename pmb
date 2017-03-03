@@ -35,7 +35,7 @@ class Db
 
 		begin
 			rs 		= stm.execute
-			#return (find "url", data[1])
+			return (find "url", data[1])
 		rescue
 			Actions.error "url already exists", false
 		end
@@ -369,7 +369,6 @@ class Actions
 		if tree.selected_row \
 		and (tree.model.get_iter tree.selected_row)
 			tree.set_cursor 	tree.selected_row, nil, false
-			#tree.scroll_to_cell 	tree.selected_row, nil, true, 0.5, 0.0
 		end
 	end
 
@@ -447,7 +446,7 @@ class Actions
 	end
 
 	def self.delete db, store, tree, s
-		if tree.model.iter_first
+		if tree.model.iter_first 
 			tree.selected_row 	= tree.selection.selected_rows[0]
 			Gtk_Delete.new 		db, store, tree, s
 		else
@@ -556,6 +555,15 @@ class Store < Gtk::TreeStore
 		end
 	end
 
+	def n_entries child, n
+		if child and !child.has_child?
+			child.next!
+			n_entries child, n + 1
+		else
+			return n
+		end
+	end
+
 	def insert_dir iter, name, tag, number_of_items
 		it = insert iter, number_of_items += 1 \
 			,["", (Actions.search_icon "folder"), nil, "", "#{name}", "", "#{tag}"]
@@ -563,53 +571,60 @@ class Store < Gtk::TreeStore
 		it
 	end
 
-	def feed_tree result
-		number_of_items = 0
-		root		= nil
+	def insert_item iter, item, number_of_items
+		insert iter, number_of_items \
+			,["#{item[0]}" \
+			,(Actions.search_icon "starred-symbolic") \
+			,(Actions.set_icon item[2], "starred-symbolic", @s) \
+			,"#{item[2]}" \
+			,"#{item[1]}" \
+			,"#{item[3]}" \
+			,"#{item[4]}"]
 
-		for i in result do
-			dirs 	= i[4].split '/'
-			iter 	= nil
+		number_of_items += 1
+	end
 
-			dirs.each_with_index do |d, j|
-				if j == 0
-					if !(iter = search_toplevel d)
-						iter = insert_dir nil, d, i[4] \
-							,number_of_items
-					
-						root = iter
+	def tag dirs, item, number_of_items
+		iter = nil
+		root = nil
+
+		dirs.each_with_index do |d, j|
+			if j == 0
+				if !(iter = search_toplevel d)
+					iter = insert_dir nil, d, item[4] \
+						,number_of_items
+				end		
+
+				root = iter
+			else
+				if dirs[j - 1] 
+					if !(r = search_children d, dirs[j - 1]) 
+						if dirs[j]
+							iter = insert_dir iter, d, item[4] \
+								,number_of_items
+						end
 					else
-						root = iter
-					end
-				else
-					if dirs[j - 1] 
-						if !(r = search_children d, dirs[j - 1]) 
-							if dirs[j]
-								iter = insert_dir iter, d, i[4] \
-									,number_of_items
-							end
+						if !root == (get_iter_root r)
+							iter = insert_dir iter, d, item[4] \
+								,number_of_items
 						else
-							if !root == (get_iter_root r)
-								iter = insert_dir iter, d, i[4] \
-									,number_of_items
-							else
-								iter = r
-							end
+							iter = r
 						end
 					end
 				end
 			end
+		end
 
-			insert iter, number_of_items += 1 \
-				,["#{i[0]}" \
-				,(Actions.search_icon "text-html") \
-				,(Actions.set_icon i[2], "starred-symbolic", @s) \
-				,"#{i[2]}" \
-				,"#{i[1]}" \
-				,"#{i[3]}" \
-				,"#{i[4]}"]
+		iter
+	end
 
-			icon = nil
+	def feed_tree result
+		number_of_items = 0
+
+		for i in result do
+			iter 		= tag (i[4].split '/'), i, number_of_items
+			number_of_items = insert_item iter, i, number_of_items
+			icon 		= nil
 		end
 	end
 
@@ -619,20 +634,18 @@ class Store < Gtk::TreeStore
 
 		for i in result do
 			if !last or i[4] != last
-				iter = insert_dir nil, i[4], i[4], number_of_items
+				iter 	= insert_dir nil, i[4], i[4], number_of_items
 			end
 
-			insert iter, number_of_items += 1 \
-				,["#{i[0]}" \
-				,(Actions.search_icon "text-html") \
-				,(Actions.set_icon i[2], "starred-symbolic", @s) \
-				,"#{i[2]}" \
-				,"#{i[1]}" \
-				,"#{i[3]}" \
-				,"#{i[4]}"]
+			number_of_items = insert_item iter, i, number_of_items
+		end
+	end
 
-			last	= i[4]
-			icon	= nil
+	def append_item items
+		for i in items do
+			iter 		= tag (i[4].split '/'), i, 0
+			insert_item 	iter, i, (n_entries iter.first_child, 0)
+			icon 		= nil
 		end
 	end
 end
@@ -868,8 +881,7 @@ class Gtk_Insert < Gtk_Window
 				end
 
 				r = db.insert 		[name, url, comment, tag]
-				Actions.store_feed 	db, store, tree
-				#store.feed_tree r
+				store.append_item r
 
 				tree.model.each do |model, tpath, iter|
 					if (store.get_value iter, 3) == url
@@ -943,12 +955,27 @@ class Gtk_Edit < Gtk_Window
 			grid.attach cancel_button,		20,  2,   20,   1
 
 			edit_button.signal_connect "clicked" do
-				for i in rows do
-					id 		= store.get_value (tree.model.get_iter i), 0
-					db.edit id	,"tag", tag_entry.text
+				iters = Array.new
+
+				rows.each do |i|
+					iters[iters.size] = tree.model.get_iter i
 				end
 
-				Actions.store_feed 	db, store, tree
+				iters.each_with_index do |iter, i|
+					id 			= store.get_value iter, 0
+					name 			= store.get_value iter, 4
+					url  			= store.get_value iter, 3
+					comment 		= store.get_value iter, 5
+					tag 			= store.get_value iter, 6
+
+					db.edit id		,"tag", tag_entry.text
+
+					items			= [[id, name, url, comment\
+									, tag_entry.text]]
+					store.remove 		iter
+					store.append_item	items
+				end
+
 				destroy
 			end
 			
@@ -970,7 +997,7 @@ class Gtk_Edit < Gtk_Window
 
 			tag_entry 		= create_tag_entry tag
 
-			if url.empty?
+			if url and url.empty?
 				set_title 	title + " - Edit tag"
 				old_tag 	= store.get_value (tree.model.get_iter row), 6
 
@@ -978,13 +1005,21 @@ class Gtk_Edit < Gtk_Window
 
 				tag_entry.signal_connect "activate" do
 					db.edit_tag 		old_tag, tag_entry.text
-					Actions.store_feed 	db, store, tree
+
+					iter			= tree.model.get_iter row
+					store.remove		iter
+					store.append_item	(db.find "tag", tag_entry.text)
+
 					destroy
 				end
 				
 				edit_button.signal_connect "clicked" do
 					db.edit_tag 		old_tag, tag_entry.text
-					Actions.store_feed 	db, store, tree
+
+					iter			= tree.model.get_iter row
+					store.remove		iter
+					store.append_item	(db.find "tag", tag_entry.text)
+
 					destroy
 				end
 									#e   #t   #l    #a
@@ -1002,21 +1037,42 @@ class Gtk_Edit < Gtk_Window
 				edit_button.signal_connect "clicked" do
 					if name != name_entry.text 
 						db.edit id, "name", name_entry.text
+						store.set_value		(tree.model.get_iter row)\
+										,4, name_entry.text
 					end
 
 					if url != url_entry.text 
 						db.edit id, "url", url_entry.text
+						store.set_value		(tree.model.get_iter row)\
+										,3, url_entry.text
 					end
 
 					if comment != comment_entry.text 
 						db.edit id, "comment", comment_entry.text
+						store.set_value		(tree.model.get_iter row)\
+										,5, comment_entry.text
 					end
 
 					if tag != tag_entry.text
-						db.edit id, "tag", tag_entry.text
-					end
+						iter			= tree.model.get_iter row
+						parent			= iter.parent
+						db.edit 		id, "tag", tag_entry.text
 
-					Actions.store_feed 	db, store, tree
+						item			= [ \
+							[id\
+							,(store.get_value iter, 4)\
+							,(store.get_value iter, 3)\
+							,(store.get_value iter, 5)\
+							,(tag_entry.text)]\
+						]
+
+						store.remove		iter
+						store.append_item	item
+
+						if parent and !parent.has_child?
+							store.remove parent
+						end
+					end
 
 					if url != url_entry.text 
 						tree.model.each do |model, tpath, iter|
@@ -1105,12 +1161,18 @@ class Gtk_Delete < Gtk_Window
 			end
 
 			delete_button.signal_connect "clicked" do
-				for i in rows do
-					id 		= store.get_value (tree.model.get_iter i), 0
-					db.delete 	id
+				iters = Array.new
+
+				rows.each do |i|
+					iters[iters.size] = tree.model.get_iter i
 				end
 
-				Actions.store_feed 	db, store, tree
+				iters.each do |i|
+					id 		= store.get_value i, 0
+					db.delete 	id
+					store.remove	i
+				end
+
 				destroy
 			end
 			
@@ -1136,7 +1198,7 @@ class Gtk_Delete < Gtk_Window
 			tag_entry 		= create_tag_entry tag
 			tag_entry.set_editable 	false
 
-			if url.empty?
+			if url and url.empty?
 				grid.attach (Gtk::Label.new "Tag"), 	0,   0,   20,   1
 				grid.attach tag_entry, 			20,  0,   20,   1
 				grid.attach delete_button,		0,   1,   20,   1
@@ -1172,7 +1234,7 @@ class Gtk_Delete < Gtk_Window
 					db.delete 	id
 				end
 
-				Actions.store_feed 	db, store, tree
+				store.remove		(tree.model.get_iter row)
 				destroy
 			end
 
@@ -1397,6 +1459,8 @@ class Gtk_Ui < Gtk_Window
 						,String \
 						,String
 
+		@store.set_sort_column_id 6
+
 		@tree 			= make_tree 
 
 		Actions.store_feed 	@db, @store, @tree
@@ -1466,6 +1530,8 @@ class Gtk_Ui < Gtk_Window
 					if key == "G" \
 					or key == "End"
 						@tree.move_cursor 	:buffer_ends, 1
+						cursor, column 		= @tree.cursor
+						@tree.set_cursor 	cursor, nil, false
 					end
 
 					if key == "f" \
