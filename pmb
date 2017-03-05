@@ -668,7 +668,7 @@ class Store < Gtk::TreeStore
 
 	def tag_remove tag
 		@tag_list.each_with_index do |t, i|
-			if t == @tag_list[i]
+			if tag == t
 				@tag_list.delete_at i
 			end
 		end
