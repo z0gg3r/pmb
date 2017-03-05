@@ -146,6 +146,7 @@ class Settings
 			,"xclip" 		=> "true" \
 			,"tree_lines" 		=> "false" \
 			,"auto_favicon" 	=> "true" \
+			,"enable_javascript"	=> "false" \
 			,"user_agent"		=> "Mozilla/5.0 (X11; Linux i686; rv:45.0) Gecko/20100101 Firefox/45.0"]
 
 		if !(File.exists? "#{@s['dir']}")
@@ -657,6 +658,7 @@ class Store < Gtk::TreeStore
 		end
 
 		@tag_list.uniq!
+		@tag_list.sort!
 	end
 end
 
@@ -813,7 +815,7 @@ class Gtk_Window < Gtk::Window
 
 	def create_tag_list tag_list, entry
 		tag_combo		= Gtk::ComboBoxText.new 
-		tag_combo.insert_text	0, "Select tag/dir "
+		tag_combo.insert_text	0, "-- Select tag/dir "
 		tag_combo.set_active 	0
 
 		tag_list.each_with_index do |tag, i|
@@ -821,7 +823,7 @@ class Gtk_Window < Gtk::Window
 		end
 
 		tag_combo.signal_connect "changed" do |t|
-			entry.text = t.active_text
+			entry.text 		= t.active_text
 		end
 
 		tag_combo
@@ -944,8 +946,8 @@ class Gtk_Insert < Gtk_Window
 		grid.attach (Gtk::Label.new "Comment"),		0,   2,   20,   1
 		grid.attach comment_entry,			20,  2,   20,   1
 		grid.attach (Gtk::Label.new "Tag"), 		0,   3,   20,   1
-		grid.attach tag_entry,				20,  3,   20,   1
-		grid.attach tag_list,				20,  4,   20,   1
+		grid.attach tag_list,				20,  3,   20,   1
+		grid.attach tag_entry,				20,  4,   20,   1
 		grid.attach insert_button,			0,   5,   20,   1
 		grid.attach cancel_button,			20,  5,   20,   1
 
@@ -978,10 +980,11 @@ class Gtk_Edit < Gtk_Window
 			set_title 	title + " - Edit multiple tags"
 			tag_entry 	= create_name_entry nil
 			tag_list	= create_tag_list store.tag_list, tag_entry
+
 								#e   #t   #l    #a
 			grid.attach (Gtk::Label.new "Tag"),	0,   1,   20,   1
-			grid.attach tag_entry, 			20,  1,   20,   1
-			grid.attach tag_list,			20,  2,   20,   1
+			grid.attach tag_list,			20,  1,   20,   1
+			grid.attach tag_entry, 			20,  2,   20,   1
 			grid.attach edit_button,		0,   3,   20,   1
 			grid.attach cancel_button,		20,  3,   20,   1
 
@@ -1019,45 +1022,40 @@ class Gtk_Edit < Gtk_Window
 
 			add 		vbox	
 		else
-			row			= rows[0]
-			id 			= store.get_value (tree.model.get_iter row), 0
-			name 			= store.get_value (tree.model.get_iter row), 4
-			url  			= store.get_value (tree.model.get_iter row), 3
-			comment 		= store.get_value (tree.model.get_iter row), 5
-			tag 			= store.get_value (tree.model.get_iter row), 6
+			row		= rows[0]
+			id 		= store.get_value (tree.model.get_iter row), 0
+			name 		= store.get_value (tree.model.get_iter row), 4
+			url  		= store.get_value (tree.model.get_iter row), 3
+			comment 	= store.get_value (tree.model.get_iter row), 5
+			tag 		= store.get_value (tree.model.get_iter row), 6
 
-			tag_entry 		= create_tag_entry tag
-			tag_list		= create_tag_list store.tag_list, tag_entry
+			tag_entry 	= create_tag_entry tag
+			tag_list	= create_tag_list store.tag_list, tag_entry
 
 			if url and url.empty?
-				set_title 	title + " - Edit tag"
-				old_tag 	= store.get_value (tree.model.get_iter row), 6
-
-				tag_entry.set_text old_tag
+				set_title 		title + " - Edit tag"
+				old_tag 		= store.get_value (tree.model.get_iter row), 6
+				tag_entry.set_text 	old_tag
 
 				tag_entry.signal_connect "activate" do
 					db.edit_tag 		old_tag, tag_entry.text
-
 					iter			= tree.model.get_iter row
 					store.remove		iter
 					store.append_item	(db.find "tag", tag_entry.text)
-
 					destroy
 				end
 				
 				edit_button.signal_connect "clicked" do
 					db.edit_tag 		old_tag, tag_entry.text
-
 					iter			= tree.model.get_iter row
 					store.remove		iter
 					store.append_item	(db.find "tag", tag_entry.text)
-
 					destroy
 				end
 									#e   #t   #l    #a
 				grid.attach (Gtk::Label.new "Tag"),	0,   1,   20,   1
-				grid.attach tag_entry, 			20,  1,   20,   1
-				grid.attach tag_list,			20,  2,   20,   1
+				grid.attach tag_list,			20,  1,   20,   1
+				grid.attach tag_entry, 			20,  2,   20,   1
 				grid.attach edit_button,		0,   3,   20,   1
 				grid.attach cancel_button,		20,  3,   20,   1
 
@@ -1133,8 +1131,8 @@ class Gtk_Edit < Gtk_Window
 				grid.attach (Gtk::Label.new "Comment"),	0,   3,   20,   1
 				grid.attach comment_entry,		20,  3,   20,   1
 				grid.attach (Gtk::Label.new "Tag"), 	0,   4,   20,   1
-				grid.attach tag_entry,			20,  4,   20,   1
-				grid.attach tag_list,			20,  5,   20,   1
+				grid.attach tag_list,			20,  4,   20,   1
+				grid.attach tag_entry,			20,  5,   20,   1
 				grid.attach edit_button,		0,   6,   20,   1
 				grid.attach cancel_button,		20,  6,   20,   1
 			end
@@ -1324,6 +1322,7 @@ class Gtk_Settings < Gtk_Window
 		end
 
 		tree_lines 		= Gtk::CheckButton.new "Tree lines", false
+		tree_lines.tooltip_text = "draw lines linking tag/dirs and bookmarks?"
 
 		if s['tree_lines'] == "true"
 			tree_lines.set_active	true
@@ -1331,23 +1330,32 @@ class Gtk_Settings < Gtk_Window
 			tree_lines.set_active	false
 		end
 
-		user_agent_entry	= Gtk::Entry.new
-		user_agent_entry.text	= s['user_agent']
-
+		user_agent_entry			= Gtk::Entry.new
+		user_agent_entry.text			= s['user_agent']
+		user_agent_entry.tooltip_text 		= "user agent string, used by webkit"
+		user_agent_entry.primary_icon_pixbuf 	= (Actions.search_icon "web-browser-symbolic")
+	
 		xclip 			= Gtk::CheckButton.new "xclip?", false
+		xclip.tooltip_text	= "use xclip to make copied text available system wide?"\
+						" otherwise use default gtk clipboard api"
 
 		if s['xclip'] == "true"
 			xclip.set_active	true
-		else
-			xclip.set_active	false
+		end
+
+		enable_js 		= Gtk::CheckButton.new "enable javascript?", false
+		enable_js.tooltip_text	= "enable webkit to use JavaScript?"
+
+		if s['enable_javascript'] == "true"
+			enable_js.set_active	true
 		end
 
 		auto_favicon 			= Gtk::CheckButton.new "auto download favicon?", false
+		auto_favicon.tooltip_text 	= "automatically download favicon"\
+							" when add a bookmark?"
 
 		if s['auto_favicon'] == "true"
 			auto_favicon.set_active	true
-		else
-			auto_favicon.set_active	false
 		end
 
 		apply_button 		= Gtk::Button.new :stock_id => Gtk::Stock::APPLY
@@ -1388,8 +1396,8 @@ class Gtk_Settings < Gtk_Window
 		bh_grid.attach xclip,				5,   1,   5,   1
 		bh_grid.attach (Gtk::Label.new "Favicon:"),	0,   2,   5,   1
 		bh_grid.attach auto_favicon,			5,   2,   5,   1
-		bh_grid.attach (Gtk::Label.new "User agent:"),	0,   3,   5,   1
-		bh_grid.attach user_agent_entry,		5,   3,   5,   1
+		bh_grid.attach enable_js,			5,   3,   5,   1
+		bh_grid.attach user_agent_entry,		5,   4,   5,   1
 
 		tabs			= Gtk::Notebook.new
 		tabs.append_page 	bh_grid, (Gtk::Label.new "Options")
