@@ -285,7 +285,6 @@ class Web_Data
 
 				view 		= nil
 			end
-
 		end
 	end
 
@@ -509,12 +508,13 @@ class Actions
 end
 
 class Store < Gtk::TreeStore
-	attr_accessor :filter, :style
+	attr_accessor :filter, :style, :tag_list
 
 	def initialize *args
 		super(*args[1..-1])
 		@s		= args[0]
 		@style 		= @s['style'].to_i
+		@tag_list	= Array.new
 	end
 
 	def search_toplevel entry
@@ -617,7 +617,8 @@ class Store < Gtk::TreeStore
 				end
 			end
 		end
-
+	
+		@tag_list[@tag_list.size] = get_value iter, 6
 		iter
 	end
 
@@ -629,6 +630,8 @@ class Store < Gtk::TreeStore
 			number_of_items = insert_item iter, i, number_of_items
 			icon 		= nil
 		end
+
+		@tag_list.uniq!
 	end
 
 	def feed_tag result
@@ -642,6 +645,8 @@ class Store < Gtk::TreeStore
 
 			number_of_items = insert_item iter, i, number_of_items
 		end
+
+		@tag_list.uniq!
 	end
 
 	def append_item items
@@ -650,6 +655,8 @@ class Store < Gtk::TreeStore
 			insert_item 	iter, i, (n_entries iter.first_child, 0)
 			icon 		= nil
 		end
+
+		@tag_list.uniq!
 	end
 end
 
@@ -698,6 +705,7 @@ class Tree < Gtk::TreeView
 		parse_font 	@render_tag, s['tag_font']
 
 		@render_url.underline = "single"
+
 		if s['tree_lines'] == "true"
 			self.enable_tree_lines  = true
 		else
@@ -733,6 +741,7 @@ class Gtk_Window < Gtk::Window
 		set_title 	"Poor man's bookmark"
 		set_type_hint 	:dialog
 		set_default_size 600, 0
+
 		signal_connect "destroy" do
 			destroy
 		end
@@ -801,6 +810,22 @@ class Gtk_Window < Gtk::Window
 
 		tag_entry
 	end
+
+	def create_tag_list tag_list, entry
+		tag_combo		= Gtk::ComboBoxText.new 
+		tag_combo.insert_text	0, "Select tag/dir "
+		tag_combo.set_active 	0
+
+		tag_list.each_with_index do |tag, i|
+			tag_combo.insert_text 	(i + 1), tag
+		end
+
+		tag_combo.signal_connect "changed" do |t|
+			entry.text = t.active_text
+		end
+
+		tag_combo
+	end
 end
 
 class Gtk_Error < Gtk_Window
@@ -854,6 +879,7 @@ class Gtk_Insert < Gtk_Window
 						,"non-starred-symbolic", s), s, tree, store
 		comment_entry 		= create_comment_entry nil
 		tag_entry 		= create_tag_entry nil
+		tag_list		= create_tag_list store.tag_list, tag_entry
 		row 			= tree.selection.selected_rows[0]
 
 		insert_button 		= Gtk::Button.new :stock_id => Gtk::Stock::ADD
@@ -883,8 +909,8 @@ class Gtk_Insert < Gtk_Window
 					tag 		= tag_entry.text
 				end
 
-				r = db.insert 		[name, url, comment, tag]
-				store.append_item r
+				item = db.insert 	[name, url, comment, tag]
+				store.append_item 	item
 
 				tree.model.each do |model, tpath, iter|
 					if (store.get_value iter, 3) == url
@@ -919,8 +945,9 @@ class Gtk_Insert < Gtk_Window
 		grid.attach comment_entry,			20,  2,   20,   1
 		grid.attach (Gtk::Label.new "Tag"), 		0,   3,   20,   1
 		grid.attach tag_entry,				20,  3,   20,   1
-		grid.attach insert_button,			0,   4,   20,   1
-		grid.attach cancel_button,			20,  4,   20,   1
+		grid.attach tag_list,				20,  4,   20,   1
+		grid.attach insert_button,			0,   5,   20,   1
+		grid.attach cancel_button,			20,  5,   20,   1
 
 		vbox 			= Gtk::Box.new :vertical, 2
 		vbox.pack_start 	grid \
@@ -950,12 +977,13 @@ class Gtk_Edit < Gtk_Window
 		if rows.size > 1
 			set_title 	title + " - Edit multiple tags"
 			tag_entry 	= create_name_entry nil
-
+			tag_list	= create_tag_list store.tag_list, tag_entry
 								#e   #t   #l    #a
 			grid.attach (Gtk::Label.new "Tag"),	0,   1,   20,   1
 			grid.attach tag_entry, 			20,  1,   20,   1
-			grid.attach edit_button,		0,   2,   20,   1
-			grid.attach cancel_button,		20,  2,   20,   1
+			grid.attach tag_list,			20,  2,   20,   1
+			grid.attach edit_button,		0,   3,   20,   1
+			grid.attach cancel_button,		20,  3,   20,   1
 
 			edit_button.signal_connect "clicked" do
 				iters = Array.new
@@ -973,10 +1001,10 @@ class Gtk_Edit < Gtk_Window
 
 					db.edit id		,"tag", tag_entry.text
 
-					items			= [[id, name, url, comment\
+					item			= [[id, name, url, comment\
 									, tag_entry.text]]
 					store.remove 		iter
-					store.append_item	items
+					store.append_item	item
 				end
 
 				destroy
@@ -999,6 +1027,7 @@ class Gtk_Edit < Gtk_Window
 			tag 			= store.get_value (tree.model.get_iter row), 6
 
 			tag_entry 		= create_tag_entry tag
+			tag_list		= create_tag_list store.tag_list, tag_entry
 
 			if url and url.empty?
 				set_title 	title + " - Edit tag"
@@ -1028,8 +1057,9 @@ class Gtk_Edit < Gtk_Window
 									#e   #t   #l    #a
 				grid.attach (Gtk::Label.new "Tag"),	0,   1,   20,   1
 				grid.attach tag_entry, 			20,  1,   20,   1
-				grid.attach edit_button,		0,   2,   20,   1
-				grid.attach cancel_button,		20,  2,   20,   1
+				grid.attach tag_list,			20,  2,   20,   1
+				grid.attach edit_button,		0,   3,   20,   1
+				grid.attach cancel_button,		20,  3,   20,   1
 
 			else
 				name_entry 	= create_name_entry name
@@ -1104,8 +1134,9 @@ class Gtk_Edit < Gtk_Window
 				grid.attach comment_entry,		20,  3,   20,   1
 				grid.attach (Gtk::Label.new "Tag"), 	0,   4,   20,   1
 				grid.attach tag_entry,			20,  4,   20,   1
-				grid.attach edit_button,		0,   5,   20,   1
-				grid.attach cancel_button,		20,  5,   20,   1
+				grid.attach tag_list,			20,  5,   20,   1
+				grid.attach edit_button,		0,   6,   20,   1
+				grid.attach cancel_button,		20,  6,   20,   1
 			end
 
 			vbox 			= Gtk::Box.new :vertical, 2
@@ -1353,12 +1384,12 @@ class Gtk_Settings < Gtk_Window
 
 		bh_grid			= Grid.new
 
-		bh_grid.attach (Gtk::Label.new "Clipboard:"),		0,   1,   5,   1
-		bh_grid.attach xclip,					5,   1,   5,   1
-		bh_grid.attach (Gtk::Label.new "Favicon:"),		0,   2,   5,   1
-		bh_grid.attach auto_favicon,				5,   2,   5,   1
-		bh_grid.attach (Gtk::Label.new "User agent:"),		0,   3,   5,   1
-		bh_grid.attach user_agent_entry,			5,   3,   5,   1
+		bh_grid.attach (Gtk::Label.new "Clipboard:"),	0,   1,   5,   1
+		bh_grid.attach xclip,				5,   1,   5,   1
+		bh_grid.attach (Gtk::Label.new "Favicon:"),	0,   2,   5,   1
+		bh_grid.attach auto_favicon,			5,   2,   5,   1
+		bh_grid.attach (Gtk::Label.new "User agent:"),	0,   3,   5,   1
+		bh_grid.attach user_agent_entry,		5,   3,   5,   1
 
 		tabs			= Gtk::Notebook.new
 		tabs.append_page 	bh_grid, (Gtk::Label.new "Options")
