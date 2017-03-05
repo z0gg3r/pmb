@@ -1021,15 +1021,18 @@ class Gtk_Edit < Gtk_Window
 
 					item			= [[id, name, url, comment\
 									, tag_entry.text]]
-					store.remove 		iter
+					if tree.model.iter_is_valid? iter
+						store.remove 		iter
 
-					if parent and !parent.has_child?
-						tag			= store.get_value parent, 6
-						store.tag_remove 	tag
-						store.remove 		parent
+						if parent and !parent.has_child?
+							tag			= store.get_value \
+											parent, 6
+							store.tag_remove 	tag
+							store.remove 		parent
+						end
+
+						store.append_item	item
 					end
-
-					store.append_item	item
 				end
 
 				destroy
@@ -1230,16 +1233,19 @@ class Gtk_Delete < Gtk_Window
 				end
 
 				iters.each do |i|
-					parent		= i.parent
+					if tree.model.iter_is_valid? i
+						parent		= i.parent
 
-					id 		= store.get_value i, 0
-					db.delete 	id
-					store.remove	i
+						id 		= store.get_value i, 0
+						db.delete 	id
+						store.remove	i
 
-					if parent and !parent.has_child?
-						tag			= store.get_value parent, 6
-						store.tag_remove 	tag
-						store.remove 		parent
+						if parent and !parent.has_child?
+							tag			= store.get_value \
+											parent, 6
+							store.tag_remove 	tag
+							store.remove 		parent
+						end
 					end
 				end
 
@@ -1307,12 +1313,14 @@ class Gtk_Delete < Gtk_Window
 					db.delete 	id
 				end
 
-				store.remove		iter
+				if tree.model.iter_is_valid? iter
+					store.remove		iter
 
-				if parent and !parent.has_child?
-					tag			= store.get_value parent, 6
-					store.tag_remove 	tag
-					store.remove 		parent
+					if parent and !parent.has_child?
+						tag			= store.get_value parent, 6
+						store.tag_remove 	tag
+						store.remove 		parent
+					end
 				end
 
 				destroy
