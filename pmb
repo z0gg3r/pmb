@@ -220,7 +220,7 @@ class Web_Data
 					icon = (Net::HTTP.get \
 						(URI "#{uri.scheme}://#{uri.host}/favicon.ico"))
 
-					favicon_write path, icon
+					#favicon_write path, icon
 				end
 
 				favicon_write path, icon
@@ -239,7 +239,12 @@ class Web_Data
 		path 		= "#{s['dir']}/favicon/#{uri.host}#{uri.path}"
 		view 		= WebKitGtk::WebView.new
 
-		view.settings.enable_scripts 				= false
+		if s['enable_javascript'] == "true"
+			view.settings.enable_scripts 			= true
+		else
+			view.settings.enable_scripts 			= false
+		end
+
 		view.settings.enable_plugins 				= false
 		view.settings.auto_shrink_images 			= true
 		view.settings.enable_offline_web_application_cache 	= false
@@ -660,6 +665,14 @@ class Store < Gtk::TreeStore
 		@tag_list.uniq!
 		@tag_list.sort!
 	end
+
+	def tag_remove tag
+		@tag_list.each_with_index do |t, i|
+			if t == @tag_list[i]
+				@tag_list.delete_at i
+			end
+		end
+	end
 end
 
 class Tree < Gtk::TreeView
@@ -913,6 +926,7 @@ class Gtk_Insert < Gtk_Window
 
 				item = db.insert 	[name, url, comment, tag]
 				store.append_item 	item
+				tree.expand_all
 
 				tree.model.each do |model, tpath, iter|
 					if (store.get_value iter, 3) == url
@@ -996,6 +1010,7 @@ class Gtk_Edit < Gtk_Window
 				end
 
 				iters.each_with_index do |iter, i|
+					parent			= iter.parent
 					id 			= store.get_value iter, 0
 					name 			= store.get_value iter, 4
 					url  			= store.get_value iter, 3
@@ -1007,6 +1022,13 @@ class Gtk_Edit < Gtk_Window
 					item			= [[id, name, url, comment\
 									, tag_entry.text]]
 					store.remove 		iter
+
+					if parent and !parent.has_child?
+						tag			= store.get_value parent, 6
+						store.tag_remove 	tag
+						store.remove 		parent
+					end
+
 					store.append_item	item
 				end
 
@@ -1042,6 +1064,7 @@ class Gtk_Edit < Gtk_Window
 					iter			= tree.model.get_iter row
 					store.remove		iter
 					store.append_item	(db.find "tag", tag_entry.text)
+					tree.expand_all
 					destroy
 				end
 				
@@ -1050,6 +1073,7 @@ class Gtk_Edit < Gtk_Window
 					iter			= tree.model.get_iter row
 					store.remove		iter
 					store.append_item	(db.find "tag", tag_entry.text)
+					tree.expand_all
 					destroy
 				end
 									#e   #t   #l    #a
@@ -1098,12 +1122,18 @@ class Gtk_Edit < Gtk_Window
 						]
 
 						store.remove		iter
-						store.append_item	item
 
 						if parent and !parent.has_child?
-							store.remove parent
+							tag			= store.get_value \
+											parent, 6
+							store.tag_remove 	tag
+							store.remove 		parent
 						end
+
+						store.append_item	item
 					end
+
+					tree.expand_all
 
 					if url != url_entry.text 
 						tree.model.each do |model, tpath, iter|
@@ -1200,9 +1230,17 @@ class Gtk_Delete < Gtk_Window
 				end
 
 				iters.each do |i|
+					parent		= i.parent
+
 					id 		= store.get_value i, 0
 					db.delete 	id
 					store.remove	i
+
+					if parent and !parent.has_child?
+						tag			= store.get_value parent, 6
+						store.tag_remove 	tag
+						store.remove 		parent
+					end
 				end
 
 				destroy
@@ -1260,13 +1298,23 @@ class Gtk_Delete < Gtk_Window
 			end
 
 			delete_button.signal_connect "clicked" do
+				iter			= tree.model.get_iter row
+				parent			= iter.parent
+
 				if url.empty?
 					db.delete_tag 	tag
 				else
 					db.delete 	id
 				end
 
-				store.remove		(tree.model.get_iter row)
+				store.remove		iter
+
+				if parent and !parent.has_child?
+					tag			= store.get_value parent, 6
+					store.tag_remove 	tag
+					store.remove 		parent
+				end
+
 				destroy
 			end
 
