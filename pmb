@@ -189,8 +189,8 @@ end
 
 class Web_Data
 	def self.favicon_exist? url, s
-		uri  		= URI url
-		path 		= "#{s['dir']}/favicon/#{uri.host}#{uri.path}"
+		uri  	= URI url
+		path 	= "#{s['dir']}/favicon/#{uri.host}#{uri.path}"
 
 		if (File.exists? "#{path}/icon")
 			return true
@@ -219,8 +219,6 @@ class Web_Data
 				if !is_image? icon
 					icon = (Net::HTTP.get \
 						(URI "#{uri.scheme}://#{uri.host}/favicon.ico"))
-
-					#favicon_write path, icon
 				end
 
 				favicon_write path, icon
@@ -338,11 +336,11 @@ class Web_Data
 end
 
 class Actions
-	def self.clipboard store, tree, xclip
+	def self.clipboard store, tree, s
 		url 	= store.get_value \
 				(tree.model.get_iter tree.selection.selected_rows[0]), 3
 
-		if xclip == "true"
+		if s['xclip'] == "true"
 			Process.detach spawn \
 				"echo -n '#{url}' | xclip -i -selection 'primary'"
 
@@ -486,6 +484,18 @@ class Actions
 		if icon_theme.has_icon? icon
 			r = icon_theme.load_icon icon \
 				,16, Gtk::IconTheme::LookupFlags::FORCE_SIZE
+			return r
+		end
+
+		nil
+	end
+
+	def self.search_icon_with_size icon, size
+		icon_theme 	= Gtk::IconTheme.default
+
+		if icon_theme.has_icon? icon
+			r = icon_theme.load_icon icon \
+				,size, Gtk::IconTheme::LookupFlags::FORCE_SIZE
 			return r
 		end
 
@@ -666,12 +676,30 @@ class Store < Gtk::TreeStore
 		@tag_list.sort!
 	end
 
-	def tag_remove tag
+	def delete_tag tag
 		@tag_list.each_with_index do |t, i|
 			if tag == t
 				@tag_list.delete_at i
 			end
 		end
+	end
+
+	def delete_parent parent
+		if parent and !parent.has_child?
+			tag		= get_value parent, 6
+			delete_tag 	tag
+			remove 		parent
+		end
+	end
+
+	def values iter
+		id 		= get_value iter, 0
+		name 		= get_value iter, 4
+		url  		= get_value iter, 3
+		comment 	= get_value iter, 5
+		tag 		= get_value iter, 6
+
+		[id, name, url, comment, tag]
 	end
 end
 
@@ -841,6 +869,19 @@ class Gtk_Window < Gtk::Window
 
 		tag_combo
 	end
+
+	def favicon store, tree, url, s
+		tree.model.each do |model, tpath, iter|
+			if (store.get_value iter, 3) == url
+				tree.set_cursor tpath, nil, false
+
+				if s['auto_favicon'] == "true" \
+				and !(Web_Data.favicon_exist? url, s)
+					Actions.download_favicon store, tree, s
+				end
+			end
+		end		
+	end
 end
 
 class Gtk_Error < Gtk_Window
@@ -890,8 +931,8 @@ class Gtk_Insert < Gtk_Window
 		set_title 		title + " - Insert"
 
 		name_entry 		= create_name_entry nil
-		url_entry 		= create_url_entry nil, (Actions.set_icon nil \
-						,"non-starred-symbolic", s), s, tree, store
+		url_entry 		= create_url_entry nil, (Actions.search_icon \
+						"non-starred-symbolic"), s, tree, store
 		comment_entry 		= create_comment_entry nil
 		tag_entry 		= create_tag_entry nil
 		tag_list		= create_tag_list store.tag_list, tag_entry
@@ -927,19 +968,7 @@ class Gtk_Insert < Gtk_Window
 				item = db.insert 	[name, url, comment, tag]
 				store.append_item 	item
 				tree.expand_all
-
-				tree.model.each do |model, tpath, iter|
-					if (store.get_value iter, 3) == url
-						tree.set_cursor tpath, nil, false
-
-						if s['auto_favicon'] == "true" \
-						and !(Web_Data.favicon_exist? url, s)
-							Actions.download_favicon \
-								store, tree, s
-						end
-					end
-				end		
-
+				favicon 		store, tree, url, s
 				destroy
 			else
 				Actions.error "Need at least name and url", false
@@ -991,7 +1020,7 @@ class Gtk_Edit < Gtk_Window
 		end
 
 		if rows.size > 1
-			set_title 	title + " - Edit multiple tags"
+			set_title 	title + " - Edit tags"
 			tag_entry 	= create_name_entry nil
 			tag_list	= create_tag_list store.tag_list, tag_entry
 
@@ -1010,27 +1039,17 @@ class Gtk_Edit < Gtk_Window
 				end
 
 				iters.each_with_index do |iter, i|
-					parent			= iter.parent
-					id 			= store.get_value iter, 0
-					name 			= store.get_value iter, 4
-					url  			= store.get_value iter, 3
-					comment 		= store.get_value iter, 5
-					tag 			= store.get_value iter, 6
+					parent		= iter.parent
+					values		= store.values iter
 
-					db.edit id		,"tag", tag_entry.text
+					db.edit 	values[0], "tag", tag_entry.text
 
-					item			= [[id, name, url, comment\
-									, tag_entry.text]]
+					item		= [[values[0], values[1], values[2], values[3]\
+								, tag_entry.text]]
+
 					if tree.model.iter_is_valid? iter
 						store.remove 		iter
-
-						if parent and !parent.has_child?
-							tag			= store.get_value \
-											parent, 6
-							store.tag_remove 	tag
-							store.remove 		parent
-						end
-
+						store.delete_parent 	parent
 						store.append_item	item
 					end
 				end
@@ -1048,35 +1067,23 @@ class Gtk_Edit < Gtk_Window
 			add 		vbox	
 		else
 			row		= rows[0]
-			id 		= store.get_value (tree.model.get_iter row), 0
-			name 		= store.get_value (tree.model.get_iter row), 4
-			url  		= store.get_value (tree.model.get_iter row), 3
-			comment 	= store.get_value (tree.model.get_iter row), 5
-			tag 		= store.get_value (tree.model.get_iter row), 6
+			values		= store.values (tree.model.get_iter row)
 
-			tag_entry 	= create_tag_entry tag
+			tag_entry 	= create_tag_entry values[4]
 			tag_list	= create_tag_list store.tag_list, tag_entry
 
-			if url and url.empty?
+			if values[2] and values[2].empty?
 				set_title 		title + " - Edit tag"
-				old_tag 		= store.get_value (tree.model.get_iter row), 6
+				old_tag 		= values[4]
 				tag_entry.set_text 	old_tag
 
 				tag_entry.signal_connect "activate" do
-					db.edit_tag 		old_tag, tag_entry.text
-					iter			= tree.model.get_iter row
-					store.remove		iter
-					store.append_item	(db.find "tag", tag_entry.text)
-					tree.expand_all
+					edit_tag 	db, tree, store, row, old_tag, tag_entry
 					destroy
 				end
 				
 				edit_button.signal_connect "clicked" do
-					db.edit_tag 		old_tag, tag_entry.text
-					iter			= tree.model.get_iter row
-					store.remove		iter
-					store.append_item	(db.find "tag", tag_entry.text)
-					tree.expand_all
+					edit_tag 	db, tree, store, row, old_tag, tag_entry
 					destroy
 				end
 									#e   #t   #l    #a
@@ -1087,36 +1094,36 @@ class Gtk_Edit < Gtk_Window
 				grid.attach cancel_button,		20,  3,   20,   1
 
 			else
-				name_entry 	= create_name_entry name
-				url_entry 	= create_url_entry url, (Actions.set_icon url \
-							,"starred-symbolic", s), s, tree, store
-				comment_entry 	= create_comment_entry comment
+				name_entry 	= create_name_entry values[1]
+				url_entry 	= create_url_entry values[2], (Actions.set_icon \
+							values[2],"starred-symbolic", s), s, tree, store
+				comment_entry 	= create_comment_entry values[3]
 
 				edit_button.signal_connect "clicked" do
-					if name != name_entry.text 
-						db.edit id, "name", name_entry.text
-						store.set_value		(tree.model.get_iter row)\
-										,4, name_entry.text
+					if values[1] != name_entry.text 
+						db.edit 	values[0], "name", name_entry.text
+						store.set_value	(tree.model.get_iter row)\
+									,4, name_entry.text
 					end
 
-					if url != url_entry.text 
-						db.edit id, "url", url_entry.text
-						store.set_value		(tree.model.get_iter row)\
-										,3, url_entry.text
+					if values[2] != url_entry.text 
+						db.edit 	values[0], "url", url_entry.text
+						store.set_value	(tree.model.get_iter row)\
+									,3, url_entry.text
 					end
 
-					if comment != comment_entry.text 
-						db.edit id, "comment", comment_entry.text
-						store.set_value		(tree.model.get_iter row)\
-										,5, comment_entry.text
+					if values[3] != comment_entry.text 
+						db.edit 	values[0], "comment", comment_entry.text
+						store.set_value	(tree.model.get_iter row)\
+									,5, comment_entry.text
 					end
 
-					if tag != tag_entry.text
-						iter			= tree.model.get_iter row
-						parent			= iter.parent
-						db.edit 		id, "tag", tag_entry.text
+					if values[4] != tag_entry.text
+						iter		= tree.model.get_iter row
+						parent		= iter.parent
+						db.edit 	values[0], "tag", tag_entry.text
 
-						item			= [ \
+						item		= [ \
 							[id\
 							,(store.get_value iter, 4)\
 							,(store.get_value iter, 3)\
@@ -1125,32 +1132,14 @@ class Gtk_Edit < Gtk_Window
 						]
 
 						store.remove		iter
-
-						if parent and !parent.has_child?
-							tag			= store.get_value \
-											parent, 6
-							store.tag_remove 	tag
-							store.remove 		parent
-						end
-
+						store.delete_parent 	parent
 						store.append_item	item
 					end
 
 					tree.expand_all
 
-					if url != url_entry.text 
-						tree.model.each do |model, tpath, iter|
-							if (store.get_value iter, 3) == url_entry.text
-								tree.set_cursor tpath, nil, false
-
-								if s['auto_favicon'] == "true" \
-								and !(Web_Data.favicon_exist? \
-									url_entry.text, s)
-									Actions.download_favicon \
-										store, tree, s
-								end
-							end
-						end		
+					if values[2] != url_entry.text 
+						favicon 	store, tree, url_entry.text, s
 					end
 
 					destroy
@@ -1181,6 +1170,15 @@ class Gtk_Edit < Gtk_Window
 
 		show_all
 	end
+
+	def edit_tag db, tree, store, row, old_tag, tag_entry
+		db.edit_tag 		old_tag, tag_entry.text
+		iter			= tree.model.get_iter row
+		store.remove		iter
+		store.append_item	(db.find "tag", tag_entry.text)
+		tree.expand_all
+		destroy
+	end
 end
 
 class Gtk_Delete < Gtk_Window
@@ -1206,17 +1204,13 @@ class Gtk_Delete < Gtk_Window
 			hbox.pack_start delete_button
 			hbox.pack_start cancel_button
 			
-			rows.each_with_index do |t, i|
-				id 		= store.get_value (tree.model.get_iter t), 0
-				name 		= store.get_value (tree.model.get_iter t), 4
-				url  		= store.get_value (tree.model.get_iter t), 3
-				comment 	= store.get_value (tree.model.get_iter t), 5
-				tag 		= store.get_value (tree.model.get_iter t), 6
-
-				name_entry 		= create_name_entry name
+			rows.each_with_index do |row, i|
+				values			= store.values (tree.model.get_iter row)
+				name_entry 		= create_name_entry values[1]
 				name_entry.set_editable false
 
-				url_entry 		= create_url_entry url, (Actions.set_icon url \
+				url_entry 		= create_url_entry values[2] \
+								,(Actions.set_icon values[2] \
 								,"starred-symbolic", s), s, tree, store
 				url_entry.set_editable 	false
 				url_entry.primary_icon_activatable = false
@@ -1234,18 +1228,11 @@ class Gtk_Delete < Gtk_Window
 
 				iters.each do |i|
 					if tree.model.iter_is_valid? i
-						parent		= i.parent
-
-						id 		= store.get_value i, 0
-						db.delete 	id
-						store.remove	i
-
-						if parent and !parent.has_child?
-							tag			= store.get_value \
-											parent, 6
-							store.tag_remove 	tag
-							store.remove 		parent
-						end
+						parent			= i.parent
+						id 			= store.get_value i, 0
+						db.delete 		id
+						store.remove		i
+						store.delete_parent 	parent
 					end
 				end
 
@@ -1265,30 +1252,26 @@ class Gtk_Delete < Gtk_Window
 			add 	vbox	
 		else	
 			row			= rows[0]
-			id 			= store.get_value (tree.model.get_iter row), 0
-			name 			= store.get_value (tree.model.get_iter row), 4
-			url  			= store.get_value (tree.model.get_iter row), 3
-			comment 		= store.get_value (tree.model.get_iter row), 5
-			tag 			= store.get_value (tree.model.get_iter row), 6
-
-			tag_entry 		= create_tag_entry tag
+			values			= store.values (tree.model.get_iter row)
+			tag_entry 		= create_tag_entry values[4]
 			tag_entry.set_editable 	false
 
-			if url and url.empty?
+			if values[2] and values[2].empty?
 				grid.attach (Gtk::Label.new "Tag"), 	0,   0,   20,   1
 				grid.attach tag_entry, 			20,  0,   20,   1
 				grid.attach delete_button,		0,   1,   20,   1
 				grid.attach cancel_button,		20,  1,   20,   1
 			else
-				name_entry 		= create_name_entry name
+				name_entry 		= create_name_entry values[1]
 				name_entry.set_editable false
 
-				url_entry 		= create_url_entry url, (Actions.set_icon url \
+				url_entry 		= create_url_entry values[2] \
+								,(Actions.set_icon values[2] \
 								,"starred-symbolic", s), s, tree, store
 				url_entry.set_editable 	false
 				url_entry.primary_icon_activatable = false
 
-				comment_entry 			= create_comment_entry comment
+				comment_entry 			= create_comment_entry values[3]
 				comment_entry.set_editable 	false
 
 				grid.attach (Gtk::Label.new "Name"), 	0,   0,   20,   1
@@ -1307,20 +1290,15 @@ class Gtk_Delete < Gtk_Window
 				iter			= tree.model.get_iter row
 				parent			= iter.parent
 
-				if url.empty?
-					db.delete_tag 	tag
+				if values[2].empty?
+					db.delete_tag 	values[4]
 				else
-					db.delete 	id
+					db.delete 	values[0]
 				end
 
 				if tree.model.iter_is_valid? iter
 					store.remove		iter
-
-					if parent and !parent.has_child?
-						tag			= store.get_value parent, 6
-						store.tag_remove 	tag
-						store.remove 		parent
-					end
+					store.delete_parent 	parent
 				end
 
 				destroy
@@ -1799,7 +1777,7 @@ class Gtk_Ui < Gtk_Window
 		end
 
 		edit_copy.signal_connect "activate" do
-			Actions.clipboard 	@store, @tree, @settings['xclip']
+			Actions.clipboard 	@store, @tree, @settings.s
 		end
 
 		edit_insert.signal_connect "activate" do
@@ -1843,12 +1821,16 @@ class Gtk_Ui < Gtk_Window
 		end
 
 		help_about.signal_connect "activate" do
-			about 			= Gtk::AboutDialog.new
+			about 			= Gtk::AboutDialog.new 
 			about.name 		= "poor man's bookmark"
 			about.program_name 	= "pmb"
-			about.version  		= "0.1"
+			about.version  		= "Version 0.1"
+			about.comments		= "A simple bookmark manager"
 			about.license		= "GNU GPL 2.0"
+			about.copyright		= "GNU GPL 2.0"
 			about.website 		= "https://github.com/neoncortex/poor-man-s-bookmark"
+			about.authors		= ["neoncortex"]
+			about.logo		= Actions.search_icon_with_size "gnome-globe", 64
 			
 			about.run
 			about.destroy
@@ -1919,7 +1901,7 @@ class Gtk_Ui < Gtk_Window
 		end
 
 		edit_copy.signal_connect "clicked" do
-			Actions.clipboard 	@store, @tree, @settings['xclip']
+			Actions.clipboard 	@store, @tree, @settings.s
 		end
 
 		edit_insert.signal_connect "clicked" do
@@ -1981,12 +1963,13 @@ class Gtk_Ui < Gtk_Window
 		help_item.image 		= nil
 		help_menu 			= Gtk::Menu.new 
 		help_item.set_submenu 		help_menu
-		help_menu.append		items['help_doc']
+		#help_menu.append		items['help_doc']
 		help_menu.append		items['help_about']
 
 		menu_bar 			= Gtk::MenuBar.new
 		menu_bar.append 		file_item
 		menu_bar.append 		edit_item
+		menu_bar.append 		help_item
 		menu_bar
 	end
 
@@ -2092,6 +2075,7 @@ class Gtk_Ui < Gtk_Window
 		filter_label 			= Gtk::Label.new " Filter "
 		filter_entry 			= Gtk::Entry.new
 		filter_button 			= Gtk::Button.new :stock_id => Gtk::Stock::APPLY
+		filter_entry.tooltip_text	= "filter bookmarks with inserted text"
 
 		if (icon = Actions.search_icon "edit-find-symbolic")
 			filter_entry.primary_icon_pixbuf = icon
