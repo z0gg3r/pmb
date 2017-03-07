@@ -1380,7 +1380,7 @@ class Gtk_Settings < Gtk_Window
 	
 		xclip 			= Gtk::CheckButton.new "xclip?", false
 		xclip.tooltip_text	= "use xclip to make copied text available system wide?"\
-						" otherwise use default gtk clipboard api"
+						" otherwise use default Gtk clipboard"
 
 		if s['xclip'] == "true"
 			xclip.set_active	true
@@ -1694,6 +1694,10 @@ class Gtk_Ui < Gtk_Window
 
 					if key == "r"
 						Actions.store_feed 	@db, @store, @tree
+					end
+
+					if key == "u"
+						Actions.open_url 	@store, @tree, @settings.s
 					end
 
 					#if key == "Menu"
