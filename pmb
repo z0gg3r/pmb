@@ -147,6 +147,7 @@ class Settings
 			,"tree_lines" 		=> "false" \
 			,"auto_favicon" 	=> "true" \
 			,"enable_javascript"	=> "false" \
+			,"open_command"		=> "firefox -new-tab -url" \
 			,"user_agent"		=> "Mozilla/5.0 (X11; Linux i686; rv:45.0) Gecko/20100101 Firefox/45.0"]
 
 		if !(File.exists? "#{@s['dir']}")
@@ -457,6 +458,16 @@ class Actions
 			Gtk_Delete.new 		db, store, tree, s
 		else
 			error "Nothing to delete.", false
+		end
+	end
+
+	def self.open_url store, tree, s
+		url 	= store.get_value \
+				(tree.model.get_iter tree.selection.selected_rows[0]), 3
+
+		if url
+			Process.detach spawn \
+				"#{s['open_command']} #{url}"
 		end
 	end
 
@@ -1079,12 +1090,10 @@ class Gtk_Edit < Gtk_Window
 
 				tag_entry.signal_connect "activate" do
 					edit_tag 	db, tree, store, row, old_tag, tag_entry
-					destroy
 				end
 				
 				edit_button.signal_connect "clicked" do
 					edit_tag 	db, tree, store, row, old_tag, tag_entry
-					destroy
 				end
 									#e   #t   #l    #a
 				grid.attach (Gtk::Label.new "Tag"),	0,   1,   20,   1
@@ -1392,6 +1401,11 @@ class Gtk_Settings < Gtk_Window
 			auto_favicon.set_active	true
 		end
 
+		open_command_entry			= Gtk::Entry.new
+		open_command_entry.text			= s['open_command']
+		open_command_entry.tooltip_text 	= "command used to open url's"
+		open_command_entry.primary_icon_pixbuf = (Actions.search_icon "gnome-globe")
+
 		apply_button 		= Gtk::Button.new :stock_id => Gtk::Stock::APPLY
 		cancel_button 		= Gtk::Button.new :stock_id => Gtk::Stock::CANCEL
 
@@ -1426,12 +1440,14 @@ class Gtk_Settings < Gtk_Window
 
 		bh_grid			= Grid.new
 
-		bh_grid.attach (Gtk::Label.new "Clipboard:"),	0,   1,   5,   1
-		bh_grid.attach xclip,				5,   1,   5,   1
-		bh_grid.attach (Gtk::Label.new "Favicon:"),	0,   2,   5,   1
-		bh_grid.attach auto_favicon,			5,   2,   5,   1
-		bh_grid.attach enable_js,			5,   3,   5,   1
-		bh_grid.attach user_agent_entry,		5,   4,   5,   1
+		bh_grid.attach (Gtk::Label.new "Open url command:"),	0,   0,   5,   1
+		bh_grid.attach open_command_entry,			5,   0,   5,   1
+		bh_grid.attach (Gtk::Label.new "Clipboard:"),		0,   1,   5,   1
+		bh_grid.attach xclip,					5,   1,   5,   1
+		bh_grid.attach (Gtk::Label.new "Favicons:"),		0,   2,   5,   1
+		bh_grid.attach auto_favicon,				5,   2,   5,   1
+		bh_grid.attach enable_js,				5,   3,   5,   1
+		bh_grid.attach user_agent_entry,			5,   4,   5,   1
 
 		tabs			= Gtk::Notebook.new
 		tabs.append_page 	bh_grid, (Gtk::Label.new "Options")
@@ -1479,6 +1495,8 @@ class Gtk_Settings < Gtk_Window
 			s['tag_font']     	= tag_font_button.font_name
 
 			s['user_agent'] 	= user_agent_entry.text
+
+			s['open_command'] 	= open_command_entry.text
 
 			if xclip.active?
 				s['xclip'] = "true"
@@ -1734,6 +1752,11 @@ class Gtk_Ui < Gtk_Window
 		edit_insert	 		= Gtk::ImageMenuItem.new :stock_id => Gtk::Stock::ADD
 		edit_edit	 		= Gtk::ImageMenuItem.new :stock_id => Gtk::Stock::EDIT
 		edit_delete	 		= Gtk::ImageMenuItem.new :stock_id => Gtk::Stock::DELETE
+		edit_open			= Gtk::ImageMenuItem.new :label => "_Open url"
+		edit_open.use_underline		= true
+		edit_open.image			= Gtk::Image.new \
+							:pixbuf => (Actions.search_icon \
+								"gnome-globe")
 		edit_preferences 		= Gtk::ImageMenuItem.new \
 							:stock_id => Gtk::Stock::PREFERENCES
 
@@ -1792,6 +1815,10 @@ class Gtk_Ui < Gtk_Window
 			Actions.edit 		@db, @store, @tree, @settings.s
 		end
 
+		edit_open.signal_connect "activate" do
+			Actions.open_url 	@store, @tree, @settings.s
+		end
+
 		edit_preferences.signal_connect "activate" do
 			Actions.settings 	@settings, @db, @store, @tree
 		end
@@ -1844,6 +1871,7 @@ class Gtk_Ui < Gtk_Window
 			,"edit_insert" 		=> edit_insert \
 			,"edit_edit" 		=> edit_edit \
 			,"edit_delete" 		=> edit_delete \
+			,"edit_open"		=> edit_open \
 			,"edit_fetch_db" 	=> edit_fetch_db \
 			,"edit_fetch_fv" 	=> edit_fetch_fv \
 			,"edit_toolbar" 	=> edit_toolbar \
@@ -1875,7 +1903,10 @@ class Gtk_Ui < Gtk_Window
 		edit_edit	 		= Gtk::ToolButton.new :stock_id => Gtk::Stock::EDIT
 		edit_delete	 		= Gtk::ToolButton.new :stock_id => Gtk::Stock::DELETE
 		edit_preferences 		= Gtk::ToolButton.new \
-							:stock_id => Gtk::Stock::PREFERENCES
+
+		edit_open			= Gtk::ToolButton.new 
+		edit_open.label 		= "Open url"
+		edit_open.icon_name		= "gnome-globe"
 
 		file_open.signal_connect "clicked" do
 			if (ret = Actions.open @store, @tree, @settings, self)
@@ -1912,6 +1943,10 @@ class Gtk_Ui < Gtk_Window
 			Actions.delete 		@db, @store, @tree, @settings.s
 		end
 
+		edit_open.signal_connect "clicked" do
+			Actions.open_url	@store, @tree, @settings.s
+		end
+
 		edit_edit.signal_connect "clicked" do
 			Actions.edit 		@db, @store, @tree, @settings.s
 		end
@@ -1928,6 +1963,7 @@ class Gtk_Ui < Gtk_Window
 			,"edit_insert" 		=> edit_insert \
 			,"edit_edit" 		=> edit_edit \
 			,"edit_delete" 		=> edit_delete \
+			,"edit_open"		=> edit_open \
 			,"edit_fetch_db" 	=> edit_fetch_db \
 			,"edit_fetch_fv" 	=> edit_fetch_fv \
 			,"edit_preferences" 	=> edit_preferences] 
@@ -1948,6 +1984,8 @@ class Gtk_Ui < Gtk_Window
 		edit_menu 			= Gtk::Menu.new
 		edit_item.set_submenu 		edit_menu
 		edit_menu.append 		items['edit_copy']
+		edit_menu.append 		items['edit_open']
+		edit_menu.append		Gtk::SeparatorMenuItem.new
 		edit_menu.append 		items['edit_insert']
 		edit_menu.append 		items['edit_edit']
 		edit_menu.append 		items['edit_delete']
@@ -1985,6 +2023,8 @@ class Gtk_Ui < Gtk_Window
 		tool_bar.insert 	items['file_import']		,number_of_items += 1
 		tool_bar.insert		Gtk::SeparatorToolItem.new	,number_of_items += 1
 		tool_bar.insert 	items['edit_copy']		,number_of_items += 1
+		tool_bar.insert 	items['edit_open']		,number_of_items += 1
+		tool_bar.insert		Gtk::SeparatorToolItem.new	,number_of_items += 1
 		tool_bar.insert		items['edit_insert']		,number_of_items += 1
 		tool_bar.insert 	items['edit_edit']		,number_of_items += 1
 		tool_bar.insert		items['edit_delete']		,number_of_items += 1
@@ -1998,6 +2038,8 @@ class Gtk_Ui < Gtk_Window
 	def make_tree_menu items
 		menu 			= Gtk::Menu.new
 		menu.append 		items['edit_copy']
+		menu.append 		items['edit_open']
+		menu.append 		Gtk::SeparatorMenuItem.new
 		menu.append 		items['edit_insert']
 		menu.append 		items['edit_edit']
 		menu.append 		items['edit_delete']
