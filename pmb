@@ -338,8 +338,8 @@ end
 
 class Actions
 	def self.clipboard store, tree, s
-		url 	= store.get_value \
-				(tree.model.get_iter tree.selection.selected_rows[0]), 3
+		iter	= tree.model.get_iter tree.selection.selected_rows[0]
+		url 	= store.get_value iter, 3
 
 		if s['xclip'] == "true"
 			Process.detach spawn \
@@ -462,19 +462,33 @@ class Actions
 	end
 
 	def self.open_url store, tree, s
-		url 	= store.get_value \
-				(tree.model.get_iter tree.selection.selected_rows[0]), 3
-
-		if url
-			Process.detach spawn \
-				"#{s['open_command']} #{url}"
+		if !tree.selection.selected_rows.empty?
+			if tree.selection.selected_rows.size > 1
+				tree.selection.selected_rows.each do |row|
+					iter 	= tree.model.get_iter row
+					url 	= store.get_value iter, 3
+			
+					if !url.empty?
+						Process.detach spawn \
+							"#{s['open_command']} #{url}"
+					end
+				end
+			else
+				iter	= tree.model.get_iter tree.selection.selected_rows[0]
+				url 	= store.get_value iter, 3
+						
+				if !url.empty?
+					Process.detach spawn \
+						"#{s['open_command']} #{url}"
+				end
+			end
 		end
 	end
 
 	def self.download_favicon store, tree, s
 		if !tree.selection.selected_rows.empty?
-			url 	= store.get_value \
-					(tree.model.get_iter tree.selection.selected_rows[0]), 3
+			iter	= tree.model.get_iter tree.selection.selected_rows[0]
+			url 	= store.get_value iter, 3
 
 			Web_Data.webkit_favicon_fetch url, store, tree, s
 		end
