@@ -488,11 +488,10 @@ class Actions
 	end
 
 	def self.open_url store, iter, s
-		url 		= store.get_value iter, 3
+		url 	= store.get_value iter, 3
 
 		if !url.empty?
-			Process.detach spawn \
-				"#{s['open_command']} #{url}"
+			Process.detach spawn "#{s['open_command']} #{url}"
 		end
 	end
 
@@ -1097,7 +1096,7 @@ class Gtk_Edit < Gtk_Window
 			set_title 	title + " - Edit tags"
 			set_default_size 600, 200
 
-			tag_entry 	= create_name_entry nil
+			tag_entry 	= create_tag_entry nil
 			tag_list	= create_tag_list store.tag_list, tag_entry, nil
 			s_grid		= selected_rows_grid store, tree, rows, s
 
@@ -1216,7 +1215,7 @@ class Gtk_Edit < Gtk_Window
 						db.edit 	values[0], "tag", tag_entry.text
 
 						item		= [ \
-							[id\
+							[(store.get_value iter, 0)\
 							,(store.get_value iter, 4)\
 							,(store.get_value iter, 3)\
 							,(store.get_value iter, 5)\
