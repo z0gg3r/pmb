@@ -461,30 +461,57 @@ class Actions
 		end
 	end
 
-	def self.open_url store, tree, s
+	def self.settings settings, db, store, tree
+		tree.selected_row 	= tree.selection.selected_rows[0]
+		Gtk_Settings.new 	settings, db, store, tree
+	end
+
+	def self.error message, fatal
+		Gtk_Error.new 		message, fatal
+	end
+
+	def self.open_bookmark store, tree, s
 		if !tree.selection.selected_rows.empty?
-			if tree.selection.selected_rows.size > 1
-				tree.selection.selected_rows.each do |row|
-					iter 	= tree.model.get_iter row
-					url 	= store.get_value iter, 3
-			
-					if !url.empty?
-						Process.detach spawn \
-							"#{s['open_command']} #{url}"
-					end
-				end
-			else
-				iter	= tree.model.get_iter tree.selection.selected_rows[0]
+			tree.selection.selected_rows.each do |row|
+				iter 	= tree.model.get_iter row
 				url 	= store.get_value iter, 3
-						
+		
 				if !url.empty?
-					Process.detach spawn \
-						"#{s['open_command']} #{url}"
+					open_url store, iter, s
+				end
+
+				if url.empty? and iter.has_child?
+					open_tag store, tree, iter.first_child, s
 				end
 			end
 		end
 	end
 
+	def self.open_url store, iter, s
+		url 		= store.get_value iter, 3
+
+		if !url.empty?
+			Process.detach spawn \
+				"#{s['open_command']} #{url}"
+		end
+	end
+
+	def self.open_tag store, tree, iter, s
+		if iter.has_child?
+			open_tag 	store, tree, iter.first_child, s
+		else
+			open_url 	store, iter, s
+		end
+
+		while iter.next!
+			if iter.has_child?
+				open_tag 	store, tree, iter.first_child, s
+			else
+				open_url	store, iter, s
+			end
+		end
+	end		
+		
 	def self.download_favicon store, tree, s
 		if !tree.selection.selected_rows.empty?
 			iter	= tree.model.get_iter tree.selection.selected_rows[0]
@@ -492,15 +519,6 @@ class Actions
 
 			Web_Data.webkit_favicon_fetch url, store, tree, s
 		end
-	end
-
-	def self.error message, fatal
-		Gtk_Error.new 		message, fatal
-	end
-
-	def self.settings settings, db, store, tree
-		tree.selected_row 	= tree.selection.selected_rows[0]
-		Gtk_Settings.new 	settings, db, store, tree
 	end
 
 	def self.search_icon icon
@@ -879,13 +897,21 @@ class Gtk_Window < Gtk::Window
 		tag_entry
 	end
 
-	def create_tag_list tag_list, entry
+	def create_tag_list tag_list, entry, item_active
 		tag_combo		= Gtk::ComboBoxText.new 
-		tag_combo.insert_text	0, "-- Select tag/dir "
-		tag_combo.set_active 	0
 
 		tag_list.each_with_index do |tag, i|
 			tag_combo.insert_text 	(i + 1), tag
+		end
+
+		if item_active
+			tag_combo.model.each do |model, path, iter|
+				if (model.get_value iter, 0) == item_active
+					tag_combo.set_active_iter iter
+				end
+			end
+		else
+			tag_combo.set_active 	0
 		end
 
 		tag_combo.signal_connect "changed" do |t|
@@ -893,6 +919,27 @@ class Gtk_Window < Gtk::Window
 		end
 
 		tag_combo
+	end
+
+	def selected_rows_grid store, tree, rows, s
+		grid		= Grid.new
+
+		rows.each_with_index do |row, i|
+			values			= store.values (tree.model.get_iter row)
+			name_entry 		= create_name_entry values[1]
+			name_entry.set_editable false
+
+			url_entry 		= create_url_entry values[2] \
+							,(Actions.set_icon values[2] \
+							,"starred-symbolic", s), s, tree, store
+			url_entry.set_editable 	false
+			url_entry.primary_icon_activatable = false
+
+			grid.attach name_entry,		0,  i,  20,   1
+			grid.attach url_entry,		20, i,  20,   1
+		end
+
+		grid
 	end
 
 	def favicon store, tree, url, s
@@ -960,7 +1007,6 @@ class Gtk_Insert < Gtk_Window
 						"non-starred-symbolic"), s, tree, store
 		comment_entry 		= create_comment_entry nil
 		tag_entry 		= create_tag_entry nil
-		tag_list		= create_tag_list store.tag_list, tag_entry
 		row 			= tree.selection.selected_rows[0]
 
 		insert_button 		= Gtk::Button.new :stock_id => Gtk::Stock::ADD
@@ -971,6 +1017,9 @@ class Gtk_Insert < Gtk_Window
 		if tree.model.iter_first \
 		and !(tag = store.get_value (tree.model.get_iter row), 6).empty?
 			tag_entry.set_text tag
+			tag_list	= create_tag_list store.tag_list, tag_entry, tag
+		else
+			tag_list	= create_tag_list store.tag_list, tag_entry, nil
 		end 
 
 		insert_button.signal_connect "clicked" do
@@ -1046,15 +1095,26 @@ class Gtk_Edit < Gtk_Window
 
 		if rows.size > 1
 			set_title 	title + " - Edit tags"
-			tag_entry 	= create_name_entry nil
-			tag_list	= create_tag_list store.tag_list, tag_entry
+			set_default_size 600, 200
 
-								#e   #t   #l    #a
+			tag_entry 	= create_name_entry nil
+			tag_list	= create_tag_list store.tag_list, tag_entry, nil
+			s_grid		= selected_rows_grid store, tree, rows, s
+
+			vbox 		= Gtk::Box.new :vertical, 2
+			hbox 		= Gtk::Box.new :horizontal, 2
+
+			sw 		= Gtk::ScrolledWindow.new nil, nil
+			sw.border_width	= 2
+			sw.shadow_type	= :out
+			sw.add 		s_grid 
+
+			hbox.pack_start edit_button
+			hbox.pack_start cancel_button
+
 			grid.attach (Gtk::Label.new "Tag"),	0,   1,   20,   1
 			grid.attach tag_list,			20,  1,   20,   1
 			grid.attach tag_entry, 			20,  2,   20,   1
-			grid.attach edit_button,		0,   3,   20,   1
-			grid.attach cancel_button,		20,  3,   20,   1
 
 			edit_button.signal_connect "clicked" do
 				iters = Array.new
@@ -1081,10 +1141,19 @@ class Gtk_Edit < Gtk_Window
 
 				destroy
 			end
-			
-			vbox 		= Gtk::Box.new :vertical, 2
 
+			vbox.pack_start	(Gtk::Label.new "Edit tags") \
+					,:expand 	=> false \
+					,:fill 		=> false \
+					,:padding 	=> 0 \
+
+			vbox.pack_start sw 
 			vbox.pack_start grid \
+					,:expand 	=> false \
+					,:fill 		=> false \
+					,:padding 	=> 0 \
+
+			vbox.pack_start hbox \
 					,:expand 	=> false \
 					,:fill 		=> false \
 					,:padding 	=> 0 \
@@ -1095,7 +1164,7 @@ class Gtk_Edit < Gtk_Window
 			values		= store.values (tree.model.get_iter row)
 
 			tag_entry 	= create_tag_entry values[4]
-			tag_list	= create_tag_list store.tag_list, tag_entry
+			tag_list	= create_tag_list store.tag_list, tag_entry, values[4]
 
 			if values[2] and values[2].empty?
 				set_title 		title + " - Edit tag"
@@ -1220,28 +1289,20 @@ class Gtk_Delete < Gtk_Window
 
 		if rows.size > 1
 			set_title 	title + " - Delete multiple"
+			set_default_size 600, 200
+
 			vbox 		= Gtk::Box.new :vertical, 2
 			hbox 		= Gtk::Box.new :horizontal, 2
-			
-			vbox.pack_start	(Gtk::Label.new "delete bookmarks:")
+			grid 		= selected_rows_grid store, tree, rows, s
+
+			sw 		= Gtk::ScrolledWindow.new nil, nil
+			sw.border_width	= 2
+			sw.shadow_type	= :out
+			sw.add 		grid 
+
 			hbox.pack_start delete_button
 			hbox.pack_start cancel_button
 			
-			rows.each_with_index do |row, i|
-				values			= store.values (tree.model.get_iter row)
-				name_entry 		= create_name_entry values[1]
-				name_entry.set_editable false
-
-				url_entry 		= create_url_entry values[2] \
-								,(Actions.set_icon values[2] \
-								,"starred-symbolic", s), s, tree, store
-				url_entry.set_editable 	false
-				url_entry.primary_icon_activatable = false
-
-				grid.attach name_entry,		0,  i,  20,   1
-				grid.attach url_entry,		20, i,  20,   1
-			end
-
 			delete_button.signal_connect "clicked" do
 				iters = Array.new
 
@@ -1262,11 +1323,8 @@ class Gtk_Delete < Gtk_Window
 				destroy
 			end
 			
-			vbox.pack_start grid \
-					,:expand 	=> false \
-					,:fill 		=> false \
-					,:padding 	=> 0 \
-
+			vbox.pack_start	(Gtk::Label.new "delete bookmarks:")
+			vbox.pack_start sw 
 			vbox.pack_start hbox \
 					,:expand 	=> false \
 					,:fill 		=> false \
@@ -1332,6 +1390,7 @@ class Gtk_Delete < Gtk_Window
 							,:expand 	=> false \
 							,:fill 		=> false \
 							,:padding 	=> 0 \
+
 
 			add 			vbox
 		end
@@ -1770,7 +1829,7 @@ class Gtk_Ui < Gtk_Window
 		edit_insert	 		= Gtk::ImageMenuItem.new :stock_id => Gtk::Stock::ADD
 		edit_edit	 		= Gtk::ImageMenuItem.new :stock_id => Gtk::Stock::EDIT
 		edit_delete	 		= Gtk::ImageMenuItem.new :stock_id => Gtk::Stock::DELETE
-		edit_open			= Gtk::ImageMenuItem.new :label => "_Open url"
+		edit_open			= Gtk::ImageMenuItem.new :label => "_Open bookmark"
 		edit_open.use_underline		= true
 		edit_open.image			= Gtk::Image.new \
 							:pixbuf => (Actions.search_icon \
@@ -1834,7 +1893,7 @@ class Gtk_Ui < Gtk_Window
 		end
 
 		edit_open.signal_connect "activate" do
-			Actions.open_url 	@store, @tree, @settings.s
+			Actions.open_bookmark 	@store, @tree, @settings.s
 		end
 
 		edit_preferences.signal_connect "activate" do
@@ -1923,7 +1982,7 @@ class Gtk_Ui < Gtk_Window
 		edit_preferences 		= Gtk::ToolButton.new \
 
 		edit_open			= Gtk::ToolButton.new 
-		edit_open.label 		= "Open url"
+		edit_open.label 		= "Open bookmark"
 		edit_open.icon_name		= "gnome-globe"
 
 		file_open.signal_connect "clicked" do
@@ -1962,7 +2021,7 @@ class Gtk_Ui < Gtk_Window
 		end
 
 		edit_open.signal_connect "clicked" do
-			Actions.open_url	@store, @tree, @settings.s
+			Actions.open_bookmark	@store, @tree, @settings.s
 		end
 
 		edit_edit.signal_connect "clicked" do
