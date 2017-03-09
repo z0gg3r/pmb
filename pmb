@@ -140,6 +140,7 @@ class Settings
 			,"tag_fg" 		=> String.new \
 			,"tag_bg" 		=> String.new \
 			,"tag_font" 		=> String.new \
+			,"url_underline"	=> "true" \
 			,"style"		=> "0" \
 			,"show_toolbar"		=> "true" \
 			,"show_filterbar"	=> "true" \
@@ -635,7 +636,7 @@ class Store < Gtk::TreeStore
 	def insert_item iter, item, number_of_items
 		insert iter, number_of_items \
 			,["#{item[0]}" \
-			,(Actions.search_icon "starred-symbolic") \
+			,(Actions.search_icon "web-browser-symbolic") \
 			,(Actions.set_icon item[2], "starred-symbolic", @s) \
 			,"#{item[2]}" \
 			,"#{item[1]}" \
@@ -789,7 +790,11 @@ class Tree < Gtk::TreeView
 		parse_font 	@render_comment, s['comment_font']
 		parse_font 	@render_tag, s['tag_font']
 
-		@render_url.underline = "single"
+		if s['url_underline'] == "true"
+			@render_url.underline = "single"
+		else
+			@render_url.underline = "none"
+		end
 
 		if s['tree_lines'] == "true"
 			self.enable_tree_lines  = true
@@ -1445,6 +1450,15 @@ class Gtk_Settings < Gtk_Window
 			tree_lines.set_active	false
 		end
 
+		url_underline 		= Gtk::CheckButton.new "Url underline", false
+		tree_lines.tooltip_text = "draw underline in url's?"
+
+		if s['url_underline'] == "true"
+			url_underline.set_active	true
+		else
+			url_underline.set_active	false
+		end
+
 		user_agent_entry			= Gtk::Entry.new
 		user_agent_entry.text			= s['user_agent']
 		user_agent_entry.tooltip_text 		= "user agent string, used by webkit"
@@ -1486,7 +1500,8 @@ class Gtk_Settings < Gtk_Window
 								#e   #t   #l   #a
 		ap_grid.attach (Gtk::Label.new "List:"),	0,   0,   5,   1
 		ap_grid.attach tree_lines,			5,   0,   5,   1
-		ap_grid.attach (tree_style),   			10,  0,   5,   1
+		ap_grid.attach url_underline,  			10,  0,   5,   1
+		ap_grid.attach (tree_style),   			15,  0,   5,   1
 		ap_grid.attach (Gtk::Label.new ""),   		0,   1,   5,   1
 		ap_grid.attach (Gtk::Label.new "Column"),   	0,   2,   5,   1
 		ap_grid.attach (Gtk::Label.new "Foreground"),   5,   2,   5,   1
@@ -1559,6 +1574,12 @@ class Gtk_Settings < Gtk_Window
 				s['tree_lines'] = "true"
 			else
 				s['tree_lines'] = "false"
+			end
+
+			if url_underline.active?
+				s['url_underline'] = "true"
+			else
+				s['url_underline'] = "none"
 			end
 
 			s['id_font'] 		= id_font_button.font_name
