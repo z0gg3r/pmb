@@ -7,116 +7,134 @@ require 'nokogiri'
 require 'sqlite3'
 
 class Db
+	attr_accessor :db
+
 	def initialize path
 		begin
 			@db = SQLite3::Database.open path
-		rescue
-			puts 		"can't open database"
-			exit
-		end
 
-		@db.execute 	"CREATE TABLE IF NOT EXISTS bookmark" \
-					"(id INTEGER PRIMARY KEY" \
-					",name text" \
-					",url text" \
-					",comment text" \
-					",tag text" \
-					",UNIQUE(url))"
+			@db.execute 	"CREATE TABLE IF NOT EXISTS bookmark" \
+						"(id INTEGER PRIMARY KEY" \
+						",name text" \
+						",url text" \
+						",comment text" \
+						",tag text" \
+						",UNIQUE(url))"
+		rescue
+			Actions.error	"Can't open database", false
+			puts 		"Can't open database"
+		end
 	end
 
 	def insert data
-		stm 		= @db.prepare "INSERT INTO bookmark " \
-					"(name, url, comment, tag) VALUES(?,?,?,?)"
-	
-		stm.bind_param 	1, data[0]
-		stm.bind_param 	2, data[1]
-		stm.bind_param 	3, data[2]
-		stm.bind_param 	4, data[3]
+		if @db
+			stm 		= @db.prepare "INSERT INTO bookmark " \
+						"(name, url, comment, tag) VALUES(?,?,?,?)"
+		
+			stm.bind_param 	1, data[0]
+			stm.bind_param 	2, data[1]
+			stm.bind_param 	3, data[2]
+			stm.bind_param 	4, data[3]
 
-		begin
-			rs 		= stm.execute
-			return (find "url", data[1])
-		rescue
-			Actions.error "url already exists", false
+			begin
+				rs 		= stm.execute
+				return (find "url", data[1])
+			rescue
+				Actions.error "url already exists", false
+			end
 		end
 	end
 
 	def import data
-		stm 		= @db.prepare "INSERT OR IGNORE INTO bookmark " \
-					"(name, url, comment, tag) VALUES(?,?,?,?)"
-	
-		stm.bind_param 	1, data[0]
-		stm.bind_param 	2, data[1]
-		stm.bind_param 	3, data[2]
-		stm.bind_param 	4, data[3]
+		if @db
+			stm 		= @db.prepare "INSERT OR IGNORE INTO bookmark " \
+						"(name, url, comment, tag) VALUES(?,?,?,?)"
+		
+			stm.bind_param 	1, data[0]
+			stm.bind_param 	2, data[1]
+			stm.bind_param 	3, data[2]
+			stm.bind_param 	4, data[3]
+		end
 	end
 
 	def delete id
-		stm 		= @db.prepare "DELETE FROM bookmark " \
-					"WHERE id = ?"	
+		if @db
+			stm 		= @db.prepare "DELETE FROM bookmark " \
+						"WHERE id = ?"	
 
-		stm.bind_param	1, id
-		rs 		= stm.execute
-	end
-
-	def delete_tag tag
-		stm 		= @db.prepare "DELETE FROM bookmark " \
-					"WHERE tag = ?"
-
-		stm.bind_param 	1, tag
-		rs 		= stm.execute
-	end
-
-	def edit id, field, value
-		if field == "name" \
-		or field == "url" \
-		or field == "comment" \
-		or field == "tag"
-			stm 		= @db.prepare "UPDATE bookmark " \
-						"SET #{field} = ? WHERE id = ?"
-
-			stm.bind_param 	1, value
-			stm.bind_param 	2, id
+			stm.bind_param	1, id
 			rs 		= stm.execute
 		end
 	end
 
-	def edit_tag tag, new_tag
-		stm 		= @db.prepare "UPDATE bookmark " \
-					"SET tag = ? WHERE tag = ?"
+	def delete_tag tag
+		if @db
+			stm 		= @db.prepare "DELETE FROM bookmark " \
+						"WHERE tag = ?"
 
-		stm.bind_param 	1, new_tag
-		stm.bind_param 	2, tag
-		rs 		= stm.execute
+			stm.bind_param 	1, tag
+			rs 		= stm.execute
+		end
+	end
+
+	def edit id, field, value
+		if @db
+			if field == "name" \
+			or field == "url" \
+			or field == "comment" \
+			or field == "tag"
+				stm 		= @db.prepare "UPDATE bookmark " \
+							"SET #{field} = ? WHERE id = ?"
+
+				stm.bind_param 	1, value
+				stm.bind_param 	2, id
+				rs 		= stm.execute
+			end
+		end
+	end
+
+	def edit_tag tag, new_tag
+		if @db
+			stm 		= @db.prepare "UPDATE bookmark " \
+						"SET tag = ? WHERE tag = ?"
+
+			stm.bind_param 	1, new_tag
+			stm.bind_param 	2, tag
+			rs 		= stm.execute
+		end
 	end
 
 	def find field, value
-		if field == "name" \
-		or field == "url" \
-		or field == "comment" \
-		or field == "tag"
-			stm 		= @db.prepare "SELECT * FROM bookmark " \
-						"WHERE #{field} = ? ORDER BY tag ASC"
+		if @db
+			if field == "name" \
+			or field == "url" \
+			or field == "comment" \
+			or field == "tag"
+				stm 		= @db.prepare "SELECT * FROM bookmark " \
+							"WHERE #{field} = ? ORDER BY tag ASC"
 
-			stm.bind_param 	1, value
-			rs		= stm.execute
+				stm.bind_param 	1, value
+				rs		= stm.execute
+			end
 		end
 	end
 
 	def fetch filter
-		if filter
-			stm 	= @db.prepare "SELECT * FROM bookmark " \
-					"WHERE name LIKE '%%#{filter}%%' " \
-					"OR url LIKE '%%#{filter}%%' " \
-					"OR comment LIKE '%%#{filter}%%' " \
-					"OR tag LIKE '%%#{filter}%%' " \
-					"ORDER BY tag ASC"
-		else
-			stm 	= @db.prepare "SELECT * from bookmark " \
-					"ORDER BY tag ASC"
-		end
+		if @db
+			if filter
+				stm 	= @db.prepare "SELECT * FROM bookmark " \
+						"WHERE name LIKE '%%#{filter}%%' " \
+						"OR url LIKE '%%#{filter}%%' " \
+						"OR comment LIKE '%%#{filter}%%' " \
+						"OR tag LIKE '%%#{filter}%%' " \
+						"ORDER BY tag ASC"
+			else
+				stm 	= @db.prepare "SELECT * from bookmark " \
+						"ORDER BY tag ASC"
+			end
 
-		rs 		= stm.execute
+			rs 		= stm.execute
+		end
 	end
 end
 
@@ -335,28 +353,30 @@ end
 
 class Actions
 	def self.clipboard store, tree, s
-		iter	= tree.model.get_iter tree.selection.selected_rows[0]
-		url 	= store.get_value iter, 3
+		if !tree.selection.selected_rows.empty?
+			iter	= tree.model.get_iter tree.selection.selected_rows[0]
+			url 	= store.get_value iter, 3
 
-		if !url.empty?
-			if s['xclip'] == "true"
-				Process.detach spawn \
-					"echo -n '#{url}' | xclip -i -selection 'primary'"
+			if url and !url.empty?
+				if s['xclip'] == "true"
+					Process.detach spawn \
+						"echo -n '#{url}' | xclip -i -selection 'primary'"
 
-				Process.detach spawn \
-					"echo -n '#{url}' | xclip -i -selection 'secoundary'"
+					Process.detach spawn \
+						"echo -n '#{url}' | xclip -i -selection 'secoundary'"
 
-				Process.detach spawn \
-					"echo -n '#{url}' | xclip -i -selection 'clipboard'"
-			else
-				clip_p 		= Gtk::Clipboard.get Gdk::Selection::PRIMARY
-				clip_c 		= Gtk::Clipboard.get Gdk::Selection::CLIPBOARD
+					Process.detach spawn \
+						"echo -n '#{url}' | xclip -i -selection 'clipboard'"
+				else
+					clip_p 		= Gtk::Clipboard.get Gdk::Selection::PRIMARY
+					clip_c 		= Gtk::Clipboard.get Gdk::Selection::CLIPBOARD
 
-				clip_p.text 	= url
-				clip_c.text 	= url
+					clip_p.text 	= url
+					clip_c.text 	= url
 
-				clip_p.store
-				clip_c.store
+					clip_p.store
+					clip_c.store
+				end
 			end
 		end
 	end
@@ -440,7 +460,11 @@ class Actions
 	end
 
 	def self.insert db, store, tree, s
-		Gtk_Insert.new 		db, store, tree, s
+		if db.db
+			Gtk_Insert.new 		db, store, tree, s
+		else
+			error "Need a database", false
+		end
 	end
 
 	def self.edit db, store, tree, s
@@ -683,10 +707,12 @@ class Store < Gtk::TreeStore
 	def feed_tree result
 		number_of_items = 0
 
-		for i in result do
-			iter 		= tag (i[4].split '/'), i, number_of_items
-			number_of_items = insert_item iter, i, number_of_items
-			icon 		= nil
+		if result
+			for i in result do
+				iter 		= tag (i[4].split '/'), i, number_of_items
+				number_of_items = insert_item iter, i, number_of_items
+				icon 		= nil
+			end
 		end
 
 		@tag_list.uniq!
@@ -696,12 +722,14 @@ class Store < Gtk::TreeStore
 		last 			= nil
 		number_of_items 	= 0
 
-		for i in result do
-			if !last or i[4] != last
-				iter 	= insert_dir nil, i[4], i[4], number_of_items
-			end
+		if result
+			for i in result do
+				if !last or i[4] != last
+					iter 	= insert_dir nil, i[4], i[4], number_of_items
+				end
 
-			number_of_items = insert_item iter, i, number_of_items
+				number_of_items = insert_item iter, i, number_of_items
+			end
 		end
 
 		@tag_list.uniq!
