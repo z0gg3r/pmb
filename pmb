@@ -357,7 +357,8 @@ class Actions
 			iter	= tree.model.get_iter tree.selection.selected_rows[0]
 			url 	= store.get_value iter, 3
 
-			if url and !url.empty?
+			if url \
+			and !url.empty?
 				if s['xclip'] == "true"
 					Process.detach spawn \
 						"echo -n '#{url}' | xclip -i -selection 'primary'"
@@ -384,17 +385,19 @@ class Actions
 	def self.store_feed db, store, tree
 		store.clear
 		
-		if store.style.to_i == 0
-			store.feed_tree		(db.fetch store.filter)
-		else
-			store.feed_tag		(db.fetch store.filter)
-		end
+		if db.db
+			if store.style.to_i == 0
+				store.feed_tree		(db.fetch store.filter)
+			else
+				store.feed_tag		(db.fetch store.filter)
+			end
 
-		tree.expand_all
+			tree.expand_all
 
-		if tree.selected_row \
-		and (tree.model.get_iter tree.selected_row)
-			tree.set_cursor 	tree.selected_row, nil, false
+			if tree.selected_row \
+			and (tree.model.get_iter tree.selected_row)
+				tree.set_cursor 	tree.selected_row, nil, false
+			end
 		end
 	end
 
@@ -707,12 +710,10 @@ class Store < Gtk::TreeStore
 	def feed_tree result
 		number_of_items = 0
 
-		if result
-			for i in result do
-				iter 		= tag (i[4].split '/'), i, number_of_items
-				number_of_items = insert_item iter, i, number_of_items
-				icon 		= nil
-			end
+		for i in result do
+			iter 		= tag (i[4].split '/'), i, number_of_items
+			number_of_items = insert_item iter, i, number_of_items
+			icon 		= nil
 		end
 
 		@tag_list.uniq!
@@ -722,14 +723,12 @@ class Store < Gtk::TreeStore
 		last 			= nil
 		number_of_items 	= 0
 
-		if result
-			for i in result do
-				if !last or i[4] != last
-					iter 	= insert_dir nil, i[4], i[4], number_of_items
-				end
-
-				number_of_items = insert_item iter, i, number_of_items
+		for i in result do
+			if !last or i[4] != last
+				iter 	= insert_dir nil, i[4], i[4], number_of_items
 			end
+
+			number_of_items = insert_item iter, i, number_of_items
 		end
 
 		@tag_list.uniq!
@@ -1468,7 +1467,7 @@ class Gtk_Settings < Gtk_Window
 		end
 
 		url_underline 		= Gtk::CheckButton.new "Url underline", false
-		tree_lines.tooltip_text = "draw underline in url's?"
+		url_underline.tooltip_text = "draw underline in url's?"
 
 		if s['url_underline'] == "true"
 			url_underline.set_active	true
