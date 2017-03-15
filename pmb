@@ -204,7 +204,7 @@ class Settings
 	attr_accessor :s
 end
 
-class Web_Data
+class WebData
 	def self.favicon_exist? url, s
 		uri  	= URI url
 		path 	= "#{s['dir']}/favicon/#{uri.host}#{uri.path}"
@@ -465,7 +465,7 @@ class Actions
 
 	def self.insert db, store, tree, s
 		if db.db
-			Gtk_Insert.new 		db, store, tree, s
+			GtkInsert.new 		db, store, tree, s
 		else
 			error "Need a database", false
 		end
@@ -474,7 +474,7 @@ class Actions
 	def self.edit db, store, tree, s
 		if tree.model.iter_first
 			tree.selected_row 	= tree.selection.selected_rows[0]
-			Gtk_Edit.new 		db, store, tree, s
+			GtkEdit.new 		db, store, tree, s
 		else
 			error "Nothing to edit.", false
 		end
@@ -483,7 +483,7 @@ class Actions
 	def self.delete db, store, tree, s
 		if tree.model.iter_first 
 			tree.selected_row 	= tree.selection.selected_rows[0]
-			Gtk_Delete.new 		db, store, tree, s
+			GtkDelete.new 		db, store, tree, s
 		else
 			error "Nothing to delete.", false
 		end
@@ -491,11 +491,11 @@ class Actions
 
 	def self.settings settings, db, store, tree
 		tree.selected_row 	= tree.selection.selected_rows[0]
-		Gtk_Settings.new 	settings, db, store, tree
+		GtkSettings.new 	settings, db, store, tree
 	end
 
 	def self.error message, fatal
-		Gtk_Error.new 		message, fatal
+		GtkError.new 		message, fatal
 	end
 
 	def self.open_bookmark store, tree, s
@@ -544,7 +544,7 @@ class Actions
 			iter	= tree.model.get_iter tree.selection.selected_rows[0]
 			url 	= store.get_value iter, 3
 
-			Web_Data.webkit_favicon_fetch url, store, tree, s
+			WebData.webkit_favicon_fetch url, store, tree, s
 		end
 	end
 
@@ -574,7 +574,7 @@ class Actions
 
 	def self.set_icon url, alt, s
 		if url and url[/^(http|https)/]
-			if (Web_Data.favicon_exist? url, s)
+			if (WebData.favicon_exist? url, s)
 				begin
 					uri  	= URI url
 					path 	= "#{s['dir']}/favicon/#{uri.host}#{uri.path}"
@@ -608,6 +608,7 @@ class Store < Gtk::TreeStore
 			if it \
 			and entry \
 			and entry == (get_value it, 4) \
+			and !(get_value it, 2) \
 			and !it.parent
 				return it
 			end
@@ -622,7 +623,8 @@ class Store < Gtk::TreeStore
 			and entry \
 			and entry == (get_value it, 4) \
 			and it.parent \
-			and parent == (get_value it.parent, 4) 
+			and parent == (get_value it.parent, 4) \
+			and !(get_value it, 2)
 				return it
 			end
 		end
@@ -689,13 +691,17 @@ class Store < Gtk::TreeStore
 				if dirs[j - 1] 
 					if !(r = search_children d, dirs[j - 1]) 
 						if dirs[j]
-							iter = insert_dir iter, d, item[4] \
-								,number_of_items
+							if item
+								iter = insert_dir iter, d, item[4] \
+									,number_of_items
+							end
 						end
 					else
 						if !root == (get_iter_root r)
-							iter = insert_dir iter, d, item[4] \
-								,number_of_items
+							if item
+								iter = insert_dir iter, d, item[4] \
+									,number_of_items
+							end
 						else
 							iter = r
 						end
@@ -849,7 +855,7 @@ class Grid < Gtk::Grid
 	end
 end
 
-class Gtk_Window < Gtk::Window
+class GtkWindow < Gtk::Window
 	def initialize 
 		super
 		set_wmclass 	"Poor man's bookmark"	,"Pmb"
@@ -936,10 +942,12 @@ class Gtk_Window < Gtk::Window
 			tag_combo.model.each do |model, path, iter|
 				if (model.get_value iter, 0) == item_active
 					tag_combo.set_active_iter iter
+					entry.text 		  = tag_combo.active_text
 				end
 			end
 		else
 			tag_combo.set_active 	0
+			entry.text 		= tag_combo.active_text
 		end
 
 		tag_combo.signal_connect "changed" do |t|
@@ -977,7 +985,7 @@ class Gtk_Window < Gtk::Window
 			if (store.get_value iter, 3) == url
 				tree.set_cursor tpath, nil, false
 
-				if !(Web_Data.favicon_exist? url, s)
+				if !(WebData.favicon_exist? url, s)
 					Actions.download_favicon store, tree, s
 				end
 			end
@@ -985,7 +993,7 @@ class Gtk_Window < Gtk::Window
 	end
 end
 
-class Gtk_Error < Gtk_Window
+class GtkError < GtkWindow
 	def initialize message, fatal
 		super()
 		set_title 		title + " - Error"
@@ -1027,17 +1035,47 @@ class Gtk_Error < Gtk_Window
 	end
 end
 
-class Gtk_Insert < Gtk_Window
+class GtkInsert < GtkWindow
 	def initialize db, store, tree, s
 		super()
 		set_title 		title + " - Insert"
 
+		row 			= tree.selection.selected_rows[0]
+
+		insert_button 		= Gtk::Button.new :stock_id => Gtk::Stock::ADD
+		cancel_button 		= Gtk::Button.new :stock_id => Gtk::Stock::CANCEL
+
+		cancel_button.signal_connect "clicked" do
+			destroy
+		end
+
+		dialog 			= single_bookmark db, store, tree, s, row, insert_button
+
+		button_box 		= Gtk::Box.new :horizontal, 2
+		button_box.pack_start	insert_button
+		button_box.pack_start	cancel_button
+
+		vbox 			= Gtk::Box.new :vertical, 2
+		vbox.pack_start 	dialog \
+						,:expand 	=> true \
+						,:fill 		=> true \
+						,:padding 	=> 0 \
+
+		vbox.pack_start 	button_box \
+						,:expand 	=> false \
+						,:fill 		=> false \
+						,:padding 	=> 0 \
+
+		add 			vbox
+		show_all
+	end
+
+	def single_bookmark db, store, tree, s, row, insert_button
 		name_entry 		= create_name_entry nil
 		url_entry 		= create_url_entry nil, (Actions.search_icon \
 						"non-starred-symbolic"), s, tree, store
 		comment_entry 		= create_comment_entry nil
 		tag_entry 		= create_tag_entry nil
-		row 			= tree.selection.selected_rows[0]
 
 		favicon 		= Gtk::CheckButton.new "Download favicon?", false
 		favicon.tooltip_text 	= "download favicon?"
@@ -1047,9 +1085,6 @@ class Gtk_Insert < Gtk_Window
 		else
 			favicon.set_active	false
 		end
-
-		insert_button 		= Gtk::Button.new :stock_id => Gtk::Stock::ADD
-		cancel_button 		= Gtk::Button.new :stock_id => Gtk::Stock::CANCEL
 
 		url_entry.primary_icon_activatable = false
 
@@ -1092,10 +1127,6 @@ class Gtk_Insert < Gtk_Window
 			end
 		end
 
-		cancel_button.signal_connect "clicked" do
-			destroy
-		end
-
 		grid 			= Grid.new
 								#e   #t   #l    #a
 		grid.attach (Gtk::Label.new "Name"), 		0,   0,   20,   1
@@ -1106,13 +1137,9 @@ class Gtk_Insert < Gtk_Window
 		grid.attach comment_entry,			20,  2,   60,   1
 		grid.attach (Gtk::Label.new "Tag"), 		0,   3,   20,   1
 		grid.attach tag_list,				20,  3,   60,   1
-		grid.attach tag_entry,				20,  4,   20,   1
-		grid.attach (Gtk::Label.new "Favicon"),		0,   5,   60,   1
+		grid.attach tag_entry,				20,  4,   60,   1
+		grid.attach (Gtk::Label.new "Favicon"),		0,   5,   20,   1
 		grid.attach favicon,				20,  5,   20,   1
-
-		button_box 		= Gtk::Box.new :horizontal, 2
-		button_box.pack_start	insert_button
-		button_box.pack_start	cancel_button
 
 		vbox 			= Gtk::Box.new :vertical, 2
 		vbox.pack_start 	grid \
@@ -1120,17 +1147,11 @@ class Gtk_Insert < Gtk_Window
 						,:fill 		=> true \
 						,:padding 	=> 0 \
 
-		vbox.pack_start 	button_box \
-						,:expand 	=> false \
-						,:fill 		=> false \
-						,:padding 	=> 0 \
-
-		add 			vbox
-		show_all
+		vbox
 	end
 end
 
-class Gtk_Edit < Gtk_Window
+class GtkEdit < GtkWindow
 	def initialize db, store, tree, s
 		super()
 		set_title 		title + " - Edit"
@@ -1298,22 +1319,27 @@ class Gtk_Edit < Gtk_Window
 			iters = Array.new
 
 			rows.each do |i|
-				iters[iters.size] = tree.model.get_iter i
+				iters[iters.size] = (tree.model.get_iter i)
 			end
 
 			iters.each_with_index do |iter, i|
-				parent		= iter.parent
-				values		= store.values iter
+				if (store.get_value iter, 3).empty?
+					old_tag 	  = store.get_value iter, 6
+					edit_tag_multiple db, store, tree, iter, old_tag, tag_entry.text
+				else
+					parent		= iter.parent
+					values		= store.values iter
 
-				db.edit 	values[0], "tag", tag_entry.text
+					db.edit 	values[0], "tag", tag_entry.text
 
-				item		= [[values[0], values[1], values[2], values[3]\
-							, tag_entry.text]]
+					item		= [[values[0], values[1], values[2], values[3]\
+								, tag_entry.text]]
 
-				if tree.model.iter_is_valid? iter
-					store.remove 		iter
-					store.delete_parent 	parent
-					store.append_item	item
+					if tree.model.iter_is_valid? iter
+						store.remove 		iter
+						store.delete_parent 	parent
+						store.append_item	item
+					end
 				end
 			end
 
@@ -1342,9 +1368,27 @@ class Gtk_Edit < Gtk_Window
 		tree.expand_all
 		destroy
 	end
+
+	def edit_tag_multiple db, store, tree, iter, old_tag, tag
+		children		= iter.first_child
+		new_tag			= tag + '/' + (old_tag.split '/').last
+		db.edit_tag 		old_tag, new_tag
+		store.remove		children
+
+		if !iter.has_child?
+			store.remove	iter
+		end
+
+		#if (r_iter = store.tag (tag.split '/'), nil, 0)
+		#	store.remove 	r_iter
+		#end
+
+		store.append_item	(db.find "tag", new_tag)
+		tree.expand_all
+	end
 end
 
-class Gtk_Delete < Gtk_Window
+class GtkDelete < GtkWindow
 	def initialize db, store, tree, s
 		super()
 		set_title 		title + " - Delete"
@@ -1356,6 +1400,8 @@ class Gtk_Delete < Gtk_Window
 		cancel_button.signal_connect "clicked" do
 			destroy
 		end
+
+		cancel_button.grab_focus
 
 		if rows.size > 1
 			dialog 		= multiple_bookmark db, store, tree, s, rows, delete_button
@@ -1373,8 +1419,6 @@ class Gtk_Delete < Gtk_Window
 						,:expand 	=> false \
 						,:fill 		=> false \
 						,:padding 	=> 0 \
-
-		cancel_button.grab_focus
 
 		add			vbox
 		show_all
@@ -1461,11 +1505,20 @@ class Gtk_Delete < Gtk_Window
 
 			iters.each do |i|
 				if tree.model.iter_is_valid? i
-					parent			= i.parent
-					id 			= store.get_value i, 0
-					db.delete 		id
-					store.remove		i
-					store.delete_parent 	parent
+					if (store.get_value i, 3).empty?
+						db.delete_tag 		(store.get_value i, 6)
+						store.remove		i
+					else
+						parent			= i.parent
+						id 			= store.get_value i, 0
+
+						db.delete 		id
+						store.remove		i
+
+						if !parent.has_child?
+							store.delete_parent 	parent
+						end
+					end
 				end
 			end
 
@@ -1478,7 +1531,7 @@ class Gtk_Delete < Gtk_Window
 	end
 end
 
-class Gtk_Settings < Gtk_Window
+class GtkSettings < GtkWindow
 	def initialize settings, db, store, tree
 		super()
 		set_title 		title + " - Options"
@@ -1719,7 +1772,7 @@ class Gtk_Settings < Gtk_Window
 	end
 end
 
-class Gtk_Ui < Gtk_Window
+class GtkUi < GtkWindow
 	def initialize 
 		super
 		set_default_size 	800, 600
@@ -2347,6 +2400,6 @@ class Gtk_Ui < Gtk_Window
 end
 
 Gtk.init
-Gtk_Ui.new
+GtkUi.new
 Gtk.main
 
