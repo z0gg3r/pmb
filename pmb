@@ -1197,13 +1197,16 @@ class GtkEdit < GtkWindow
 			set_title 		title + " - Edit tag"
 			old_tag 		= values[4]
 			tag_entry.set_text 	old_tag
+			iter			= tree.model.get_iter row
 
 			tag_entry.signal_connect "activate" do
-				edit_tag 	db, tree, store, row, old_tag, tag_entry
+				edit_tag 	db, tree, store, iter, old_tag, tag_entry.text
+				destroy
 			end
 			
 			edit_button.signal_connect "clicked" do
-				edit_tag 	db, tree, store, row, old_tag, tag_entry
+				edit_tag 	db, tree, store, iter, old_tag, tag_entry.text
+				destroy
 			end
 								#e   #t   #l    #a
 			grid.attach (Gtk::Label.new "Tag"),	0,   1,   20,   1
@@ -1257,6 +1260,7 @@ class GtkEdit < GtkWindow
 					]
 
 					store.remove		iter
+					store.delete_tag	values[4]
 					store.delete_parent 	parent
 					store.append_item	item
 				end
@@ -1325,7 +1329,7 @@ class GtkEdit < GtkWindow
 			iters.each_with_index do |iter, i|
 				if (store.get_value iter, 3).empty?
 					old_tag 	  = store.get_value iter, 6
-					edit_tag_multiple db, store, tree, iter, old_tag, tag_entry.text
+					edit_tag_multiple db, tree, store, iter, old_tag, tag_entry.text
 				else
 					parent		= iter.parent
 					values		= store.values iter
@@ -1360,28 +1364,24 @@ class GtkEdit < GtkWindow
 		vbox	
 	end
 
-	def edit_tag db, tree, store, row, old_tag, tag_entry
-		db.edit_tag 		old_tag, tag_entry.text
-		iter			= tree.model.get_iter row
+	def edit_tag db, tree, store, iter, old_tag, tag
+		db.edit_tag 		old_tag, tag
 		store.remove		iter
-		store.append_item	(db.find "tag", tag_entry.text)
+		store.delete_tag	old_tag
+		store.append_item	(db.find "tag", tag)
 		tree.expand_all
-		destroy
 	end
 
-	def edit_tag_multiple db, store, tree, iter, old_tag, tag
+	def edit_tag_multiple db, tree, store, iter, old_tag, tag
 		children		= iter.first_child
 		new_tag			= tag + '/' + (old_tag.split '/').last
 		db.edit_tag 		old_tag, new_tag
 		store.remove		children
+		store.delete_tag	old_tag
 
 		if !iter.has_child?
 			store.remove	iter
 		end
-
-		#if (r_iter = store.tag (tag.split '/'), nil, 0)
-		#	store.remove 	r_iter
-		#end
 
 		store.append_item	(db.find "tag", new_tag)
 		tree.expand_all
@@ -1462,9 +1462,10 @@ class GtkDelete < GtkWindow
 			parent			= iter.parent
 
 			if values[2].empty?
-				db.delete_tag 	values[4]
+				db.delete_tag 		values[4]
+				store.delete_tag	values[4]
 			else
-				db.delete 	values[0]
+				db.delete 		values[0]
 			end
 
 			if tree.model.iter_is_valid? iter
@@ -1506,18 +1507,16 @@ class GtkDelete < GtkWindow
 			iters.each do |i|
 				if tree.model.iter_is_valid? i
 					if (store.get_value i, 3).empty?
-						db.delete_tag 		(store.get_value i, 6)
+						tag			= (store.get_value i, 6)
+						db.delete_tag 		tag
+						store.delete_tag	tag
 						store.remove		i
 					else
 						parent			= i.parent
 						id 			= store.get_value i, 0
-
 						db.delete 		id
 						store.remove		i
-
-						if !parent.has_child?
-							store.delete_parent 	parent
-						end
+						store.delete_parent 	parent
 					end
 				end
 			end
