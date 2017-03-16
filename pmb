@@ -710,7 +710,12 @@ class Store < Gtk::TreeStore
 			end
 		end
 	
-		@tag_list[@tag_list.size] = get_value iter, 6
+		if (tag = get_value iter, 6)
+			@tag_list[@tag_list.size] = tag
+		else
+			@tag_list[@tag_list.size] = "none"
+		end
+
 		iter
 	end
 
@@ -745,13 +750,25 @@ class Store < Gtk::TreeStore
 		if items
 			for i in items do
 				iter 		= tag (i[4].split '/'), i, 0
-				insert_item 	iter, i, (n_entries iter.first_child, 0)
+
+				if iter_is_valid? iter
+					insert_item 	iter, i, (n_entries iter.first_child, 0)
+				else
+					insert_item 	nil, i, 0
+				end
+
 				icon 		= nil
 			end
 
 			@tag_list.uniq!
 			@tag_list.sort!
 		end
+	end
+
+	def insert_tag tag
+		@tag_list[@tag_list.size] = tag
+		@tag_list.uniq!
+		@tag_list.sort!
 	end
 
 	def delete_tag tag
@@ -860,11 +877,17 @@ class GtkWindow < Gtk::Window
 		super
 		set_wmclass 	"Poor man's bookmark"	,"Pmb"
 		set_title 	"Poor man's bookmark"
-		set_type_hint 	:dialog
 
 		signal_connect "destroy" do
 			destroy
 		end
+	end
+end
+
+class GtkDialog < GtkWindow
+	def initialize 
+		super
+		set_type_hint 	:dialog
 	end
 
 	def create_name_entry text
@@ -942,7 +965,7 @@ class GtkWindow < Gtk::Window
 			tag_combo.model.each do |model, path, iter|
 				if (model.get_value iter, 0) == item_active
 					tag_combo.set_active_iter iter
-					entry.text 		  = tag_combo.active_text
+					entry.text = tag_combo.active_text
 				end
 			end
 		else
@@ -1035,7 +1058,7 @@ class GtkError < GtkWindow
 	end
 end
 
-class GtkInsert < GtkWindow
+class GtkInsert < GtkDialog
 	def initialize db, store, tree, s
 		super()
 		set_title 		title + " - Insert"
@@ -1151,7 +1174,7 @@ class GtkInsert < GtkWindow
 	end
 end
 
-class GtkEdit < GtkWindow
+class GtkEdit < GtkDialog
 	def initialize db, store, tree, s
 		super()
 		set_title 		title + " - Edit"
@@ -1193,11 +1216,16 @@ class GtkEdit < GtkWindow
 		tag_entry 	= create_tag_entry values[4]
 		tag_list	= create_tag_list store.tag_list, tag_entry, values[4]
 
-		if values[2] and values[2].empty?
+		if values[3] and values[3].empty?
 			set_title 		title + " - Edit tag"
 			old_tag 		= values[4]
 			tag_entry.set_text 	old_tag
 			iter			= tree.model.get_iter row
+
+								#e   #t   #l    #a
+			grid.attach (Gtk::Label.new "Tag"),	0,   1,   20,   1
+			grid.attach tag_list,			20,  1,   60,   1
+			grid.attach tag_entry, 			20,  2,   60,   1
 
 			tag_entry.signal_connect "activate" do
 				edit_tag 	db, tree, store, iter, old_tag, tag_entry.text
@@ -1208,10 +1236,6 @@ class GtkEdit < GtkWindow
 				edit_tag 	db, tree, store, iter, old_tag, tag_entry.text
 				destroy
 			end
-								#e   #t   #l    #a
-			grid.attach (Gtk::Label.new "Tag"),	0,   1,   20,   1
-			grid.attach tag_list,			20,  1,   60,   1
-			grid.attach tag_entry, 			20,  2,   60,   1
 		else
 			name_entry 	= create_name_entry values[1]
 			url_entry 	= create_url_entry values[2], (Actions.set_icon \
@@ -1328,16 +1352,22 @@ class GtkEdit < GtkWindow
 
 			iters.each_with_index do |iter, i|
 				if (store.get_value iter, 3).empty?
-					old_tag 	  = store.get_value iter, 6
-					edit_tag_multiple db, tree, store, iter, old_tag, tag_entry.text
+					old_tag 	= store.get_value iter, 6
+					edit_tag 	db, tree, store, iter, old_tag, tag_entry.text
 				else
 					parent		= iter.parent
 					values		= store.values iter
 
 					db.edit 	values[0], "tag", tag_entry.text
 
+					if tag_entry.text.empty?
+						tag = "none"
+					else
+						tag = tag_entry.text
+					end
+
 					item		= [[values[0], values[1], values[2], values[3]\
-								, tag_entry.text]]
+								, tag]]
 
 					if tree.model.iter_is_valid? iter
 						store.remove 		iter
@@ -1365,30 +1395,23 @@ class GtkEdit < GtkWindow
 	end
 
 	def edit_tag db, tree, store, iter, old_tag, tag
-		db.edit_tag 		old_tag, tag
+		if tag.empty?
+			new_tag		= 'none' + '/' + (old_tag.split '/').last
+		else
+			new_tag		= tag + '/' + (old_tag.split '/').last
+		end
+			
+		parent			= iter.parent
+		db.edit_tag 		old_tag, new_tag
 		store.remove		iter
 		store.delete_tag	old_tag
-		store.append_item	(db.find "tag", tag)
-		tree.expand_all
-	end
-
-	def edit_tag_multiple db, tree, store, iter, old_tag, tag
-		children		= iter.first_child
-		new_tag			= tag + '/' + (old_tag.split '/').last
-		db.edit_tag 		old_tag, new_tag
-		store.remove		children
-		store.delete_tag	old_tag
-
-		if !iter.has_child?
-			store.remove	iter
-		end
-
 		store.append_item	(db.find "tag", new_tag)
+		store.delete_parent 	parent
 		tree.expand_all
 	end
 end
 
-class GtkDelete < GtkWindow
+class GtkDelete < GtkDialog
 	def initialize db, store, tree, s
 		super()
 		set_title 		title + " - Delete"
@@ -1534,6 +1557,7 @@ class GtkSettings < GtkWindow
 	def initialize settings, db, store, tree
 		super()
 		set_title 		title + " - Options"
+		set_type_hint 		:dialog
 
 		s 			= settings.s
 		id_font_button 		= Gtk::FontButton.new s['id_font']
@@ -2262,7 +2286,7 @@ class GtkUi < GtkWindow
 		tool_bar 		= Gtk::Toolbar.new
 
 		if show_text
-			tool_bar.toolbar_style	= :both
+			tool_bar.toolbar_style = :both
 		end
 
 		number_of_items		= 0
@@ -2349,12 +2373,12 @@ class GtkUi < GtkWindow
 
 		tree.signal_connect "button-press-event" do |tree, e|
 			if e.kind_of? Gdk::EventButton and e.button == 3
-				menu.popup nil, nil, e.button, e.time
+				menu.popup 	nil, nil, e.button, e.time
 			end
 		end
 
 		tree.signal_connect "popup_menu" do
-			menu.popup nil, nil, 0, Gdk::Event::CURRENT_TIME
+			menu.popup 		nil, nil, 0, Gdk::Event::CURRENT_TIME
 		end
 
 		tree
