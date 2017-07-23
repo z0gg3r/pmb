@@ -19,6 +19,7 @@ bookmarks easily.
 **Examples:**
 
 *Adding a bookmark:*
+
 	pmb -a name=example,url="http://example.com",comment="my example",tag=ex
 
 	comment and tag can be ommited, they be set to 'none' on database
@@ -27,6 +28,7 @@ bookmarks easily.
 	pmb -a name=example,url="http://example.com"
 
 *Printing.*
+
 	pmb -p all
 
 	Will print all bookmarks.
@@ -41,6 +43,7 @@ bookmarks easily.
 	who have id 10.
 
 *Search by database by name, url, comment and tag.*
+
 	pmb -s name=linux 
 
 	Will search all database for bookmarks who  have
@@ -51,12 +54,14 @@ bookmarks easily.
 	pmb -s linux	
 
 *Exporting the search result.*
+
 	pmb -s linux,e=xyz.db
 
 	Will export the result of the search to the database
 	xyz.db (if xyz.db do not exist, it will be created).
 
 *Deleting the search result.*
+
 	pmb -s linux,d
 	pmb -s name=linux,d
 	...
@@ -64,6 +69,7 @@ bookmarks easily.
 	Will delete the result of the search from database.
 
 *Edit bookmarks by id or field.*
+
 	pmb -e id=10,tag="new value"
 
 	Will set tag of the bookmark who have id number 10
@@ -75,6 +81,7 @@ bookmarks easily.
 	value "old tag" to value "new value".
 	
 *Deleting.*
+
 	pmb -d id=10
 
 	Wll delete bookmark who have id 10.
@@ -89,6 +96,7 @@ bookmarks easily.
 	"value" in the tag field.
 		
 *Colored output.*
+
 	pmb -c -p all
 	pmb -s linux -c
 
