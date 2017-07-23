@@ -1,3 +1,5 @@
+![screenshort](pmb-medium.png)
+
 **pmb** is a bookmark management tool for those who want more power and flexibility
 in bookmark management.
 
