@@ -107,6 +107,12 @@ Examples:
 
 	And more =D
 
+Depends:
+
+	* libsqlite3-dev
+	
+	* libgtk-3-dev [for development]
+
 TODO:
 
 	* Implement config file.
