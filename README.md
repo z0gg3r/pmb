@@ -1,6 +1,4 @@
-# poor-man-s-bookmark
-
-pmb is a bookmark management tool for those who want more power and flexibility
+**pmb** is a bookmark management tool for those who want more power and flexibility
 in bookmark management.
 
 A bookmark inside pmb will have 5 fields:
@@ -18,103 +16,97 @@ A bookmark inside pmb will have 5 fields:
 Tags are used to group bookmarks together, then you can operate on groups of
 bookmarks easily.
 
-Examples:
+**Examples:**
 
-	Add a bookmark:
-		pmb -a name=example,url="http://example.com",comment="my example",tag=ex
+*Adding a bookmark:*
+	pmb -a name=example,url="http://example.com",comment="my example",tag=ex
 
-		Will add bookmark to the database with:
+	comment and tag can be ommited, they be set to 'none' on database
+	if you do not specify any value.
 
-			name = example
+	pmb -a name=example,url="http://example.com"
 
-			url = http://example.com
+*Printing.*
+	pmb -p all
 
-			comment = my example
+	Will print all bookmarks.
 
-			tag = ex
+	pmb -p i=10
 
-		comment and tag can be ommited, they be set to 'none' on database
-		if you do not specify any value.
+	Will print bookmark who have id 10;
 
-	Printing.
-		pmb -p all
+	pmb -p=10,field=url
 
-		Will print all bookmarks.
+	Will print the field url of the bookmark
+	who have id 10.
 
-		pmb -p i=10
+*Search by database by name, url, comment and tag.*
+	pmb -s name=linux 
 
-		Will print bookmark who have id 10;
+	Will search all database for bookmarks who  have
+	linux in name and print it, same for other field's.
+	If you do not specify a field, it will search all
+	fields:
 
-		pmb -p=10,field=url
+	pmb -s linux	
 
-		Will print the field url of the bookmark
-		who have id 10.
+*Exporting the search result.*
+	pmb -s linux,e=xyz.db
 
-	Search by database by name, url, comment and tag.
-		pmb -s name=linux 
+	Will export the result of the search to the database
+	xyz.db (if xyz.db do not exist, it will be created).
 
-		Will search all database for bookmarks who  have
-		linux in name and print it, same for other field's.
-		If you do not specify a field, it will search all
-		fields:
+*Deleting the search result.*
+	pmb -s linux,d
+	pmb -s name=linux,d
+	...
 
-		pmb -s linux	
+	Will delete the result of the search from database.
 
-	Exporting the search result.
-		pmb -s linux,e=xyz.db
+*Edit bookmarks by id or field.*
+	pmb -e id=10,tag="new value"
 
-		Will export the result of the search to the database
-		xyz.db (if xyz.db do not exist, it will be created).
+	Will set tag of the bookmark who have id number 10
+	to "new value".
 
-	Deleting the search result.
-		pmb -s linux,d
-		pmb -s name=linux,d
-		...
+	pmb -e f=tag,value="old value",new-value="new value"
 
-		Will delete the result of the search from database.
+	Will set tag of the bookmarks who have tag with 
+	value "old tag" to value "new value".
+	
+*Deleting.*
+	pmb -d id=10
 
-	Edit bookmarks by id or field.
-		pmb -e id=10,tag="new value"
+	Wll delete bookmark who have id 10.
 
-		Will set tag of the bookmark who have id number 10
-		to "new value".
+	pmb -d tag=value
 
-		pmb -e f=tag,value="old value",new-value="new value"
+	Will delete any bookmark tagged with "value"
 
-		Will set tag of the bookmarks who have tag with 
-		value "old tag" to value "new value".
+	pmb -d tag=value,g
+
+	Will delete any bookmark that contain the word
+	"value" in the tag field.
 		
-	Deleting.
-		pmb -d id=10
+*Colored output.*
+	pmb -c -p all
+	pmb -s linux -c
 
-		Wll delete bookmark who have id 10.
+	Adding -c will make search' output and print output
+	colored.	
 
-		pmb -d tag=value
+And more =D
 
-		Will delete any bookmark tagged with "value"
-
-		pmb -d tag=value,g
-
-		Will delete any bookmark that contain the word
-		"value" in the tag field.
-			
-	Colored output.
-		pmb -c -p all
-		pmb -s linux -c
-
-		Adding -c will make search' output and print output
-		colored.	
-
-	And more =D
-
-Depends:
+**Depends:**
 
 	* libsqlite3-dev
 	
 	* libgtk-3-dev [for development]
 
-TODO:
+**TODO:**
 
 	* Implement config file.
 
 	* Gtk interface.
+
+I'm writing it in linux and do not know if it will run into other platforms.
