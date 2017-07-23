@@ -18,6 +18,15 @@ A bookmark inside pmb will have 5 fields:
 Tags are used to group bookmarks together, then you can operate on groups of
 bookmarks easily.
 
+**Databases**
+
+	The default database file are ~/.bookmarks.db. You can point another
+	database with -f option.
+
+	pmb -f ~/xyz.db
+
+	pmb uses sqlite3 to manage databses.
+
 **Examples:**
 
 *Adding a bookmark:*
