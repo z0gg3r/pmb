@@ -121,9 +121,9 @@ cl_option
 struct 
 cl_option_list 
 {
-	int 	size;
-	int 	position;
-	char** 	opt;
+	int 		size;
+	int 		position;
+	cl_option** 	opt;
 };
 
 cl_option*
@@ -189,7 +189,7 @@ option_list_add(cl_option_list* l, cl_option* opt)
 		if(l->position >= l->size - 1) 
 		{
 			++l->size;
-			char** nopt = realloc(l->opt, l->size * sizeof(cl_option*));
+			cl_option** nopt = realloc(l->opt, l->size * sizeof(cl_option*));
 
 			if(nopt) 
 			{

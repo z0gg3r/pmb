@@ -1,7 +1,7 @@
-![screenshort](pmb-medium.png)
-
 **pmb** is a bookmark management tool for those who want more power and flexibility
 in bookmark management.
+
+![screenshort](pmb-medium.png)
 
 A bookmark inside pmb will have 5 fields:
 
@@ -18,7 +18,7 @@ A bookmark inside pmb will have 5 fields:
 Tags are used to group bookmarks together, then you can operate on groups of
 bookmarks easily.
 
-**Databases**
+**Databases:**
 
 	The default database file are ~/.bookmarks.db. You can point another
 	database with -f option.
@@ -111,8 +111,7 @@ bookmarks easily.
 	pmb -c -p all
 	pmb -s linux -c
 
-	Adding -c will make search' output and print output
-	colored.	
+	Adding -c will make search output and print output colored.	
 
 And more =D
 
