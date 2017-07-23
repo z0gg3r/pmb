@@ -510,7 +510,7 @@ add_bookmark(char* optarg)
 
 		if(name && url) 
 		{
-			b = bookmark_create();
+			b = bookmark_create(NULL, NULL, NULL, NULL);
 
 			if(b) 
 			{
@@ -888,11 +888,9 @@ search(char* optarg)
 
 					for(int i = 0; i < bookmark_list_get_size(bl) - 1; ++i) 
 					{
-						bookmark* 	b	= bookmark_create();
 						char** 		result	= bookmark_list_return_next(bl);
-
-						if(bookmark_add(b, result[1], result[2], result[3], result[4]))
-							printf("search: error setting bookmark\n");
+						bookmark* 	b	= bookmark_create(result[1], result[2]
+										,result[3], result[4]);
 
 						if(bookmark_db_write(b, e_db))
 							printf("search: failed to export bookmark\n");

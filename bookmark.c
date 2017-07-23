@@ -338,16 +338,31 @@ bookmark_list_get_next_position(bookmark_list* l)
 }
 
 bookmark* 
-bookmark_create() 
+bookmark_create(char* name, char* url, char* comment, char* tag) 
 {
 	bookmark* b = malloc(sizeof(bookmark));
 	
 	if(b) 
 	{
-		b->name      = NULL;
-		b->url       = NULL;
-		b->comment   = NULL;
-		b->tag 	     = NULL;
+		if(name)
+			b->name = name;
+		else
+			b->name	= NULL;
+
+		if(url)
+			b->url = url;
+		else
+			b->url       = NULL;
+
+		if(comment)
+			b->comment = comment;
+		else
+			b->comment   = NULL;
+
+		if(tag)
+			b->tag = tag;
+		else
+			b->tag 	     = NULL;
 
 		return b;
 	} 
@@ -507,19 +522,15 @@ bookmark_db_import(sqlite3* db, sqlite3* i_db)
 {
 	if(db && i_db)
 	{
-		char** result;
 		bookmark_list* bl = bookmark_db_query(i_db, 0, NULL);
 
 		if(bl)
 		{
 			for(int i = 0; i < bookmark_list_get_size(bl) - 1; ++i)
 			{
-				bookmark* b = bookmark_create();
-				result 	    = bookmark_list_return_next(bl);
-
-				if(bookmark_add(b, result[1], result[2]
-				,result[3], result[4]))
-					return 1;
+				char** result 	= bookmark_list_return_next(bl);
+				bookmark* b 	= bookmark_create(result[1], result[2]
+							,result[3], result[4]);
 
 				if(bookmark_db_write(b, db))
 					return 1;
