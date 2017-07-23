@@ -510,13 +510,10 @@ add_bookmark(char* optarg)
 
 		if(name && url) 
 		{
-			b = bookmark_create(NULL, NULL, NULL, NULL);
+			b = bookmark_create(name, url, comment, tag);
 
 			if(b) 
 			{
-				if(bookmark_add(b, name, url, comment, tag))
-					printf("error setting bookmark\n");
-
 				if(bookmark_db_write(b, db))
 					printf("failed to write bookmark to database\n");
 
