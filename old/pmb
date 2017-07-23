@@ -534,7 +534,7 @@ class Actions
 			if iter.has_child?
 				open_tag 	store, tree, iter.first_child, s
 			else
-				open_url	store, iter, s
+				open_url 	store, iter, s
 			end
 		end
 	end		
@@ -728,6 +728,7 @@ class Store < Gtk::TreeStore
 			icon 		= nil
 		end
 
+		@tag_list.sort!
 		@tag_list.uniq!
 	end
 
@@ -743,6 +744,7 @@ class Store < Gtk::TreeStore
 			number_of_items = insert_item iter, i, number_of_items
 		end
 
+		@tag_list.sort!
 		@tag_list.uniq!
 	end
 
@@ -777,6 +779,8 @@ class Store < Gtk::TreeStore
 				@tag_list.delete_at i
 			end
 		end
+
+		@tag_list.sort!
 	end
 
 	def delete_parent parent
@@ -785,6 +789,9 @@ class Store < Gtk::TreeStore
 			delete_tag 	tag
 			remove 		parent
 		end
+
+		@tag_list.uniq!
+		@tag_list.sort!
 	end
 
 	def values iter
@@ -1358,16 +1365,16 @@ class GtkEdit < GtkDialog
 					parent		= iter.parent
 					values		= store.values iter
 
-					db.edit 	values[0], "tag", tag_entry.text
+					db.edit 	values[0], 'tag', tag_entry.text
 
 					if tag_entry.text.empty?
-						tag = "none"
+						tag = 'none'
 					else
 						tag = tag_entry.text
 					end
 
-					item		= [[values[0], values[1], values[2], values[3]\
-								, tag]]
+					item	= [[values[0], values[1], values[2], values[3]\
+							, tag]]
 
 					if tree.model.iter_is_valid? iter
 						store.remove 		iter
@@ -1394,21 +1401,138 @@ class GtkEdit < GtkDialog
 		vbox	
 	end
 
+	#def coolect_iters
+	#...
+
+	#then pass iter by iter to a method who move them
+	# ... in this way, iter does not de-validate
+
 	def edit_tag db, tree, store, iter, old_tag, tag
-		if tag.empty?
-			new_tag		= 'none' + '/' + (old_tag.split '/').last
-		else
-			new_tag		= tag + '/' + (old_tag.split '/').last
-		end
-			
 		parent			= iter.parent
-		db.edit_tag 		old_tag, new_tag
-		store.remove		iter
-		store.delete_tag	old_tag
-		store.append_item	(db.find "tag", new_tag)
+		new_tag			= pathmaker store, iter, old_tag, tag
+		destiny			= store.tag (tag.split '/'), nil, 0
+
+		#values			= store.values iter
+
+		db.edit_tag		old_tag, new_tag
+		#item			= [[values[0], values[1], values[2], values[3], new_tag]]
+		#move 			db, store, tree, iter, old_tag, tag, new_tag
+
+		store.remove 		iter
 		store.delete_parent 	parent
+
+		(db.find 'tag', new_tag).each do |i|
+			if i
+				store.append_item [[i[0], i[1], i[2], i[3], i[4]]]
+			end
+		end
+
+		#db.edit 		values[0], 'tag', new_tag
+		#store.append_item 	item
+		#Actions.store_feed	db, store, tree
+
+		# for later =D
+		#store.delete_tag	old_tag
+		#store.delete_tag	tag
+		#store.delete_tag	new_tag
+
+		#store.delete_parent 	parent
+		#store.remove		iter
+
+		#if destiny
+		#	store.remove	destiny
+		#end
+
+		#store.feed_tree		(db.fetch (new_tag.split '/')[0])
 		tree.expand_all
 	end
+
+	def pathmaker store, iter, old_tag, tag
+		parent		= iter.parent
+		dir		= String.new
+		new_dir		= String.new
+		new_root	= String.new
+
+		if parent
+			selection_p	= store.get_value parent, 4
+		end
+
+		selection	= store.get_value iter, 4
+		dir_index	= 0
+		tag_index	= 0
+
+		old_tag_s 	= old_tag.split '/'
+		tag_s 		= tag.split '/'
+
+		#index
+		old_tag_s.each_with_index do |t, i|
+			if t == selection \
+			and old_tag_s[i - 1] == selection_p
+				dir_index = i 
+			end
+		end
+
+		tag_s.each_with_index do |t, i|
+			if t == selection \
+			and tag_s[i - 1] == selection_p
+				tag_index = i 
+			end
+		end
+
+		#dirs
+		old_tag_s[(dir_index)..-1].each do |i|
+			dir	= dir + "/#{i}"
+		end
+
+		tag_s[(tag_index)..-1].each do |i|
+			new_dir	= new_dir + "/#{i}"
+		end
+
+		tag_s[0..(tag_index - 1)].each_with_index do |t, i|
+			if new_root.empty?
+				new_root	= new_root + "#{t}"
+			else
+				new_root	= new_root + "/#{t}"
+			end
+		end
+
+		if new_root == new_dir[1..-1]
+			return "#{new_root}#{dir}"
+		else
+			return "#{new_root}#{new_dir}"
+		end
+	end
+
+	def move db, store, tree, iter, old_tag, tag, new_tag
+		puts (store.get_value iter, 6)
+
+		if iter and iter != nil 
+			if iter.has_child?
+				move	db, store, tree, iter.first_child, old_tag, tag, new_tag
+			else
+				if (id = store.get_value iter, 0) 
+					parent			= iter.parent
+					destiny			= store.tag (tag.split '/'), nil, 0
+					destiny_tag		= store.get_value destiny, 6
+
+					db.edit 		id, 'tag', new_tag
+
+					store.remove		iter
+					store.delete_parent 	parent
+
+					if store.iter_is_valid? destiny
+						store.remove	destiny
+					end
+
+					store.feed_tree		(db.fetch destiny_tag)
+				end
+			end
+
+			while iter.next! and iter != nil
+				move	db, store, tree, iter.first_child, old_tag, tag, new_tag
+			end
+		end
+	end		
 end
 
 class GtkDelete < GtkDialog
@@ -2422,7 +2546,7 @@ class GtkUi < GtkWindow
 	end
 end
 
-Gtk.init
+#Gtk.init
 GtkUi.new
 Gtk.main
 
