@@ -108,5 +108,7 @@ Examples:
 	And more =D
 
 TODO:
+
 	* Implement config file.
+
 	* Gtk interface.
