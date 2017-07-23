@@ -4,23 +4,33 @@ pmb is a bookmark management tool for those who want more power and flexibility
 in bookmark management.
 
 A bookmark inside pmb will have 5 fields:
+
 	id		<- unique identifier
+
 	name		<- name of the website
+
 	url		<- url of the website
+
 	comment		<- a comment about it [optional]
+
 	tag		<- a tag [optional]
 
 Tags are used to group bookmarks together, then you can operate on groups of
 bookmarks easily.
 
 Examples:
+
 	Add a bookmark:
 		pmb -a name=example,url="http://example.com",comment="my example",tag=ex
 
 		Will add bookmark to the database with:
+
 			name = example
+
 			url = http://example.com
+
 			comment = my example
+
 			tag = ex
 
 		comment and tag can be ommited, they be set to 'none' on database
