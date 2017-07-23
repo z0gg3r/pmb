@@ -352,17 +352,17 @@ bookmark_create(char* name, char* url, char* comment, char* tag)
 		if(url)
 			b->url = url;
 		else
-			b->url       = NULL;
+			b->url = NULL;
 
 		if(comment)
 			b->comment = comment;
 		else
-			b->comment   = NULL;
+			b->comment = "none";
 
 		if(tag)
 			b->tag = tag;
 		else
-			b->tag 	     = NULL;
+			b->tag = "none";
 
 		return b;
 	} 
