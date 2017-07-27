@@ -15,17 +15,18 @@
 #include "bookmark.h"
 
 /* colors */
-#define RED 		"\033[31m"
-#define GREEN 		"\033[32m"
-#define YELLOW 		"\033[33m"
-#define BLUE 		"\033[34m"
-#define MAGENTA 	"\033[35m"
-#define CYAN 		"\033[4;36m"
-#define GRAY 		"\033[37m"
-#define WHITE 		"\033[38m"
-#define DEFAULT 	"\033[0m"
+#define RED 	"\033[31m"
+#define GREEN 	"\033[32m"
+#define YELLOW 	"\033[33m"
+#define BLUE 	"\033[34m"
+#define MAGENTA	"\033[35m"
+#define CYAN 	"\033[4;36m"
+#define GRAY 	"\033[37m"
+#define WHITE 	"\033[38m"
+#define DEFAULT	"\033[0m"
 
 static short	color 	= 0;
+static short	verbose	= 0;
 static sqlite3*	db 	= NULL;
 
 typedef struct  cl_option cl_option;
@@ -279,7 +280,9 @@ help()
 
 	printf("\t-h | --help:\t\tshow [this] help\n");
 
-	printf("\t-v | --version:\t\tshow version\n");
+	printf("\t-v | --verbose:\t\tbe verbose\n");
+
+	printf("\t-V | --version:\t\tshow version\n");
 
 	printf("\n");
 }
@@ -298,7 +301,7 @@ bookmark_print_field(int i, char* r)
 		if(i % 2)
 			printf("%s%s%s\n", WHITE, r, DEFAULT);
 		else
-			printf("%s%s%s\n", BLUE, r, DEFAULT);
+			printf("%s%s%s\n", GREEN, r, DEFAULT);
 	}
 	else
 		printf("%s\n", r);
@@ -313,25 +316,50 @@ bookmark_print(bookmark_list* bl, int field)
 
 		if(!field) 
 		{
-			if(color && isatty(STDOUT_FILENO))
-				printf("id\t\t%s%s%s\n"
-					"name\t\t%s\n"
-					"url\t\t%s%s%s\n"
-					"comment\t\t%s\n"
-					"tag\t\t%s%s%s\n\n"
-					,BLUE, result[0], DEFAULT
-					,result[1]
-					,CYAN, result[2], DEFAULT
-					,result[3]
-					,GREEN, result[4], DEFAULT);
+			if(verbose)
+			{
+				if(color && isatty(STDOUT_FILENO))
+					printf("id\t\t%s%s%s\n"
+						"name\t\t%s\n"
+						"url\t\t%s%s%s\n"
+						"comment\t\t%s\n"
+						"tag\t\t%s%s%s\n\n"
+						,BLUE, result[0], DEFAULT
+						,result[1]
+						,CYAN, result[2], DEFAULT
+						,result[3]
+						,GREEN, result[4], DEFAULT);
+				else
+					printf("id\t\t%s\n"
+						"name\t\t%s\n"
+						"url\t\t%s\n"
+						"comment\t\t%s\n"
+						"tag\t\t%s\n\n"
+						,result[0], result[1], result[2], result[3]
+						,result[4]);
+			}
 			else
-				printf("id\t\t%s\n"
-					"name\t\t%s\n"
-					"url\t\t%s\n"
-					"comment\t\t%s\n"
-					"tag\t\t%s\n\n"
-					,result[0], result[1], result[2], result[3]
-					,result[4]);
+			{
+				if(color && isatty(STDOUT_FILENO))
+					printf("%s%s%s\n"
+						"%s\n"
+						"%s%s%s\n"
+						"%s\n"
+						"%s%s%s\n\n"
+						,BLUE, result[0], DEFAULT
+						,result[1]
+						,CYAN, result[2], DEFAULT
+						,result[3]
+						,GREEN, result[4], DEFAULT);
+				else
+					printf("%s\n"
+						"%s\n"
+						"%s\n"
+						"%s\n"
+						"%s\n\n"
+						,result[0], result[1], result[2], result[3]
+						,result[4]);
+			}
 		}
 
 		if(field == 1) 
@@ -1268,11 +1296,12 @@ parse_options(int argc, char* argv[], cl_option_list* option
 		,{"html", 	0, 0, 'H'}
 		,{"print", 	1, 0, 'p'}
 		,{"search", 	1, 0, 's'}
-		,{"version", 	0, 0, 'v'}
+		,{"verbose", 	0, 0, 'V'}
+		,{"version", 	0, 0, 'V'}
 		,{NULL, 	0, NULL, 0}
 	};
 
-	while((c = getopt_long(argc, argv, "a:e:d:s:f:i:p:chHv", long_options
+	while((c = getopt_long(argc, argv, "a:e:d:s:f:i:p:chHVv", long_options
 		,&option_index))) 
 	{
 		if(c == -1) 
@@ -1353,6 +1382,9 @@ parse_options(int argc, char* argv[], cl_option_list* option
 				break;
 			}
 			case 'v': /* version */
+				verbose = 1;
+				break;
+			case 'V': /* version */
 				version();
 				exit(EXIT_SUCCESS);
 
