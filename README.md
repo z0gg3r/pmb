@@ -113,18 +113,38 @@ bookmarks easily.
 
 	Adding -c will make search output and print output colored.	
 
+*Load a config file.*
+
+	pmb -C ~/.my_config_file.conf
+
+	pmb will automatically look for ~/.pmb.conf file.
+	
+	For now we do have only two options:
+		color=(0|1)
+		verbose=(0|1)
+
+	It does not understand spaces between name and value, for
+	example: 
+		color = 1
+
+	It will not be interpreted, it should be:
+		color=1
+
 And more =D
 
-**Depends:**
+**Depends**
+	* sqlite3
+	* gtk3
+
+**Build dependencies:**
 
 	* libsqlite3-dev
 	
-	* libgtk-3-dev [for development]
+	* libgtk-3-dev 
+
+	To build, just clone the repository, cd to it and type make
 
 **TODO:**
-
-	* Implement config file.
-
 	* Gtk interface.
 
 I'm writing it in linux and do not know if it will run into other platforms.

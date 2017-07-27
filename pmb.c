@@ -3,8 +3,9 @@
  * version:	0.1, 17/07/2017        * 
  ***************************************/
 
-#define VERSION "0.0.1"
-#define _GNU_SOURCE 		/* getsubopt, secure_getenv */
+#define _GNU_SOURCE 	/* getsubopt, secure_getenv */
+#define VERSION 	"0.0.1"
+#define CONFIG_FILE	".pmb.conf"
 
 #include <getopt.h>
 #include <stdio.h>
@@ -13,6 +14,7 @@
 #include <unistd.h> 		/* isatty */
 #include <limits.h>
 #include "bookmark.h"
+#include "config.h"
 
 /* colors */
 #define RED 	"\033[31m"
@@ -192,13 +194,10 @@ option_list_add(cl_option_list* l, cl_option* opt)
 			++l->size;
 			cl_option** nopt = realloc(l->opt, l->size * sizeof(cl_option*));
 
-			if(nopt) 
-			{
-				l->opt 			= nopt;
-				l->opt[l->size - 1] 	= NULL;
-			}
-			else
+			if(!nopt) 
 				return 1;
+			else
+				l->opt[l->size - 1] 	= NULL;
 		}
 	}
 	else
@@ -271,6 +270,8 @@ help()
 		"\t\t         pmb -s linux,d\n\n");
 
 	printf("\t-c | --color\t\tcolored output\n");
+
+	printf("\t-C | --config\t\tfilename:\topen config file 'filename'\n");
 
 	printf("\t-f | --file\t\tfilename:\topen bookmark file 'filename'\n");
 
@@ -455,6 +456,50 @@ bookmark_print_html(bookmark_list* bl)
 	}
 
 	return 1;
+}
+
+int
+parse_config_file(char* optarg)
+{
+	char** res = NULL;
+
+	if(optarg)
+		res 	= read_config(optarg);
+	else
+		return 1;
+
+	if(res)
+	{
+		if(res[0])
+		{
+			int r = strtol(res[0], NULL, 10);	
+
+			if(r == 0 || r == 1)
+				color = r;
+			else
+			{
+				printf("unknown color parameter\nshoud be 0 or 1\n");
+				exit(EXIT_FAILURE);
+			}
+		}
+
+		if(res[1])
+		{
+			int r = strtol(res[1], NULL, 10);	
+
+			if(r == 0 || r == 1)
+				verbose = r;
+			else
+			{
+				printf("unknown verbose parameter\nshoud be 0 or 1\n");
+				exit(EXIT_FAILURE);
+			}
+		}
+	}
+	else
+		return 1;
+
+	return 0;
 }
 
 int
@@ -1278,6 +1323,17 @@ set_color(char* optarg)
 	return 0;
 }
 
+int
+set_verbose(char* optarg)
+{
+	if(verbose == 1)
+		verbose = 0;
+	else
+		verbose = 1;
+
+	return 0;
+}
+
 void
 parse_options(int argc, char* argv[], cl_option_list* option
 	,cl_option_list* command) 
@@ -1288,6 +1344,7 @@ parse_options(int argc, char* argv[], cl_option_list* option
 	{
 		{"add", 	1, 0, 'a'}
 		,{"color", 	0, 0, 'c'}
+		,{"config", 	1, 0, 'C'}
 		,{"delete", 	1, 0, 'd'}
 		,{"edit", 	1, 0, 'e'}
 		,{"open_file", 	1, 0, 'f'}
@@ -1301,7 +1358,7 @@ parse_options(int argc, char* argv[], cl_option_list* option
 		,{NULL, 	0, NULL, 0}
 	};
 
-	while((c = getopt_long(argc, argv, "a:e:d:s:f:i:p:chHVv", long_options
+	while((c = getopt_long(argc, argv, "a:C:e:d:s:f:i:p:chHVv", long_options
 		,&option_index))) 
 	{
 		if(c == -1) 
@@ -1314,6 +1371,31 @@ parse_options(int argc, char* argv[], cl_option_list* option
 				cl_option* opt = create_option(add_bookmark
 					,optarg);
 				option_list_add(command, opt);	
+
+				break;
+			}
+			case 'C': /* config */
+			{
+				cl_option* opt = create_option(parse_config_file
+					,optarg);
+				option_list_add(option, opt);	
+
+				break;
+			}
+			case 'c': /* color */
+			{
+				cl_option* opt = create_option(set_color
+					,optarg);
+				option_list_add(option, opt);	
+
+				break;
+			}
+			case 'd': /* delete */
+			{
+				cl_option* opt = create_option
+					(delete_bookmark, optarg);
+				option_list_add(command, opt);	
+
 				break;
 			}
 			case 'e': /* edit */
@@ -1329,35 +1411,6 @@ parse_options(int argc, char* argv[], cl_option_list* option
 				cl_option* opt = create_option(open_file
 					,optarg);
 				option_list_add(option, opt);	
-				break;
-			}
-			case 'i': /* import file */
-			{
-				cl_option* opt = create_option(import
-					,optarg);
-				option_list_add(option, opt);	
-				break;
-			}
-			case 's': /* search */
-			{
-				cl_option* opt = create_option(search, optarg);
-				option_list_add(command, opt);	
-
-				break;
-			}
-			case 'p': /* print */
-			{
-				cl_option* opt = create_option(print_bookmark
-					,optarg);
-				option_list_add(command, opt);	
-
-				break;
-			}
-			case 'd': /* delete */
-			{
-				cl_option* opt = create_option
-					(delete_bookmark, optarg);
-				option_list_add(command, opt);	
 
 				break;
 			}
@@ -1373,21 +1426,40 @@ parse_options(int argc, char* argv[], cl_option_list* option
 				version();
 				exit(EXIT_SUCCESS);
 
-			case 'c': /* color */
+			case 'i': /* import file */
 			{
-				cl_option* opt = create_option(set_color
+				cl_option* opt = create_option(import
+					,optarg);
+				option_list_add(command, opt);	
+
+				break;
+			}
+			case 'p': /* print */
+			{
+				cl_option* opt = create_option(print_bookmark
+					,optarg);
+				option_list_add(command, opt);	
+
+				break;
+			}
+			case 's': /* search */
+			{
+				cl_option* opt = create_option(search, optarg);
+				option_list_add(command, opt);	
+
+				break;
+			}
+			case 'v': /* verbose */
+			{
+				cl_option* opt = create_option(set_verbose
 					,optarg);
 				option_list_add(option, opt);	
 
 				break;
 			}
-			case 'v': /* version */
-				verbose = 1;
-				break;
 			case 'V': /* version */
 				version();
 				exit(EXIT_SUCCESS);
-
 			default: /* anything else */
 				printf("unknown option\n");
 				help();
@@ -1401,9 +1473,20 @@ main(int argc, char *argv[])
 {
 	const char* 	home 	= secure_getenv("HOME");	
 
+	/* database file */
 	char* 		file 	= calloc((strlen(home) 
 				+ strlen(DATABASE) + 1), sizeof(char));
 
+	/* config file */
+	char* 	config_file 	= calloc((strlen(home) 
+				+ strlen(CONFIG_FILE) + 1), sizeof(char));
+
+	snprintf(config_file, strlen(config_file) - 1, "%s/%s"
+				,home, CONFIG_FILE);
+
+	parse_config_file(config_file);
+
+	/* parse options */
 	cl_option_list* option 	= option_list_create();
 	cl_option_list* command = option_list_create();
 	parse_options(argc, argv, option, command);
