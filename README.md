@@ -133,7 +133,9 @@ bookmarks easily.
 And more =D
 
 **Depends**
+
 	* sqlite3
+
 	* gtk3
 
 **Build dependencies:**
@@ -145,6 +147,7 @@ And more =D
 	To build, just clone the repository, cd to it and type make
 
 **TODO:**
+
 	* Gtk interface.
 
 I'm writing it in linux and do not know if it will run into other platforms.
