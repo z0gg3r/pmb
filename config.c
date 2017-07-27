@@ -71,7 +71,7 @@ read_config(char* filename)
 	if(fp)
 	{
 		file_option* 	opt = create_file_option();
-		char** 		ret = calloc(2, sizeof(char*));
+		char** 		ret = calloc(1, sizeof(char*));
 
 		ret[0] = NULL;
 		ret[1] = NULL;
