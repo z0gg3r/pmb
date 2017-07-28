@@ -6,7 +6,8 @@ struct file_option {
 
 typedef struct file_option file_option;
 
-/* -- read option file */
+/* -- read option file 
+   -- return : [0] = color, [1] = verbose */
 /* char* filename */
 char**
 read_config(char*);

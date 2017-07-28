@@ -89,11 +89,6 @@ read_config(char* filename)
 
 				else if(!(strcmp(str, "verbose")))
 					ret[1] = strsep(&opt->option, "=");
-				else
-				{
-					printf("unknown option: %s\n", str);
-					exit(EXIT_FAILURE);
-				}
 
 				file_option_destroy(opt);
 				opt = create_file_option();
