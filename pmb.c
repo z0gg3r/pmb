@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h> 		/* isatty */
+#include <unistd.h> 	/* isatty */
 #include <limits.h>
 #include "bookmark.h"
 #include "config.h"
@@ -105,6 +105,10 @@ html(char*);
 /* -- turn on/off terminal color output */
 int
 set_color(char*);
+
+/* -- turn on/off verbose output */
+int
+set_verbose(char*);
 
 /* -- show help on terminal */
 void
@@ -211,7 +215,7 @@ destroy_option_list(cl_option_list* l)
 {
 	if(l)
 	{
-		for(short i = 0; i < l->size - 1; ++i)
+		for(int i = 0; i < l->size - 1; ++i)
 			destroy_option(l->opt[i]);
 
 		free(l);
@@ -385,9 +389,9 @@ bookmark_print_html(bookmark_list* bl)
 {
 	if(bl) 
 	{
-		int 	i;
 		char** 	result 	= NULL;
 		char* 	tag 	= NULL;
+		int 	i;
 
 		printf("<html>\n"
 			"<head>\n"
@@ -1491,7 +1495,7 @@ main(int argc, char *argv[])
 	cl_option_list* command = option_list_create();
 	parse_options(argc, argv, option, command);
 	
-	for(short i = 0; i < option->size - 1; ++i)
+	for(int i = 0; i < option->size - 1; ++i)
 	{
 		cl_option* opt = option->opt[i];
 		opt->func(opt->optarg);
@@ -1513,7 +1517,7 @@ main(int argc, char *argv[])
 			exit(EXIT_FAILURE);
 	}
 
-	for(short i = 0; i < command->size - 1; ++i)
+	for(int i = 0; i < command->size - 1; ++i)
 	{
 		cl_option* opt = command->opt[i];
 		opt->func(opt->optarg);

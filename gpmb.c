@@ -862,7 +862,7 @@ read_database(GtkWidget* button, gpointer** args)
 
 	if(bl) 
 	{
-		for(short i = 0; i < bookmark_list_get_size(bl) - 1; ++i) 
+		for(int i = 0; i < bookmark_list_get_size(bl) - 1; ++i) 
 		{
 			result = bookmark_list_return_next(bl);
 

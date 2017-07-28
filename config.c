@@ -82,6 +82,12 @@ read_config(char* filename)
 
 			if(st == '\n')
 			{
+				if(!(strcmp(opt->option, "\0")) /* blank line */
+				||(opt->option[0] == ' ')
+				||(opt->option[0] == '\t')
+				||(opt->option[0] == '#'))	/* comment */
+					goto new_option;
+
 				char* str = strsep(&opt->option, "=");
 
 				if(!(strcmp(str, "color")))
@@ -89,7 +95,13 @@ read_config(char* filename)
 
 				else if(!(strcmp(str, "verbose")))
 					ret[1] = strsep(&opt->option, "=");
+				else
+				{
+					printf("unknown option: %s\n", str);
+					exit(EXIT_FAILURE);
+				}
 
+				new_option:
 				file_option_destroy(opt);
 				opt = create_file_option();
 			}
