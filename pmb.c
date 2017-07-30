@@ -1509,9 +1509,6 @@ main(int argc, char *argv[])
 				,home, DATABASE);
 
 			db = bookmark_db_open(file);
-
-			free(file);
-			file = NULL;
 		}
 		else
 			exit(EXIT_FAILURE);
