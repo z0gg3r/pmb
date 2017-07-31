@@ -1479,16 +1479,17 @@ main(int argc, char *argv[])
 
 	/* database file */
 	char* 		file 	= calloc((strlen(home) 
-				+ strlen(DATABASE) + 1), sizeof(char));
+				+ strlen(DATABASE) + 2), sizeof(char));
 
 	/* config file */
 	char* 	config_file 	= calloc((strlen(home) 
-				+ strlen(CONFIG_FILE) + 1), sizeof(char));
+				+ strlen(CONFIG_FILE) + 2), sizeof(char));
 
 	snprintf(config_file, strlen(config_file) - 1, "%s/%s"
 				,home, CONFIG_FILE);
 
 	parse_config_file(config_file);
+	free(config_file);
 
 	/* parse options */
 	cl_option_list* option 	= option_list_create();
@@ -1509,6 +1510,7 @@ main(int argc, char *argv[])
 				,home, DATABASE);
 
 			db = bookmark_db_open(file);
+			free(file);
 		}
 		else
 			exit(EXIT_FAILURE);
@@ -1522,6 +1524,7 @@ main(int argc, char *argv[])
 
 	destroy_option_list(option);
 	destroy_option_list(command);
+	bookmark_db_close(db);
 	exit(EXIT_SUCCESS);
 }
 
