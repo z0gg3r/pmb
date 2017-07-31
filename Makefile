@@ -8,7 +8,6 @@ DEST_DIR=/usr/local/bin
 # source files
 PMB=pmb
 BOOKMARK=bookmark
-CONFIG=config
 GPMB=gpmb
 
 # recipes
@@ -19,8 +18,7 @@ GPMB=gpmb
 
 default:
 	$(CC) $(CCFLAGS) -c $(BOOKMARK).c $(bflags)
-	$(CC) $(CCFLAGS) -c $(CONFIG).c 
-	$(CC) $(CCFLAGS) $(BOOKMARK).o $(CONFIG).o $(PMB).c -o $(PMB) $(pflags)
+	$(CC) $(CCFLAGS) $(BOOKMARK).o $(PMB).c -o $(PMB) $(pflags)
 	#$(CC) $(CCFLAGS) $(GTKFLAGS) $(BOOKMARK).o $(GPMB).c -o $(GPMB) $(gflags)
 
 $(BOOKMARK):$(BOOKMARK).c

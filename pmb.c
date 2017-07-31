@@ -14,7 +14,6 @@
 #include <unistd.h> 	/* isatty */
 #include <limits.h>
 #include "bookmark.h"
-#include "config.h"
 
 /* colors */
 #define RED 	"\033[31m"
@@ -31,8 +30,20 @@ static short	color 	= 0;
 static short	verbose	= 0;
 static sqlite3*	db 	= NULL;
 
-typedef struct  cl_option cl_option;
-typedef struct 	cl_option_list cl_option_list;
+typedef struct 
+cl_option
+{
+	int	(*func)(char*); 
+	char* 	optarg;
+} cl_option;
+
+typedef struct 
+cl_option_list 
+{
+	int 		size;
+	int 		position;
+	cl_option** 	opt;
+} cl_option_list;
 
 /* internal */
 
@@ -118,20 +129,9 @@ help();
 void 
 version();
 
-struct 
-cl_option
-{
-	int	(*func)(char*); 
-	char* 	optarg;
-};
+char**
+read_config(char*); 
 
-struct 
-cl_option_list 
-{
-	int 		size;
-	int 		position;
-	cl_option** 	opt;
-};
 
 cl_option*
 create_option(int(*func)(char*), char* optarg) 
@@ -1470,6 +1470,65 @@ parse_options(int argc, char* argv[], cl_option_list* option
 				exit(EXIT_FAILURE);
 		}
 	}
+}
+
+char**
+read_config(char* filename) 
+{
+	int 	st;
+	FILE* 	fp = fopen(filename, "r");
+
+	if(fp)
+	{
+		int 	size 	= 1;
+		char*	option 	= calloc(size, sizeof(char));
+		char** 	ret 	= calloc(2, sizeof(char*));
+
+		ret[0] 		= NULL;
+		ret[1] 		= NULL;
+
+		while(!feof(fp))
+		{
+			st = fgetc(fp);
+
+			if(st == '\n')
+			{
+				if(!(strcmp(option, "\0")) 	/* blank line */
+				||(option[0] == ' ')
+				||(option[0] == '\t')
+				||(option[0] == '#'))		/* comment */
+					goto new_option;
+
+				char* str = strsep(&option, "=");
+
+				if(!(strcmp(str, "color")))
+					ret[0] = strsep(&option, "=");
+
+				else if(!(strcmp(str, "verbose")))
+					ret[1] = strsep(&option, "=");
+				else
+				{
+					printf("unknown option: %s\n", str);
+					exit(EXIT_FAILURE);
+				}
+
+				new_option:
+				free(option);
+				size 	= 1;
+				option 	= calloc(size, sizeof(char));
+			}
+			else
+			{
+				option[size - 1] = st;
+				option 		 = realloc(option, ++size * sizeof(char));
+			}
+		}
+
+		fclose(fp);
+		return ret;
+	}
+	else
+		return NULL;
 }
 
 int 
