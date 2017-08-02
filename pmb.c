@@ -269,9 +269,12 @@ help()
 		"\t\t[t]ag\t\t= tag to search in bookmark database\n"
 		"\t\t[e]xport\t= export result to [db]\n"
 		"\t\t[d]elete\t= delete results\n\n"
+		"\t\t[f]field\t= printf only specified field\n\n"
 		"\t\texample: pmb -s linux\n"
 		"\t\t         pmb -s name=linux\n"
-		"\t\t         pmb -s linux,d\n\n");
+		"\t\t         pmb -s name=linux,e=another.db\n"
+		"\t\t         pmb -s linux,d\n\n"
+		"\t\t         pmb -s linux,field=url\n\n");
 
 	printf("\t-c | --color\t\tcolored output\n");
 
@@ -857,6 +860,7 @@ search(char* optarg)
 		char*	subopts	= optarg;
 		char*	value 	= NULL;
 		char*	export	= NULL;
+		char*	field	= NULL;
 
 		bookmark_list* bl = NULL;
 		enum 
@@ -873,6 +877,8 @@ search(char* optarg)
 			,sexport_option
 			,delete_option
 			,sdelete_option
+			,field_option
+			,sfield_option
 		};
 
 		char* const sub_options[] = 
@@ -889,6 +895,8 @@ search(char* optarg)
 			,[sexport_option]	= "e"
 			,[delete_option] 	= "delete"
 			,[sdelete_option]	= "d"
+			,[field_option]		= "field"
+			,[sfield_option]	= "f"
 			,NULL
 		};
 
@@ -939,6 +947,14 @@ search(char* optarg)
 				case sdelete_option:
 					del = 1;
 					break;		
+				case field_option:
+				case sfield_option:
+					if(value)
+						field = value;
+					else
+						printf("search field needs an argument\n");
+
+					break;		
 				default:
 					if(value) 
 						bl = bookmark_db_search(db, NULL, value);
@@ -950,7 +966,32 @@ search(char* optarg)
 
 		if(bl) 
 		{
-			bookmark_print(bl, 0);
+			int f = 0;
+
+			if(field)
+			{
+				if(!strncmp(field, ID, strlen(ID)) 
+				||(!strncmp(field, "i", 1))) 
+					f = 1;
+
+				if(!strncmp(field, NAME, strlen(NAME)) 
+				||(!strncmp(field, "n", 1))) 
+					f = 2;
+
+				if(!strncmp(field, URL, strlen(URL)) 
+				||(!strncmp(field, "u", 1))) 
+					f = 3;
+
+				if(!strncmp(field, COMMENT, strlen(COMMENT)) 
+				||(!strncmp(field, "c", 1))) 
+					f = 4;
+
+				if(!strncmp(field, TAG, strlen(TAG)) 
+				||(!strncmp(field, "t", 1))) 
+					f = 5;
+			}
+
+			bookmark_print(bl, f);
 
 			if(export)
 			{
@@ -1521,6 +1562,7 @@ read_config(char* filename)
 			{
 				option[size - 1] = st;
 				option 		 = realloc(option, ++size * sizeof(char));
+				option[size - 1] = '\0';
 			}
 		}
 
