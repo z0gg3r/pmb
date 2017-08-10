@@ -7,6 +7,7 @@ DEST_DIR=/usr/local/bin
 
 # source files
 PMB=pmb
+PARSER=parser
 BOOKMARK=bookmark
 GPMB=gpmb
 
@@ -18,7 +19,8 @@ GPMB=gpmb
 
 default:
 	$(CC) $(CCFLAGS) -c $(BOOKMARK).c $(bflags)
-	$(CC) $(CCFLAGS) $(BOOKMARK).o $(PMB).c -o $(PMB) $(pflags)
+	$(CC) $(CCFLAGS) -c $(PARSER).c 
+	$(CC) $(CCFLAGS) $(BOOKMARK).o $(PARSER).o $(PMB).c -o $(PMB) $(pflags)
 	#$(CC) $(CCFLAGS) $(GTKFLAGS) $(BOOKMARK).o $(GPMB).c -o $(GPMB) $(gflags)
 
 $(BOOKMARK):$(BOOKMARK).c

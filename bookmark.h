@@ -1,10 +1,11 @@
+#ifndef BOOKMARK
+
 #define ID 		"id"
 #define NAME 		"name"
 #define URL 		"url"
 #define COMMENT 	"comment"
 #define TAG 		"tag"
 #define DATABASE 	".bookmarks.db"
-
 #include <sqlite3.h>
 
 typedef struct bookmark bookmark;
@@ -98,3 +99,5 @@ bookmark_list_get_position(bookmark_list*);
 void
 bookmark_list_rewind(bookmark_list*);
 
+#define BOOKMARK
+#endif
