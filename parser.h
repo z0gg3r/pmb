@@ -47,8 +47,6 @@ cl_option_list
 	cl_option** 	opt;
 } cl_option_list;
 
-/* internal */
-
 /* -- create an option structure's */
 cl_option*
 create_option(int(*)(char*), char*);
@@ -139,3 +137,4 @@ version();
 
 #define PARSER
 #endif
+

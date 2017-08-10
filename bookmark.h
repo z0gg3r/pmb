@@ -6,6 +6,7 @@
 #define COMMENT 	"comment"
 #define TAG 		"tag"
 #define DATABASE 	".bookmarks.db"
+
 #include <sqlite3.h>
 
 typedef struct bookmark bookmark;

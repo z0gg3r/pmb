@@ -352,6 +352,49 @@ bookmark_print_html(bookmark_list* bl)
 	return 1;
 }
 
+char* 
+find_color(char* color)
+{
+	if((!strcmp(color, "red")
+	||(!strcmp(color, "Red"))))
+		return red;
+
+	else if((!strcmp(color, "blue")
+	||(!strcmp(color, "Blue"))))
+		return blue;
+
+	else if((!strcmp(color, "cyan")
+	||(!strcmp(color, "Cyan"))))
+		return cyan;
+
+	else if((!strcmp(color, "green")
+	||(!strcmp(color, "Green"))))
+		return green;
+		
+	else if((!strcmp(color, "reset")
+	||(!strcmp(color, "Reset"))))
+		return reset;
+
+	else if((!strcmp(color, "white")
+	||(!strcmp(color, "White"))))
+		return white;
+
+	else if((!strcmp(color, "magenta")
+	||(!strcmp(color, "Magenta"))))
+		return magenta;
+
+	else if((!strcmp(color, "gray")
+	||(!strcmp(color, "Gray"))))
+		return gray;
+
+	else if((!strcmp(color, "yellow")
+	||(!strcmp(color, "Yellow"))))
+		return yellow;
+
+	else
+		return reset;
+}
+
 int
 parse_config_file(char* optarg)
 {
@@ -389,6 +432,22 @@ parse_config_file(char* optarg)
 				exit(EXIT_FAILURE);
 			}
 		}
+
+		if(res[2])
+			id_color 	= find_color(res[2]);
+
+		if(res[3])
+			name_color 	= find_color(res[3]);
+
+		if(res[4])
+			url_color 	= find_color(res[4]);
+
+		if(res[5])
+			comment_color 	= find_color(res[5]);
+
+		if(res[6])
+			tag_color 	= find_color(res[6]);
+
 	}
 	else
 		return 1;
@@ -1245,49 +1304,6 @@ html(char* optarg)
 	return 0;
 }
 
-char* 
-find_color(char* color)
-{
-	if((!strcmp(color, "red")
-	||(!strcmp(color, "Red"))))
-		return red;
-
-	else if((!strcmp(color, "blue")
-	||(!strcmp(color, "Blue"))))
-		return blue;
-
-	else if((!strcmp(color, "cyan")
-	||(!strcmp(color, "Cyan"))))
-		return cyan;
-
-	else if((!strcmp(color, "green")
-	||(!strcmp(color, "Green"))))
-		return green;
-		
-	else if((!strcmp(color, "reset")
-	||(!strcmp(color, "Reset"))))
-		return reset;
-
-	else if((!strcmp(color, "white")
-	||(!strcmp(color, "White"))))
-		return white;
-
-	else if((!strcmp(color, "magenta")
-	||(!strcmp(color, "Magenta"))))
-		return magenta;
-
-	else if((!strcmp(color, "gray")
-	||(!strcmp(color, "Gray"))))
-		return gray;
-
-	else if((!strcmp(color, "yellow")
-	||(!strcmp(color, "Yellow"))))
-		return yellow;
-
-	else
-		return reset;
-}
-
 int
 color_list(char* optarg)
 {
@@ -1543,7 +1559,7 @@ read_config(char* filename)
 	{
 		int 	size 	= 1;
 		char*	option 	= calloc(size, sizeof(char));
-		char** 	ret 	= calloc(2, sizeof(char*));
+		char** 	ret 	= calloc(7, sizeof(char*));
 
 		ret[0] 		= NULL;
 		ret[1] 		= NULL;
@@ -1567,6 +1583,22 @@ read_config(char* filename)
 
 				else if(!(strcmp(str, "verbose")))
 					ret[1] = strsep(&option, "=");
+
+				else if(!(strcmp(str, "id_color")))
+					ret[2] = strsep(&option, "=");
+
+				else if(!(strcmp(str, "name_color")))
+					ret[3] = strsep(&option, "=");
+
+				else if(!(strcmp(str, "url_color")))
+					ret[4] = strsep(&option, "=");
+
+				else if(!(strcmp(str, "comment_color")))
+					ret[5] = strsep(&option, "=");
+
+				else if(!(strcmp(str, "tag_color")))
+					ret[6] = strsep(&option, "=");
+
 				else
 				{
 					printf("unknown option: %s\n", str);
@@ -1602,3 +1634,4 @@ exec_option(cl_option_list* option)
 		opt->func(opt->optarg);
 	}
 }
+
