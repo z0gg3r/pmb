@@ -155,13 +155,20 @@ help()
 		"\t\t[c]omment\t= comment to search in bookmark database\n"
 		"\t\t[t]ag\t\t= tag to search in bookmark database\n"
 		"\t\t[e]xport\t= export result to [db]\n"
-		"\t\t[d]elete\t= delete results\n\n"
+		"\t\t[d]elete\t= delete results\n"
 		"\t\t[f]field\t= printf only specified field\n\n"
 		"\t\texample: pmb -s linux\n"
 		"\t\t         pmb -s name=linux\n"
 		"\t\t         pmb -s name=linux,e=another.db\n"
 		"\t\t         pmb -s linux,d\n\n"
 		"\t\t         pmb -s linux,field=url\n\n");
+
+	printf("\t-l | --colors\n"
+		"\t\t[n]ame\t\t= name color\n"
+		"\t\t[u]rl\t\t= url color\n"
+		"\t\t[c]omment\t= comment color\n"
+		"\t\t[t]ag\t\t= tag color\n\n"
+		"\t\texample: pmb s programming -l n=red\n\n");
 
 	printf("\t-c | --color\t\tcolored output\n");
 
@@ -1416,7 +1423,7 @@ parse_options(int argc, char* argv[], cl_option_list* option
 	{
 		{"add", 	1, 0, 'a'}
 		,{"color", 	0, 0, 'c'}
-		,{"color-list",	1, 0, 'l'}
+		,{"colors",	1, 0, 'l'}
 		,{"config", 	1, 0, 'C'}
 		,{"delete", 	1, 0, 'd'}
 		,{"edit", 	1, 0, 'e'}

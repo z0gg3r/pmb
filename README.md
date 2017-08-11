@@ -113,8 +113,12 @@ bookmarks easily.
 
 	Adding -c will make search output and print output colored.	
 
-*Load a config file.*
+	You can also set the colors with -l [--colors]
 
+	pmb -s xyz -l comment=red
+
+*Load a config file.*
+	
 	pmb -C ~/.my_config_file.conf
 
 	pmb will automatically look for ~/.pmb.conf file.
