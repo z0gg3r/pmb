@@ -51,6 +51,32 @@ main(int argc, char *argv[])
 			exit(EXIT_FAILURE);
 	}
 
+	/* testing the tree */
+	/*
+	bookmark_i* 	b 	= NULL;
+	bookmark_list* 	bl 	= bookmark_db_query(db, 0, NULL);
+	directory* 	d 	= directory_create("root");	
+	directory*	ret	= NULL;
+
+	for(int i = 0; i < bookmark_list_get_size(bl) - 1; ++i) 
+	{
+		b = bookmark_return_next(bl);
+		directory_add_children_from_list(d, (dismember(b)), b);
+	}
+
+	directory_rewind(d);
+
+	while((ret = directory_return_next_children(d)))
+	{
+		printf("%s\n", directory_name(ret));
+	}
+
+	bookmark_i_destroy(b);
+	bookmark_list_destroy(bl);
+	directory_destroy(ret);
+	directory_destroy(d);
+	*/
+
 	exec_option(command);
 	destroy_option_list(option);
 	destroy_option_list(command);

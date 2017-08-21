@@ -304,6 +304,25 @@ bookmark_list_return_next(bookmark_list* l)
 		return NULL;
 }
 
+bookmark_i*
+bookmark_return_next(bookmark_list* l) 
+{
+	if(l->next < l->size) 
+	{
+		bookmark_i* b 	= bookmark_i_create();
+		b->id 		= l->id[l->next];
+		b->name 	= l->name[l->next];
+		b->url 		= l->url[l->next];
+		b->comment	= l->comment[l->next];
+		b->tag		= l->tag[l->next];
+
+		l->next++;
+		return b;
+	}
+	else
+		return NULL;
+}
+
 void
 bookmark_list_rewind(bookmark_list* l) 
 {
@@ -400,6 +419,35 @@ bookmark_add(bookmark* b, char* name, char* url, char* comment, char* tag)
 		return 1;
 
 	return 0;
+}
+
+bookmark_i*
+bookmark_i_create()
+{
+	bookmark_i* b = malloc(sizeof(bookmark_i));
+	
+	if(b) 
+	{
+		b->id		= NULL;
+		b->name		= NULL;
+		b->url 		= NULL;
+		b->comment 	= "none";
+		b->tag 		= "none";
+
+		return b;
+	} 
+	else 
+		return NULL;
+}
+
+void 
+bookmark_i_destroy(bookmark_i* b) 
+{
+	if(b) 
+	{
+		free(b);
+		b = NULL;
+	}
 }
 
 int 

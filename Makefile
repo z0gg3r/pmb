@@ -8,7 +8,9 @@ DEST_DIR=/usr/local/bin
 # source files
 PMB=pmb
 PARSER=parser
+OPTION=option
 BOOKMARK=bookmark
+TREE=tree
 GPMB=gpmb
 
 # recipes
@@ -20,7 +22,9 @@ GPMB=gpmb
 default:
 	$(CC) $(CCFLAGS) -c $(BOOKMARK).c $(bflags)
 	$(CC) $(CCFLAGS) -c $(PARSER).c 
-	$(CC) $(CCFLAGS) $(BOOKMARK).o $(PARSER).o $(PMB).c -o $(PMB) $(pflags)
+	$(CC) $(CCFLAGS) -c $(OPTION).c 
+	$(CC) $(CCFLAGS) -c $(TREE).c 
+	$(CC) $(CCFLAGS) $(BOOKMARK).o $(PARSER).o $(OPTION).o $(TREE).o $(PMB).c -o $(PMB) $(pflags)
 	#$(CC) $(CCFLAGS) $(GTKFLAGS) $(BOOKMARK).o $(GPMB).c -o $(GPMB) $(gflags)
 
 $(BOOKMARK):$(BOOKMARK).c

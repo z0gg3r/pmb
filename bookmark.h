@@ -1,4 +1,4 @@
-#ifndef BOOKMARK
+#ifndef BOOKMARK_H
 
 #define ID 		"id"
 #define NAME 		"name"
@@ -9,7 +9,21 @@
 
 #include <sqlite3.h>
 
+/* bookmarks to add */
 typedef struct bookmark bookmark;
+
+/* bookmark that came from database */
+typedef struct bookmark_i
+{
+	char* id;
+	char* name;
+	char* url;
+	char* comment;
+	char* tag;
+
+} bookmark_i;
+
+/* list of bookmarks that came from database */
 typedef struct bookmark_list bookmark_list;
 
 char* date(char*, int);
@@ -100,5 +114,14 @@ bookmark_list_get_position(bookmark_list*);
 void
 bookmark_list_rewind(bookmark_list*);
 
-#define BOOKMARK
+bookmark_i*
+bookmark_i_create();
+
+void
+bookmark_i_destroy(bookmark_i*);
+
+bookmark_i*
+bookmark_return_next(bookmark_list*);
+
+#define BOOKMARK_H
 #endif

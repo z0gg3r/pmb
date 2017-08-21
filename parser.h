@@ -1,4 +1,4 @@
-#ifndef PARSER
+#ifndef PARSER_H
 
 #define _GNU_SOURCE 	/* getsubopt, secure_getenv */
 #define VERSION 	"0.0.1"
@@ -11,6 +11,8 @@
 #include <limits.h>
 #include <stdlib.h>
 #include "bookmark.h"
+#include "option.h"
+#include "tree.h"
 
 extern char* red;
 extern char* green;
@@ -31,45 +33,6 @@ extern char* tag_color;
 extern short	color;
 extern short	verbose;
 extern sqlite3* db;
-
-typedef struct 
-cl_option
-{
-	int	(*func)(char*); 
-	char* 	optarg;
-} cl_option;
-
-typedef struct 
-cl_option_list 
-{
-	int 		size;
-	int 		position;
-	cl_option** 	opt;
-} cl_option_list;
-
-/* -- create an option structure's */
-cl_option*
-create_option(int(*)(char*), char*);
-
-/* -- destroy option structure's */
-int
-destroy_option(cl_option*);
-
-/* -- destroy option list's */
-int
-destroy_option_list(cl_option_list*);
-
-/* used to exec parsed options */
-void
-exec_option(cl_option_list*);
-
-/* -- create option list's */
-cl_option_list*
-option_list_create();
-
-/* -- add option to option list */
-int
-option_list_add(cl_option_list*, cl_option*);
 
 /* read config file */
 char**
@@ -135,6 +98,6 @@ set_verbose(char*);
 void 
 version();
 
-#define PARSER
+#define PARSER_H
 #endif
 

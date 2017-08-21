@@ -174,7 +174,7 @@ read_options()
 }
 
 static void 
-add_bookmark(GtkWidget *button, gpointer **args) 
+add_bookmark(GtkWidget* button, gpointer** args) 
 {
 	char* name 	= NULL;
 	char* url 	= NULL;
@@ -302,7 +302,7 @@ add_window(GtkWidget* button, gpointer main_window)
 }
 
 static void
-delete_bookmark(GtkWidget *button, gpointer **args) 
+delete_bookmark(GtkWidget* button, gpointer** args) 
 {
 	char*  url 	= NULL;
 	char** result;
@@ -885,7 +885,6 @@ read_database(GtkWidget* button, gpointer** args)
 					,result[2]
 					,result[3]
 					,result[4]);
-
 		}
 
 		if(result) 
