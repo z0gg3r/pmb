@@ -9,21 +9,7 @@
 
 #include <sqlite3.h>
 
-/* bookmarks to add */
 typedef struct bookmark bookmark;
-
-/* bookmark that came from database */
-typedef struct bookmark_i
-{
-	char* id;
-	char* name;
-	char* url;
-	char* comment;
-	char* tag;
-
-} bookmark_i;
-
-/* list of bookmarks that came from database */
 typedef struct bookmark_list bookmark_list;
 
 char* date(char*, int);
@@ -35,6 +21,38 @@ bookmark_create();
 /* -- destroy a bookmark object */
 void 
 bookmark_destroy(bookmark*);
+
+/* -- return bookmark id -- */
+char*
+bookmark_id(bookmark*);
+
+/* -- return bookmark name -- */
+char*
+bookmark_name(bookmark*);
+
+/* -- return bookmark url -- */
+char*
+bookmark_url(bookmark*);
+
+/* -- return bookmark comment -- */
+char*
+bookmark_comment(bookmark*);
+
+/* -- return bookmark tag -- */
+char*
+bookmark_tag(bookmark*);
+
+int
+bookmark_set_name(bookmark*, char*);
+
+int
+bookmark_set_url(bookmark*, char*);
+
+int
+bookmark_set_comment(bookmark*, char*);
+
+int
+bookmark_set_tag(bookmark*, char*);
 
 /* bookmark *b, char *name, char *url, char *comment, char *tag */
 int 
@@ -64,7 +82,7 @@ bookmark_db_delete(sqlite3*, int);
 /* -- delete all bookmarks tagged with char* tag */
 /* -- if int greedy = 1, it will delete any tag containing 
 	the words in char* tag */
-/* sqlite3 database, char* tag, int greedy */
+/* sqlite3* database, char* tag, int greedy */
 int
 bookmark_db_delete_tag(sqlite3*, char*, int);
 
@@ -72,8 +90,8 @@ bookmark_db_delete_tag(sqlite3*, char*, int);
 int 
 bookmark_db_edit(sqlite3*, int, int, char*);
 
-/* sqlite3 database, int database field/column, char *current value
- 	,char *new value */
+/* sqlite3* database, int database field/column, char* current value
+ 	,char* new value */
 int 
 bookmark_db_edit_bulk(sqlite3*, int, char*, char*);
 
@@ -98,6 +116,9 @@ bookmark_list_dequeue(bookmark_list*);
 char** 
 bookmark_list_return_next(bookmark_list*);
 
+bookmark*
+bookmark_list_return_next_bookmark(bookmark_list*);
+
 /* -- get next position */
 int 
 bookmark_list_get_next_position(bookmark_list*);
@@ -113,15 +134,6 @@ bookmark_list_get_position(bookmark_list*);
 /* -- rewind a bookark list to position 0 */
 void
 bookmark_list_rewind(bookmark_list*);
-
-bookmark_i*
-bookmark_i_create();
-
-void
-bookmark_i_destroy(bookmark_i*);
-
-bookmark_i*
-bookmark_return_next(bookmark_list*);
 
 #define BOOKMARK_H
 #endif

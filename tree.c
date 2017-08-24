@@ -4,11 +4,11 @@ struct
 directory
 {
 	int			n_children;
-	int			n_bookmark_i;
+	int			n_bookmark;
 	int			children_position;
-	int			bookmark_i_position;
+	int			bookmark_position;
 	char*			name;
-	bookmark_i** 		bookmark_i;
+	bookmark** 		bookmark;
 	struct directory** 	children;
 };
 
@@ -26,14 +26,14 @@ directory_create(char* name)
 	directory* d 		= malloc(sizeof(directory));
 
 	d->n_children 		= 0;
-	d->n_bookmark_i 		= 0;
+	d->n_bookmark 		= 0;
 	d->children_position 	= 0;
-	d->bookmark_i_position 	= 0;
+	d->bookmark_position 	= 0;
 	d->name			= name;
-	d->bookmark_i 		= calloc(1, sizeof(bookmark_i));
-	d->children		= calloc(1, sizeof(directory));
+	d->bookmark 		= calloc(1, sizeof(bookmark*));
+	d->children		= calloc(1, sizeof(directory*));
 	
-	d->bookmark_i[0]		= NULL;
+	d->bookmark[0]		= NULL;
 	d->children[0]		= NULL;
 	return d;
 }
@@ -47,6 +47,42 @@ directory_name(directory* d)
 		return NULL;
 }
 
+int
+directory_childrens(directory* d)
+{
+	if(d)
+		return d->n_children;
+	else
+		return 0;
+}
+
+int
+directory_children_position(directory* d)
+{
+	if(d)
+		return d->children_position;
+	else
+		return 0;
+}
+
+int
+directory_bookmarks(directory* d)
+{
+	if(d)
+		return d->n_bookmark;
+	else
+		return 0;
+}
+
+int
+directory_bookmark_position(directory* d)
+{
+	if(d)
+		return d->bookmark_position;
+	else
+		return 0;
+}
+
 void
 directory_children_rewind(directory* d)
 {
@@ -58,7 +94,7 @@ void
 directory_bookmark_rewind(directory* d)
 {
 	if(d)
-		d->bookmark_i_position = 0;
+		d->bookmark_position = 0;
 }
 
 void
@@ -67,7 +103,7 @@ directory_rewind(directory* d)
 	if(d)
 	{
 		d->children_position = 0;
-		d->bookmark_i_position = 0;
+		d->bookmark_position = 0;
 	}
 }
 
@@ -83,13 +119,13 @@ directory_return_next_children(directory* d)
 		return NULL;
 }
 
-bookmark_i*
+bookmark*
 directory_return_next_bookmark(directory* d)
 {
-	if(d && d->bookmark_i_position <= d->n_bookmark_i)
+	if(d && d->bookmark_position <= d->n_bookmark)
 	{
-		d->bookmark_i_position++;
-		return d->bookmark_i[d->bookmark_i_position - 1];
+		d->bookmark_position++;
+		return d->bookmark[d->bookmark_position - 1];
 	}
 	else
 		return NULL;
@@ -102,16 +138,16 @@ directory_destroy(directory* d)
 	{
 		directory_rewind(d);
 
-		if(d->n_bookmark_i)
+		if(d->n_bookmark)
 		{
-			bookmark_i* b = NULL;
+			bookmark* b = NULL;
 
 			while((b = directory_return_next_bookmark(d)))
 			{
 				if(b)
 				{
-					free(d->bookmark_i[d->bookmark_i_position]);	
-					d->bookmark_i[d->bookmark_i_position] = NULL;
+					free(d->bookmark[d->bookmark_position]);	
+					d->bookmark[d->bookmark_position] = NULL;
 				}
 			}
 		}
@@ -134,8 +170,8 @@ directory_destroy(directory* d)
 		free(d->children);
 		d->children = NULL;
 
-		free(d->bookmark_i);
-		d->bookmark_i = NULL;
+		free(d->bookmark);
+		d->bookmark = NULL;
 
 		free(d);
 		d = NULL;
@@ -156,15 +192,15 @@ directory_add_children(directory* d, directory* children)
 }
 
 void
-directory_add_bookmark(directory* d, bookmark_i* b)
+directory_add_bookmark(directory* d, bookmark* b)
 {
 	if(d && b)
 	{
-		d->bookmark_i[d->n_bookmark_i] 	= b;
-		d->n_bookmark_i++;
-		d->bookmark_i 			= realloc(d->bookmark_i
-							,(d->n_bookmark_i + 1) * sizeof(bookmark_i));
-		d->bookmark_i[d->n_bookmark_i] 	= NULL;
+		d->bookmark[d->n_bookmark] 	= b;
+		d->n_bookmark++;
+		d->bookmark 			= realloc(d->bookmark
+							,(d->n_bookmark + 1) * sizeof(bookmark*));
+		d->bookmark[d->n_bookmark] 	= NULL;
 	}
 }
 
@@ -183,8 +219,6 @@ directory_delete_children(directory* d, int index)
 
 		while((ret = directory_return_next_children(d)))
 		{
-			//printf("-> %d, %s\n", d->n_children, directory_name(ret));
-		
 			if(ret)
 			{
 				printf("i'm there\n");
@@ -209,25 +243,25 @@ directory_delete_bookmark(directory* d, int index)
 {
 	if(d && index <= d->n_children)
 	{
-		free(d->bookmark_i[index]);
-		d->bookmark_i[index] = NULL;
+		free(d->bookmark[index]);
+		d->bookmark[index] = NULL;
 
 		int i, j = 0;
-		bookmark_i** new_bookmark_i = calloc(d->n_bookmark_i, sizeof(bookmark_i*));
+		bookmark** new_bookmark = calloc(d->n_bookmark, sizeof(bookmark*));
 
-		for(i = 0; i < d->n_bookmark_i; ++i)
+		for(i = 0; i < d->n_bookmark; ++i)
 		{
-			if(d->bookmark_i[i])
+			if(d->bookmark[i])
 			{
-				new_bookmark_i[j] = d->bookmark_i[i];
-				free(d->bookmark_i[i]);
+				new_bookmark[j] = d->bookmark[i];
+				free(d->bookmark[i]);
 				++j;
 			}
 		}
 
-		free(d->bookmark_i);
-		d->bookmark_i = new_bookmark_i;
-		d->n_bookmark_i--;
+		free(d->bookmark);
+		d->bookmark = new_bookmark;
+		d->n_bookmark--;
 		directory_rewind(d);
 		return 0;
 	}
@@ -264,20 +298,18 @@ directory_contain_children(directory* d, char* children)
 	return NULL;
 }
 
-bookmark_i*
+bookmark*
 directory_contain_bookmark(directory* d, int id)
 {
 	if(d && id)
 	{
-		printf("%s\n", directory_name(d));
 		directory* 	ret 	= NULL;
-		bookmark_i*	b	= NULL;
+		bookmark*	b	= NULL;
 
 		directory_rewind(d);
-		//printf("container:: %s\n", directory_name(d));
 
 		while((b = directory_return_next_bookmark(d)))
-			if(b && id == (strtol(b->id, NULL, 10)))
+			if(b && id == (strtol((bookmark_id(b)), NULL, 10)))
 				return b;
 
 		while((ret = directory_return_next_children(d)))
@@ -287,8 +319,6 @@ directory_contain_bookmark(directory* d, int id)
 
 	return NULL;
 }
-
-
 
 directory_name_list*
 directory_name_list_create()
@@ -311,6 +341,24 @@ directory_name_list_destroy(directory_name_list* d)
 		free(d->list);
 		free(d);
 	}
+}
+
+int
+directory_name_list_size(directory_name_list* l)
+{
+	if(l)
+		return l->size;
+
+	return 0;
+}
+
+int
+directory_name_list_position(directory_name_list* l)
+{
+	if(l)
+		return l->position;
+
+	return 0;
 }
 
 void
@@ -337,6 +385,15 @@ directory_name_list_return_next(directory_name_list* d)
 		return NULL;
 }
 
+char*
+directory_name_list_return_last(directory_name_list* d)
+{
+	if(d && d->size)
+		return d->list[d->size - 1];
+	else
+		return NULL;
+}
+
 void
 directory_name_list_rewind(directory_name_list* d)
 {
@@ -345,15 +402,15 @@ directory_name_list_rewind(directory_name_list* d)
 }
 
 directory_name_list*
-dismember(bookmark_i* b)
+dismember(bookmark* b)
 {
 	if(b)
 	{
 		char* 			name;
-		char* 			path 	= malloc(strlen(b->tag) * sizeof(char));
+		char* 			path 	= malloc(strlen((bookmark_tag(b))) * sizeof(char));
 		directory_name_list* 	l	= directory_name_list_create();
 
-		strcpy(path, b->tag);
+		strcpy(path, (bookmark_tag(b)));
 
 		while((name = strsep(&path, "/")))
 			directory_name_list_add_dir(l, name);
@@ -381,7 +438,7 @@ directory_name_list_pop(directory_name_list* l)
 }
 
 directory**
-create_directory_tree_from_list(directory_name_list *l, int index)
+create_directory_tree_from_list(directory_name_list* l, int index)
 {
 	if(l)
 	{
@@ -415,7 +472,7 @@ create_directory_tree_from_list(directory_name_list *l, int index)
 }
 
 void
-directory_add_children_from_list(directory* d, directory_name_list* l, bookmark_i* b)
+directory_add_children_from_list(directory* d, directory_name_list* l, bookmark* b)
 {
 	if(d && l && b)
 	{
@@ -462,8 +519,6 @@ directory_delete_last_children_from_list(directory* d, directory_name_list* l)
 		if(child)
 		{
 			char* last = l->list[l->size - 1];
-
-			//printf("%s, %s\n", last, directory_name(d->children[d->children_position - 1]));
 
 			if(!(strcmp(last, directory_name(d->children[d->children_position - 1]))))
 			{

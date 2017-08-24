@@ -30,6 +30,7 @@ char* date(char* buffer, int bufsize)
 struct 
 bookmark 
 {
+	char* id;
 	char* name;
 	char* url;
 	char* comment;
@@ -304,12 +305,12 @@ bookmark_list_return_next(bookmark_list* l)
 		return NULL;
 }
 
-bookmark_i*
-bookmark_return_next(bookmark_list* l) 
+bookmark*
+bookmark_list_return_next_bookmark(bookmark_list* l) 
 {
 	if(l->next < l->size) 
 	{
-		bookmark_i* b 	= bookmark_i_create();
+		bookmark* b 	= bookmark_create();
 		b->id 		= l->id[l->next];
 		b->name 	= l->name[l->next];
 		b->url 		= l->url[l->next];
@@ -363,6 +364,8 @@ bookmark_create(char* name, char* url, char* comment, char* tag)
 	
 	if(b) 
 	{
+		b->id	= NULL;
+
 		if(name)
 			b->name = name;
 		else
@@ -421,33 +424,97 @@ bookmark_add(bookmark* b, char* name, char* url, char* comment, char* tag)
 	return 0;
 }
 
-bookmark_i*
-bookmark_i_create()
+char*
+bookmark_id(bookmark* b)
 {
-	bookmark_i* b = malloc(sizeof(bookmark_i));
-	
-	if(b) 
-	{
-		b->id		= NULL;
-		b->name		= NULL;
-		b->url 		= NULL;
-		b->comment 	= "none";
-		b->tag 		= "none";
-
-		return b;
-	} 
-	else 
+	if(b && b->id)
+		return b->id;
+	else
 		return NULL;
 }
 
-void 
-bookmark_i_destroy(bookmark_i* b) 
+char*
+bookmark_name(bookmark* b)
 {
-	if(b) 
+	if(b && b->name)
+		return b->name;
+	else
+		return NULL;
+}
+
+char*
+bookmark_url(bookmark* b)
+{
+	if(b && b->url)
+		return b->url;
+	else
+		return NULL;
+}
+
+char*
+bookmark_comment(bookmark* b)
+{
+	if(b && b->comment)
+		return b->comment;
+	else
+		return NULL;
+}
+
+char*
+bookmark_tag(bookmark* b)
+{
+	if(b && b->tag)
+		return b->tag;
+	else
+		return NULL;
+}
+
+int
+bookmark_set_name(bookmark* b, char* name)
+{
+	if(b && name)
 	{
-		free(b);
-		b = NULL;
+		b->name = name;
+		return 0;
 	}
+
+	return 1;
+}
+
+int
+bookmark_set_url(bookmark* b, char* url)
+{
+	if(b && url)
+	{
+		b->url = url;
+		return 0;
+	}
+
+	return 1;
+}
+
+int
+bookmark_set_comment(bookmark* b, char* comment)
+{
+	if(b && comment)
+	{
+		b->comment = comment;
+		return 0;
+	}
+
+	return 1;
+}
+
+int
+bookmark_set_tag(bookmark* b, char* tag)
+{
+	if(b && tag)
+	{
+		b->tag = tag;
+		return 0;
+	}
+
+	return 1;
 }
 
 int 
@@ -485,7 +552,7 @@ bookmark_db_open(char *db_name)
 		if(r) 
 			return NULL;
 
-		else /* we going to verify if table bookmark exist on db */
+		else /* verify if table bookmark exist on db */
 		{
 			int 		step;
 			sqlite3_stmt* 	res;
@@ -499,7 +566,7 @@ bookmark_db_open(char *db_name)
 				step = sqlite3_step(res);
 				sqlite3_finalize(res);
 
-				/* the table do not exist, create */
+				/* if not, create */
 				if(step != SQLITE_ROW) 
 				{
 					rc = bookmark_db_table_create(db);
