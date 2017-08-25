@@ -42,9 +42,7 @@ test_tree()
 		b = NULL;
 
 		if((b = directory_contain_bookmark(root, 20)))
-		{
 			printf("%s\n", bookmark_name(b));
-		}
 
 		/* rename bookmark */
 		bookmark_set_name(b, "new value");
@@ -52,14 +50,12 @@ test_tree()
 		b = NULL;
 
 		if((b = directory_contain_bookmark(root, 20)))
-		{
 			printf("%s\n", bookmark_name(b));
-		}
 
 		/* rename children */
-		directory_name_list *l = dismember(b);
+		directory_name_list* l = dismember(b);
 		directory_edit_name_from_list(root, directory_name_list_return_last(l), "new_name", l);
-		print_path(r);
+		print_path(root);
 
 		bookmark_destroy(b);
 		bookmark_list_destroy(bl);
