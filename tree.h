@@ -172,6 +172,11 @@ directory_move_children(directory*, directory*, char*);
 void
 directory_move_children_all(directory*, directory*);
 
+/* -- make a tree from bookmark_list content -- */
+/* bookmark_list* bl, char* name */
+directory*
+make_tree_from_bookmark_list(bookmark_list*, char*);
+
 #define TREE_H
 #endif
 

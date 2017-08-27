@@ -16,8 +16,8 @@ char* url_color;
 char* comment_color;
 char* tag_color;
 
-short color 	= 0;
-short verbose	= 0;
+int color 	= 0;
+int verbose	= 0;
 sqlite3* db 	= NULL;
 
 void 
@@ -124,7 +124,24 @@ bookmark_print(bookmark_list* bl, int field)
 	{
 		char** result = bookmark_list_return_next(bl);
 
-		if(!field) 
+		if(field)
+		{
+			if(field == 1) 
+				bookmark_print_field(i, result[0]);
+
+			if(field == 2) 
+				bookmark_print_field(i, result[1]);
+
+			if(field == 3) 
+				bookmark_print_field(i, result[2]);
+
+			if(field == 4) 
+				bookmark_print_field(i, result[3]);
+
+			if(field == 5) 
+				bookmark_print_field(i, result[4]);
+		}
+		else 
 		{
 			if(verbose)
 			{
@@ -171,26 +188,11 @@ bookmark_print(bookmark_list* bl, int field)
 						,result[4]);
 			}
 		}
-
-		if(field == 1) 
-			bookmark_print_field(i, result[0]);
-
-		if(field == 2) 
-			bookmark_print_field(i, result[1]);
-
-		if(field == 3) 
-			bookmark_print_field(i, result[2]);
-
-		if(field == 4) 
-			bookmark_print_field(i, result[3]);
-
-		if(field == 5) 
-			bookmark_print_field(i, result[4]);
 	}
 }
 
 int
-bookmark_print_html(bookmark_list* bl) 
+bookmark_print_html_bkp(bookmark_list* bl) 
 {
 	if(bl) 
 	{
@@ -261,6 +263,114 @@ bookmark_print_html(bookmark_list* bl)
 			,date(buff, 50), i + 1);
 
 		printf("</body></html>\n");
+		return 0;
+	}
+
+	return 1;
+}
+
+void
+html_tree_table_row(directory* d, int depth)
+{
+	if(d)
+	{
+		printf("<tr>\n");
+
+		for(int i = 0; i < depth; ++i)
+			printf("<td></td>\n");
+
+		printf("<td><span style='color:brown;'>"
+			"%s</span></td>\n"
+			,directory_name(d));
+
+		printf("</tr>\n");
+
+		bookmark* b = NULL;
+
+		while((b = directory_return_next_bookmark(d)))
+		{
+			printf("<tr>\n");
+
+			for(int i = 0; i < depth + 1; ++i)
+				printf("<td></td>\n");
+
+			printf("<td><a href=\'%s\'>%s</a></td>\n", bookmark_url(b), bookmark_name(b));
+			bookmark_destroy(b);
+		}
+	}
+}
+
+void
+html_tree_branch(directory* d, int depth)
+{
+	if(d)
+	{
+		directory_rewind(d);
+		directory* ret = NULL;
+
+		html_tree_table_row(d, depth);
+		depth++;
+
+		while((ret = directory_return_next_children(d)))
+		{
+			directory_rewind(ret);
+			html_tree_table_row(ret, depth);
+			directory_rewind(ret);
+			html_tree_branch(directory_return_next_children(ret), depth);
+		}
+
+		directory_destroy(ret);
+	}
+}
+
+int
+bookmark_print_html(bookmark_list* bl) 
+{
+	if(bl) 
+	{
+		bookmark_list* 	bl 	= bookmark_db_query(db, 0, NULL);
+		directory* 	root 	= make_tree_from_bookmark_list(bl, "root");	
+
+		directory* children = NULL;
+		directory_rewind(root);
+
+		printf("<html>\n"
+			"<head>\n"
+			"<meta charset=\'UTF-8\'>\n"
+			"<style>\n"
+			"html, body, table { font-size: 12px; }\n"
+			"h3 { margin: 0; border: 0; color: steelblue; }\n"
+			"</style>\n"
+			"</head>\n"
+			"<body bgcolor=mintcream>\n"
+			"<table>\n");
+
+		html_tree_table_row(root, 0);
+
+		while((children = directory_return_next_children(root)))
+		{
+			directory* ret = NULL;
+			directory_rewind(children);
+			html_tree_table_row(children, 1);
+
+			while((ret = directory_return_next_children(children)))
+				html_tree_branch(ret, 2);
+
+			directory_destroy(ret);
+		}
+
+		char buff[50];
+
+		printf("</table><br />\nGenerated in: "
+			"<span style='color:green;'>%s</span>"
+			,date(buff, 50));
+
+		printf("</body>\n</html>\n");
+
+		directory_destroy(children);
+		directory_destroy(root);
+		bookmark_list_destroy(bl);
+
 		return 0;
 	}
 

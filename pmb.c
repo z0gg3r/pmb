@@ -5,64 +5,6 @@
 
 #include "parser.h"
 
-void
-print_path(directory* d)
-{
-	directory_rewind(d);
-	directory* tmp = d;
-	directory* ret = NULL;
-
-	while((ret = directory_return_next_children(tmp)))
-	{
-		directory_rewind(ret);
-		printf("-> %s\n", directory_name(ret));
-		print_path(ret);
-	}
-}
-
-void 
-test_tree()
-{
-	bookmark* 	b 	= NULL;
-	bookmark_list* 	bl 	= bookmark_db_query(db, 0, NULL);
-	directory* 	root 	= directory_create("root");	
-
-	if(bl && root)
-	{
-		for(int i = 0; i < bookmark_list_get_size(bl) - 1; ++i) 
-		{
-			b = bookmark_list_return_next_bookmark(bl);
-			directory_add_children_from_list(root, (dismember(b)), b);
-		}
-
-		/* print */
-		print_path(root);
-		
-		/* find a bookmark */
-		b = NULL;
-
-		if((b = directory_contain_bookmark(root, 20)))
-			printf("%s\n", bookmark_name(b));
-
-		/* rename bookmark */
-		bookmark_set_name(b, "new value");
-
-		b = NULL;
-
-		if((b = directory_contain_bookmark(root, 20)))
-			printf("%s\n", bookmark_name(b));
-
-		/* rename children */
-		directory_name_list* l = dismember(b);
-		directory_edit_name_from_list(root, directory_name_list_return_last(l), "new_name", l);
-		print_path(root);
-
-		bookmark_destroy(b);
-		bookmark_list_destroy(bl);
-		directory_destroy(root);
-	}
-}
-
 int 
 main(int argc, char *argv[]) 
 {
@@ -108,9 +50,6 @@ main(int argc, char *argv[])
 		else
 			exit(EXIT_FAILURE);
 	}
-
-	/* testing the tree */
-	//test_tree();
 
 	exec_option(command);
 	destroy_option_list(option);

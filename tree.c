@@ -146,7 +146,7 @@ directory_destroy(directory* d)
 			{
 				if(b)
 				{
-					free(d->bookmark[d->bookmark_position]);	
+					free(d->bookmark[d->bookmark_position]);
 					d->bookmark[d->bookmark_position] = NULL;
 				}
 			}
@@ -186,7 +186,8 @@ directory_add_children(directory* d, directory* children)
 		d->children[d->n_children] 	= children;
 		d->n_children++;
 		d->children 			= realloc(d->children
-							,(d->n_children + 1) * sizeof(directory));
+							,(d->n_children + 1) 
+							* sizeof(directory));
 		d->children[d->n_children] 	= NULL;
 	}
 }
@@ -199,7 +200,8 @@ directory_add_bookmark(directory* d, bookmark* b)
 		d->bookmark[d->n_bookmark] 	= b;
 		d->n_bookmark++;
 		d->bookmark 			= realloc(d->bookmark
-							,(d->n_bookmark + 1) * sizeof(bookmark*));
+							,(d->n_bookmark + 1) 
+							* sizeof(bookmark*));
 		d->bookmark[d->n_bookmark] 	= NULL;
 	}
 }
@@ -214,14 +216,14 @@ directory_delete_children(directory* d, int index)
 
 		d->children[index] 		= NULL;
 		directory* 	ret 		= NULL;
-		directory** 	new_children 	= calloc(d->n_children - 1, sizeof(directory*));
+		directory** 	new_children 	= calloc(d->n_children - 1
+							,sizeof(directory*));
 		int 		j 		= 0;
 
 		while((ret = directory_return_next_children(d)))
 		{
 			if(ret)
 			{
-				printf("i'm there\n");
 				new_children[j] = ret;
 				free(d->children[d->children_position]);
 				d->children[d->children_position] = NULL;
@@ -247,7 +249,8 @@ directory_delete_bookmark(directory* d, int index)
 		d->bookmark[index] = NULL;
 
 		int i, j = 0;
-		bookmark** new_bookmark = calloc(d->n_bookmark, sizeof(bookmark*));
+		bookmark** new_bookmark = calloc(d->n_bookmark
+						,sizeof(bookmark*));
 
 		for(i = 0; i < d->n_bookmark; ++i)
 		{
@@ -287,11 +290,21 @@ directory_contain_children(directory* d, char* children)
 	if(d && children)
 	{
 		directory* 	ret 	= NULL;
+		//directory*	rret	= NULL;
+
+		directory_rewind(d);
 
 		while((ret = directory_return_next_children(d)))
 		{
+			directory_rewind(ret);
+
 			if(!(strcmp((directory_name(ret)), children)))
-				return d;
+				return ret;
+
+			/*
+			if((rret = directory_contain_children(ret, children)))
+				return rret;
+			*/
 		}
 	}
 
@@ -334,12 +347,12 @@ directory_name_list_create()
 }
 
 void
-directory_name_list_destroy(directory_name_list* d)
+directory_name_list_destroy(directory_name_list* l)
 {
-	if(d)
+	if(l)
 	{
-		free(d->list);
-		free(d);
+		free(l->list);
+		free(l);
 	}
 }
 
@@ -362,43 +375,44 @@ directory_name_list_position(directory_name_list* l)
 }
 
 void
-directory_name_list_add_dir(directory_name_list* d, char* name)
+directory_name_list_add_dir(directory_name_list* l, char* name)
 {
-	if(d && name)
+	if(l && name)
 	{
-		d->list[d->size] 	= name;
-		d->size++;
-		d->list 		= realloc(d->list, (d->size + 1) * sizeof(char*));
-		d->list[d->size] 	= NULL;
+		l->list[l->size] 	= name;
+		l->size++;
+		l->list 		= realloc(l->list, (l->size + 1) 
+						* sizeof(char*));
+		l->list[l->size] 	= NULL;
 	}
 }
 
 char*
-directory_name_list_return_next(directory_name_list* d)
+directory_name_list_return_next(directory_name_list* l)
 {
-	if(d && d->position <= d->size - 1)
+	if(l && l->position <= l->size - 1)
 	{
-		d->position++;
-		return d->list[d->position - 1];
+		l->position++;
+		return l->list[l->position - 1];
 	}
 	else
 		return NULL;
 }
 
 char*
-directory_name_list_return_last(directory_name_list* d)
+directory_name_list_return_last(directory_name_list* l)
 {
-	if(d && d->size)
-		return d->list[d->size - 1];
+	if(l && l->size)
+		return l->list[l->size - 1];
 	else
 		return NULL;
 }
 
 void
-directory_name_list_rewind(directory_name_list* d)
+directory_name_list_rewind(directory_name_list* l)
 {
-	if(d)
-		d->position = 0;
+	if(l)
+		l->position = 0;
 }
 
 directory_name_list*
@@ -416,7 +430,11 @@ dismember(bookmark* b)
 			directory_name_list_add_dir(l, name);
 
 		free(path);
-		return l;
+
+		if(l)
+			return l;
+		else
+			return NULL;
 	}
 	else
 		return NULL;
@@ -485,14 +503,18 @@ directory_add_children_from_list(directory* d, directory_name_list* l, bookmark*
 		if(child)
 		{
 			if(l->size == l->position)
-				directory_add_bookmark(d, b);
+				directory_add_bookmark(child, b);
 			else
-				directory_add_children_from_list(d->children[d->children_position - 1], l, b);
+				directory_add_children_from_list(
+					d->children[d->children_position - 1]
+					,l
+					,b);
 		}
 		else
 		{
 			if(l->position > 1)
-				list = create_directory_tree_from_list(l, l->position - 1);
+				list = create_directory_tree_from_list(l
+					,l->position - 1);
 			else
 				list = create_directory_tree_from_list(l, 0);
 
@@ -521,12 +543,12 @@ directory_delete_last_children_from_list(directory* d, directory_name_list* l)
 			char* last = l->list[l->size - 1];
 
 			if(!(strcmp(last, directory_name(d->children[d->children_position - 1]))))
-			{
-				printf("entered\n");
 				directory_delete_children(d, d->children_position - 1);
-			}
+
 			else
-				directory_delete_last_children_from_list(d->children[d->children_position - 1], l);
+				directory_delete_last_children_from_list(
+					d->children[d->children_position - 1]
+					,l);
 		}
 	}
 }
@@ -564,7 +586,10 @@ directory_edit_last_children_name_from_list(directory* d, directory_name_list* l
 			if(!(strcmp(last, directory_name(d->children[d->children_position - 1]))))
 				directory_edit_name(d->children[d->children_position - 1], name);
 			else
-				directory_edit_last_children_name_from_list(d->children[d->children_position - 1], l, name);
+				directory_edit_last_children_name_from_list(
+					d->children[d->children_position - 1]
+					,l
+					,name);
 		}
 	}
 }
@@ -582,9 +607,15 @@ directory_edit_name_from_list(directory* d, char* name, char* new_name, director
 		if(child)
 		{
 			if(!(strcmp(ret, name)))
-				directory_edit_name(d->children[d->children_position - 1], new_name);
+				directory_edit_name(
+					d->children[d->children_position - 1]
+					,new_name);
 			else
-				directory_edit_name_from_list(d->children[d->children_position - 1], name, new_name, l);
+				directory_edit_name_from_list(
+					d->children[d->children_position - 1]
+					,name
+					,new_name
+					,l);
 		}
 	}
 }
@@ -604,7 +635,8 @@ directory_move_children(directory* receiver, directory* donator, char* name)
 			if(!(strcmp(name, (directory_name(ret)))))
 			{
 				directory_add_children(receiver, ret);
-				directory_delete_children(donator, donator->n_children);
+				directory_delete_children(donator
+					,donator->n_children);
 			}
 		}
 	}
@@ -623,8 +655,29 @@ directory_move_children_all(directory* receiver, directory* donator)
 		while((ret = directory_return_next_children(donator)))
 		{
 			directory_add_children(receiver, ret);
-			directory_delete_children(donator, donator->n_children);
+			directory_delete_children(donator
+				,donator->n_children);
 		}
 	}
+}
+
+directory*
+make_tree_from_bookmark_list(bookmark_list* bl, char* name)
+{
+	if(bl && name)
+	{
+		bookmark* 	b = NULL;
+		directory* 	d = directory_create(name);
+
+		for(int i = 0; i < bookmark_list_get_size(bl) - 1; ++i) 
+		{
+			b = bookmark_list_return_next_bookmark(bl);
+			directory_add_children_from_list(d, (dismember(b)), b);
+		}
+
+		return d;
+	}
+
+	return NULL;
 }
 

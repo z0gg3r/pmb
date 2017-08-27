@@ -30,14 +30,15 @@ extern char* url_color;
 extern char* comment_color;
 extern char* tag_color;
 
-extern short	color;
-extern short	verbose;
+extern int 	color;
+extern int 	verbose;
 extern sqlite3* db;
 
 /* read config file */
 char**
 read_config(char*); 
 
+/* int argc, char* argv[], cl_option_list*, cl_option_list* */
 void
 parse_options(int, char*[], cl_option_list*
 	,cl_option_list*);
