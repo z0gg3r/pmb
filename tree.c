@@ -662,7 +662,7 @@ directory_move_children_all(directory* receiver, directory* donator)
 }
 
 directory*
-make_tree_from_bookmark_list(bookmark_list* bl, char* name)
+create_tree_from_bookmark_list(bookmark_list* bl, char* name)
 {
 	if(bl && name)
 	{
