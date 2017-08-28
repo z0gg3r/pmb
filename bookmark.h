@@ -56,7 +56,7 @@ bookmark_set_tag(bookmark*, char*);
 
 /* bookmark *b, char *name, char *url, char *comment, char *tag */
 int 
-bookmark_add(bookmark*, char*, char*, char*, char*);
+bookmark_set(bookmark*, char*, char*, char*, char*);
 
 /* open database - full file path */
 sqlite3* 

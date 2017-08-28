@@ -148,6 +148,7 @@ directory_destroy(directory* d)
 				{
 					free(d->bookmark[d->bookmark_position]);
 					d->bookmark[d->bookmark_position] = NULL;
+					bookmark_destroy(b);
 				}
 			}
 		}
@@ -165,16 +166,13 @@ directory_destroy(directory* d)
 					d->children[d->children_position] = NULL;
 				}
 			}
+
+			free(ret); //
 		}
 
 		free(d->children);
-		d->children = NULL;
-
 		free(d->bookmark);
-		d->bookmark = NULL;
-
 		free(d);
-		d = NULL;
 	}
 }
 
@@ -231,6 +229,7 @@ directory_delete_children(directory* d, int index)
 			}
 		}
 
+		free(ret); //
 		free(d->children);
 		d->children = new_children;
 		d->n_children--;
@@ -306,6 +305,8 @@ directory_contain_children(directory* d, char* children)
 				return rret;
 			*/
 		}
+
+		free(ret); //
 	}
 
 	return NULL;
@@ -327,7 +328,10 @@ directory_contain_bookmark(directory* d, int id)
 
 		while((ret = directory_return_next_children(d)))
 			if((b = directory_contain_bookmark(ret, id)))
+			{
+				free(ret); //
 				return b;
+			}
 	}
 
 	return NULL;
@@ -639,6 +643,8 @@ directory_move_children(directory* receiver, directory* donator, char* name)
 					,donator->n_children);
 			}
 		}
+
+		free(ret); //
 	}
 }
 
@@ -658,6 +664,8 @@ directory_move_children_all(directory* receiver, directory* donator)
 			directory_delete_children(donator
 				,donator->n_children);
 		}
+
+		free(ret); //
 	}
 }
 

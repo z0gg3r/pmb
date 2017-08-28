@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "bookmark.h"
+#include "tree.h"
 
 /* used to get data from selected bookmark */
 struct bookmark_data 
@@ -80,7 +80,8 @@ options_window(GtkWidget*, GtkWidget*);
 
 /* add bookmark to the tree store */
 static void 
-tree_store_feed(GtkTreeIter
+tree_store_feed(
+	GtkTreeIter*
 	,char* 	/* id */
 	,char* 	/* name */
 	,char* 	/* url */
@@ -196,7 +197,7 @@ add_bookmark(GtkWidget* button, gpointer** args)
 	if(name && url) 
 	{
 		bookmark* b = bookmark_create();
-		bookmark_add(b, name, url, comment, tag);
+		bookmark_set(b, name, url, comment, tag);
 		bookmark_db_write(b, db);
 		bookmark_destroy(b);
 
@@ -810,7 +811,7 @@ tree_view(GtkWidget* search_entry)
 }
 
 static void 
-tree_store_feed(GtkTreeIter i
+tree_store_feed(GtkTreeIter* i
 	,char* id
 	,char* name
 	,char* url
@@ -819,12 +820,74 @@ tree_store_feed(GtkTreeIter i
 {
 	if(bookmarks) 
 	{
-		gtk_tree_store_append(bookmarks, &i, NULL);
-		gtk_tree_store_set(bookmarks, &i, 0, id, -1);
-		gtk_tree_store_set(bookmarks, &i, 1, name, -1);
-		gtk_tree_store_set(bookmarks, &i, 2, url, -1);
-		gtk_tree_store_set(bookmarks, &i, 3, comment, -1);
-		gtk_tree_store_set(bookmarks, &i, 4, tag, -1);
+		gtk_tree_store_append(bookmarks, i, NULL);
+		gtk_tree_store_set(bookmarks, i, 0, id, -1);
+		gtk_tree_store_set(bookmarks, i, 1, name, -1);
+		gtk_tree_store_set(bookmarks, i, 2, url, -1);
+		gtk_tree_store_set(bookmarks, i, 3, comment, -1);
+		gtk_tree_store_set(bookmarks, i, 4, tag, -1);
+	}
+}
+
+static void 
+tree_store_feed_child(GtkTreeIter* i
+	,GtkTreeIter* p
+	,char* id
+	,char* name
+	,char* url
+	,char* comment
+	,char* tag) 
+{
+	if(bookmarks) 
+	{
+		gtk_tree_store_append(bookmarks, i, p);
+		gtk_tree_store_set(bookmarks, i, 0, id, -1);
+		gtk_tree_store_set(bookmarks, i, 1, name, -1);
+		gtk_tree_store_set(bookmarks, i, 2, url, -1);
+		gtk_tree_store_set(bookmarks, i, 3, comment, -1);
+		gtk_tree_store_set(bookmarks, i, 4, tag, -1);
+	}
+}
+
+void
+tree_store_add_child(GtkTreeIter* iter, directory* child)
+{
+	if(child && iter)
+	{
+		directory*	ret	= NULL;
+
+		while((ret = directory_return_next_children(child)))
+		{
+			GtkTreeIter	tmp;
+
+			directory_rewind(ret);
+
+			tree_store_feed_child(&tmp, iter
+				,directory_name(ret)
+				,NULL
+				,NULL
+				,NULL
+				,NULL);
+
+			bookmark* b = NULL;
+
+			while((b = directory_return_next_bookmark(ret)))
+			{
+				GtkTreeIter btmp;
+
+				tree_store_feed_child(&btmp, &tmp
+					,bookmark_id(b)
+					,bookmark_name(b)
+					,bookmark_url(b)
+					,bookmark_comment(b)
+					,bookmark_tag(b));
+			}
+
+			free(b);
+			tree_store_add_child(&tmp, ret);
+		}
+
+		free(ret);
 	}
 }
 
@@ -832,8 +895,6 @@ static void
 read_database(GtkWidget* button, gpointer** args) 
 {
 	bookmark_list* 	bl = NULL;
-	GtkTreeIter 	tree_iter;
-	char** 		result;
 
 	gtk_tree_store_clear(bookmarks);
 
@@ -857,42 +918,53 @@ read_database(GtkWidget* button, gpointer** args)
 	else 
 	{
 		get_all:
-		bl = bookmark_db_query(db, 0 ,NULL);
+		bl = bookmark_db_query(db, 0, NULL);
 	}
 
 	if(bl) 
 	{
-		for(int i = 0; i < bookmark_list_get_size(bl) - 1; ++i) 
+		directory* 	root 	= create_tree_from_bookmark_list(bl, "root");	
+		directory*	child	= NULL;
+		directory*	ret	= NULL;
+
+		directory_rewind(root);
+
+		bookmark* b = NULL;
+
+		while((b = directory_return_next_bookmark(root)))
 		{
-			result = bookmark_list_return_next(bl);
+			GtkTreeIter iter;
 
-			/*
-			char* str 	= calloc(1, strlen(result[4]));
-			char* r 	= calloc(1, strlen(result[4]));
-			strncpy(r, result[4], strlen(result[4]));
-
-			while((str = strsep(&r, "/")))
-				printf("%s\n", str);
-
-			free(r);
-			free(str);
-			*/
-
-			if(result)
-				tree_store_feed(tree_iter
-					,result[0]
-					,result[1]
-					,result[2]
-					,result[3]
-					,result[4]);
+			tree_store_feed(&iter
+				,bookmark_id(b)
+				,bookmark_name(b)
+				,bookmark_url(b)
+				,bookmark_comment(b)
+				,bookmark_tag(b));
 		}
 
-		if(result) 
+		if(b)
+			free(b);
+
+		while((child = directory_return_next_children(root)))
 		{
-			free(result);
-			result = NULL;
+			GtkTreeIter 	tree_iter;
+
+			directory_rewind(child);
+
+			tree_store_feed(&tree_iter
+				,directory_name(child)
+				,NULL
+				,NULL
+				,NULL
+				,NULL);
+
+			tree_store_add_child(&tree_iter, child);
 		}
 
+		free(root);
+		free(child);
+		free(ret);
 		bookmark_list_destroy(bl);
 	}
 }

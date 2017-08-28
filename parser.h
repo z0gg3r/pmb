@@ -10,7 +10,6 @@
 #include <unistd.h> 	/* isatty */
 #include <limits.h>
 #include <stdlib.h>
-#include "bookmark.h"
 #include "option.h"
 #include "tree.h"
 

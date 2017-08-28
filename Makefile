@@ -25,7 +25,7 @@ default:
 	$(CC) $(CCFLAGS) -c $(OPTION).c 
 	$(CC) $(CCFLAGS) -c $(TREE).c 
 	$(CC) $(CCFLAGS) $(BOOKMARK).o $(PARSER).o $(OPTION).o $(TREE).o $(PMB).c -o $(PMB) $(pflags)
-	#$(CC) $(CCFLAGS) $(GTKFLAGS) $(BOOKMARK).o $(GPMB).c -o $(GPMB) $(gflags)
+	$(CC) $(CCFLAGS) $(GTKFLAGS) $(BOOKMARK).o $(TREE).o $(GPMB).c -o $(GPMB) $(gflags)
 
 $(BOOKMARK):$(BOOKMARK).c
 	$(CC) $(CCFLAGS) -c $(BOOKMARK).c $(bflags)

@@ -24,6 +24,7 @@ char* date(char* buffer, int bufsize)
 		}
 	}
 
+	free(tmp);
 	return NULL;
 }
 
@@ -402,28 +403,6 @@ bookmark_destroy(bookmark* b)
 	}
 }
 
-int
-bookmark_add(bookmark* b, char* name, char* url, char* comment, char* tag) 
-{
-	if(b && name && url) 
-	{
-		if(!comment)
-			comment = "None";
-		
-		if(!tag)
-			tag = "None";
-
-		b->name    = name;
-		b->url     = url;
-		b->comment = comment;
-		b->tag     = tag;
-	}
-	else 
-		return 1;
-
-	return 0;
-}
-
 char*
 bookmark_id(bookmark* b)
 {
@@ -467,6 +446,28 @@ bookmark_tag(bookmark* b)
 		return b->tag;
 	else
 		return NULL;
+}
+
+int
+bookmark_set(bookmark* b, char* name, char* url, char* comment, char* tag) 
+{
+	if(b && name && url) 
+	{
+		if(!comment)
+			comment = "None";
+		
+		if(!tag)
+			tag = "None";
+
+		b->name    = name;
+		b->url     = url;
+		b->comment = comment;
+		b->tag     = tag;
+	}
+	else 
+		return 1;
+
+	return 0;
 }
 
 int

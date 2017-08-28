@@ -228,7 +228,8 @@ print_folder_icon(int* canvas)
 		"ctx.stroke();\n"
 		"ctx.restore();\n"
 		"</script>\n", *canvas, *canvas);
-		++(*canvas);
+
+	++(*canvas);
 }
 
 int
@@ -244,10 +245,8 @@ html_tree_table_row(directory* d, int depth, int* canvas)
 		printf("<td>\n");
 		print_folder_icon(canvas);
 		printf("<span style='color:brown; font-weight:bold;'>"
-			"%s</span></td>\n"
+			"%s</span></td>\n</tr>\n"
 			,directory_name(d));
-
-		printf("</tr>\n");
 
 		bookmark* b = NULL;
 
@@ -261,8 +260,9 @@ html_tree_table_row(directory* d, int depth, int* canvas)
 			printf("<td width=\'200\'>\n""<a href=\'%s\'>%s</a></td>\n</tr>\n"
 				,bookmark_url(b), bookmark_name(b));
 
-			bookmark_destroy(b);
 		}
+
+		free(b);
 
 		printf("<tr></tr>\n");
 		return ++depth;
@@ -288,7 +288,7 @@ html_tree_branch(directory* d, int depth, int* canvas)
 			html_tree_branch(directory_return_next_children(ret), depth + 1, canvas);
 		}
 
-		directory_destroy(ret);
+		free(ret);
 	}
 }
 
@@ -302,6 +302,7 @@ bookmark_html_tree(bookmark_list* bl)
 		directory* 	child 	= NULL;
 		directory* 	ret 	= NULL;
 		int		canvas	= 0;
+		char 		buf[50]; 
 
 		directory_rewind(root);
 
@@ -314,9 +315,8 @@ bookmark_html_tree(bookmark_list* bl)
 			"h3 { margin: 0; border: 0; color: steelblue; }\n"
 			"</style>\n"
 			"</head>\n"
-			"<body bgcolor=mintcream>\n");
-
-		printf("<h3>Bookmarks:</h3>"
+			"<body bgcolor=mintcream>\n"
+			"<h3>Bookmarks:</h3>"
 			"<div style='border:1px solid green;"
 			"margin-bottom: 10px;"
 			"margin-top: 10px;"
@@ -336,13 +336,10 @@ bookmark_html_tree(bookmark_list* bl)
 				html_tree_branch(ret, 2, &canvas);
 		}
 
-		char buff[50];
-
 		printf("</table>\n</div>\n<br />\nGenerated in: "
 			"<span style='color:green;'>%s</span>\n"
-			,date(buff, 50));
-		
-		printf("</body>\n</html>\n");
+			"</body>\n</html>\n"
+			,date(buf, 50));
 
 		directory_destroy(ret);
 		directory_destroy(child);
