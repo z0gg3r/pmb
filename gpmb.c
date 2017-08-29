@@ -78,17 +78,6 @@ edit_window(GtkWidget*, gpointer);
 static void 
 options_window(GtkWidget*, GtkWidget*);
 
-/* add bookmark to the tree store */
-static void 
-tree_store_feed(
-	GtkTreeIter*
-	,GtkTreeIter*
-	,char* 	/* id */
-	,char* 	/* name */
-	,char* 	/* url */
-	,char* 	/* comment */
-	,char*); /* tag */ 
-
 /* read database */
 static void 
 read_database(GtkWidget*, gpointer**); 
@@ -811,30 +800,10 @@ tree_view(GtkWidget* search_entry)
 	return tree_view;	
 }
 
-static void 
-tree_store_feed(GtkTreeIter* i
-	,GtkTreeIter* p
-	,char* id
-	,char* name
-	,char* url
-	,char* comment
-	,char* tag) 
-{
-	if(bookmarks) 
-	{
-		gtk_tree_store_append(bookmarks, i, p);
-		gtk_tree_store_set(bookmarks, i, 0, id, -1);
-		gtk_tree_store_set(bookmarks, i, 1, name, -1);
-		gtk_tree_store_set(bookmarks, i, 2, url, -1);
-		gtk_tree_store_set(bookmarks, i, 3, comment, -1);
-		gtk_tree_store_set(bookmarks, i, 4, tag, -1);
-	}
-}
-
 void
 tree_store_add_child(GtkTreeIter* iter, directory* child)
 {
-	if(child && iter)
+	if(iter && child)
 	{
 		directory* 	d = NULL;
 		bookmark* 	b = NULL;
@@ -844,24 +813,19 @@ tree_store_add_child(GtkTreeIter* iter, directory* child)
 			GtkTreeIter d_iter;
 
 			directory_rewind(d);
-
-			tree_store_feed(&d_iter, iter
-				,directory_name(d)
-				,NULL
-				,NULL
-				,NULL
-				,NULL);
+			gtk_tree_store_append(bookmarks, &d_iter, iter);
+			gtk_tree_store_set(bookmarks, &d_iter, 0, directory_name(d), -1);
 
 			while((b = directory_return_next_bookmark(d)))
 			{
 				GtkTreeIter b_iter;
 
-				tree_store_feed(&b_iter, &d_iter
-					,bookmark_id(b)
-					,bookmark_name(b)
-					,bookmark_url(b)
-					,bookmark_comment(b)
-					,bookmark_tag(b));
+				gtk_tree_store_append(bookmarks, &b_iter, &d_iter);
+				gtk_tree_store_set(bookmarks, &b_iter, 0, bookmark_id(b), -1);
+				gtk_tree_store_set(bookmarks, &b_iter, 1, bookmark_name(b), -1);
+				gtk_tree_store_set(bookmarks, &b_iter, 2, bookmark_url(b), -1);
+				gtk_tree_store_set(bookmarks, &b_iter, 3, bookmark_comment(b), -1);
+				gtk_tree_store_set(bookmarks, &b_iter, 4, bookmark_tag(b), -1);
 			}
 
 			free(b);
