@@ -82,6 +82,7 @@ options_window(GtkWidget*, GtkWidget*);
 static void 
 tree_store_feed(
 	GtkTreeIter*
+	,GtkTreeIter*
 	,char* 	/* id */
 	,char* 	/* name */
 	,char* 	/* url */
@@ -812,25 +813,6 @@ tree_view(GtkWidget* search_entry)
 
 static void 
 tree_store_feed(GtkTreeIter* i
-	,char* id
-	,char* name
-	,char* url
-	,char* comment
-	,char* tag) 
-{
-	if(bookmarks) 
-	{
-		gtk_tree_store_append(bookmarks, i, NULL);
-		gtk_tree_store_set(bookmarks, i, 0, id, -1);
-		gtk_tree_store_set(bookmarks, i, 1, name, -1);
-		gtk_tree_store_set(bookmarks, i, 2, url, -1);
-		gtk_tree_store_set(bookmarks, i, 3, comment, -1);
-		gtk_tree_store_set(bookmarks, i, 4, tag, -1);
-	}
-}
-
-static void 
-tree_store_feed_child(GtkTreeIter* i
 	,GtkTreeIter* p
 	,char* id
 	,char* name
@@ -854,28 +836,27 @@ tree_store_add_child(GtkTreeIter* iter, directory* child)
 {
 	if(child && iter)
 	{
-		directory*	ret	= NULL;
+		directory* 	d = NULL;
+		bookmark* 	b = NULL;
 
-		while((ret = directory_return_next_children(child)))
+		while((d = directory_return_next_children(child)))
 		{
-			GtkTreeIter	tmp;
+			GtkTreeIter d_iter;
 
-			directory_rewind(ret);
+			directory_rewind(d);
 
-			tree_store_feed_child(&tmp, iter
-				,directory_name(ret)
+			tree_store_feed(&d_iter, iter
+				,directory_name(d)
 				,NULL
 				,NULL
 				,NULL
 				,NULL);
 
-			bookmark* b = NULL;
-
-			while((b = directory_return_next_bookmark(ret)))
+			while((b = directory_return_next_bookmark(d)))
 			{
-				GtkTreeIter btmp;
+				GtkTreeIter b_iter;
 
-				tree_store_feed_child(&btmp, &tmp
+				tree_store_feed(&b_iter, &d_iter
 					,bookmark_id(b)
 					,bookmark_name(b)
 					,bookmark_url(b)
@@ -884,10 +865,10 @@ tree_store_add_child(GtkTreeIter* iter, directory* child)
 			}
 
 			free(b);
-			tree_store_add_child(&tmp, ret);
+			tree_store_add_child(&d_iter, d);
 		}
 
-		free(ret);
+		free(d);
 	}
 }
 
@@ -925,46 +906,35 @@ read_database(GtkWidget* button, gpointer** args)
 	{
 		directory* 	root 	= create_tree_from_bookmark_list(bl, "root");	
 		directory*	child	= NULL;
-		directory*	ret	= NULL;
+		bookmark* 	b 	= NULL;
 
 		directory_rewind(root);
-
-		bookmark* b = NULL;
 
 		while((b = directory_return_next_bookmark(root)))
 		{
 			GtkTreeIter iter;
 
-			tree_store_feed(&iter
-				,bookmark_id(b)
-				,bookmark_name(b)
-				,bookmark_url(b)
-				,bookmark_comment(b)
-				,bookmark_tag(b));
+			gtk_tree_store_append(bookmarks, &iter, NULL);
+			gtk_tree_store_set(bookmarks, &iter, 0, bookmark_id(b), -1);
+			gtk_tree_store_set(bookmarks, &iter, 1, bookmark_name(b), -1);
+			gtk_tree_store_set(bookmarks, &iter, 2, bookmark_url(b), -1);
+			gtk_tree_store_set(bookmarks, &iter, 3, bookmark_comment(b), -1);
+			gtk_tree_store_set(bookmarks, &iter, 4, bookmark_tag(b), -1);
 		}
-
-		if(b)
-			free(b);
 
 		while((child = directory_return_next_children(root)))
 		{
-			GtkTreeIter 	tree_iter;
+			GtkTreeIter iter;
 
 			directory_rewind(child);
-
-			tree_store_feed(&tree_iter
-				,directory_name(child)
-				,NULL
-				,NULL
-				,NULL
-				,NULL);
-
-			tree_store_add_child(&tree_iter, child);
+			gtk_tree_store_append(bookmarks, &iter, NULL);
+			gtk_tree_store_set(bookmarks, &iter, 0, directory_name(child), -1);
+			tree_store_add_child(&iter, child);
 		}
 
+		free(b);
 		free(root);
 		free(child);
-		free(ret);
 		bookmark_list_destroy(bl);
 	}
 }

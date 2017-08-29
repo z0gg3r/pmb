@@ -254,10 +254,11 @@ html_tree_table_row(directory* d, int depth, int* canvas)
 		{
 			printf("<tr>\n");
 
-			for(int i = 0; i < depth + 1; ++i)
+			for(int i = 0; i < depth; ++i)
 				printf("<td></td>\n");
 
-			printf("<td width=\'200\'>\n""<a href=\'%s\'>%s</a></td>\n</tr>\n"
+			printf("<td width=\'200\'>\n"
+				"+ <a href=\'%s\'>%s</a></td>\n</tr>\n"
 				,bookmark_url(b), bookmark_name(b));
 
 		}
