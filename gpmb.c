@@ -50,6 +50,10 @@ destroy();
 static void 
 close_window(GtkWidget*, gpointer);
 
+/* create a tag combo box */
+static GtkWidget*
+tag_box_new();
+
 /* when click 'add' button inside add bookmark window */
 static void 
 add_bookmark(GtkWidget*, gpointer**);
@@ -76,7 +80,7 @@ edit_window(GtkWidget*, gpointer);
 
 /* the option window */
 static void 
-options_window(GtkWidget*, GtkWidget*);
+options_window(GtkWidget*, gpointer);
 
 /* read database */
 static void 
@@ -88,7 +92,7 @@ update_selected_row(gpointer**);
 
 /* used by get_data() -- create a new bookmark_data struct */
 static bookmark_data* 
-create_data();
+bookmark_data_new();
 
 /* get data of current selected bookmark */
 static bookmark_data* 
@@ -164,6 +168,50 @@ read_options()
 	}
 }
 
+static GtkWidget*
+tag_box_new()
+{
+	GtkWidget* 	tag_box 	= gtk_combo_box_text_new();
+	bookmark_list*	bl		= bookmark_db_query(db, 0, NULL);
+	bookmark*	b		= NULL;
+	char*		last_tag	= NULL;
+
+	for(int i = 0; i < bookmark_list_get_size(bl) - 1; ++i) 
+	{
+		if((b = bookmark_list_return_next_bookmark(bl)))
+		{
+			GtkTreeIter 	b_iter;
+			char* 		tag 	= bookmark_tag(b);
+
+			if((last_tag && strcmp(last_tag, tag)) 
+			|| (!last_tag))
+			{
+				last_tag = bookmark_tag(b);
+
+				gtk_combo_box_text_append
+					(GTK_COMBO_BOX_TEXT(tag_box)
+						,NULL
+						,last_tag);
+			}
+		}
+	}
+
+	free(b);
+	bookmark_list_destroy(bl);
+	return tag_box;
+}
+
+static void
+tag_entry_set_text(GtkWidget* tag_box, GtkWidget* tag_entry)
+{
+	if(tag_entry && tag_box)
+	{
+		char* tag = gtk_combo_box_text_get_active_text	
+			(GTK_COMBO_BOX_TEXT(tag_box));
+		gtk_entry_set_text(GTK_ENTRY(tag_entry), tag);
+	}
+}
+
 static void 
 add_bookmark(GtkWidget* button, gpointer** args) 
 {
@@ -186,8 +234,7 @@ add_bookmark(GtkWidget* button, gpointer** args)
 
 	if(name && url) 
 	{
-		bookmark* b = bookmark_create();
-		bookmark_set(b, name, url, comment, tag);
+		bookmark* b = bookmark_create(name, url, comment, tag);
 		bookmark_db_write(b, db);
 		bookmark_destroy(b);
 
@@ -264,6 +311,11 @@ add_window(GtkWidget* button, gpointer main_window)
 	g_signal_connect(cancel_button, "clicked", G_CALLBACK(close_window)
 		,add_window);
 
+	/* tag box */
+	GtkWidget* tag_box = tag_box_new();
+	g_signal_connect(tag_box, "changed", G_CALLBACK(tag_entry_set_text)
+		,tag_entry); 
+
 	/* grid */
 	GtkWidget *grid = gtk_grid_new();
 	gtk_grid_set_column_spacing(GTK_GRID(grid), 2);
@@ -282,8 +334,11 @@ add_window(GtkWidget* button, gpointer main_window)
 	gtk_grid_attach(GTK_GRID(grid), tag_label 	,0,  3, 30, 1);
 	gtk_grid_attach(GTK_GRID(grid), tag_entry 	,20, 3, 50, 1);
 
-	gtk_grid_attach(GTK_GRID(grid), add_button 	,20, 4, 20, 10);
-	gtk_grid_attach(GTK_GRID(grid), cancel_button 	,40, 4, 20, 10);
+	gtk_grid_attach(GTK_GRID(grid), tag_box 	,20, 4, 50, 1);
+
+	gtk_grid_attach(GTK_GRID(grid), add_button 	,20, 5, 20, 10);
+	gtk_grid_attach(GTK_GRID(grid), cancel_button 	,40, 5, 20, 10);
+
 
 	/* add to window */
 	gtk_container_add(GTK_CONTAINER(add_window), grid);
@@ -559,6 +614,11 @@ edit_window(GtkWidget* button, gpointer main_window)
 	g_signal_connect(cancel_button, "clicked", G_CALLBACK(close_window)
 		,edit_window);
 
+	/* tag box */
+	GtkWidget* tag_box = tag_box_new();
+	g_signal_connect(tag_box, "changed", G_CALLBACK(tag_entry_set_text)
+		,tag_entry); 
+
 	/* grid */
 	GtkWidget* grid = gtk_grid_new();
 	gtk_grid_set_column_spacing(GTK_GRID(grid), 2);
@@ -577,8 +637,10 @@ edit_window(GtkWidget* button, gpointer main_window)
 	gtk_grid_attach(GTK_GRID(grid), tag_entry_label 	,0,  3, 30, 1);
 	gtk_grid_attach(GTK_GRID(grid), tag_entry 		,20, 3, 50, 1);
 
-	gtk_grid_attach(GTK_GRID(grid), edit_button 		,20, 4, 20, 10);
-	gtk_grid_attach(GTK_GRID(grid), cancel_button 		,40, 4, 20, 10);
+	gtk_grid_attach(GTK_GRID(grid), tag_box 		,20, 4, 50, 1);
+
+	gtk_grid_attach(GTK_GRID(grid), edit_button 		,20, 5, 20, 10);
+	gtk_grid_attach(GTK_GRID(grid), cancel_button 		,40, 5, 20, 10);
 
 	/* add to window */
 	gtk_container_add(GTK_CONTAINER(edit_window), grid);
@@ -588,7 +650,7 @@ edit_window(GtkWidget* button, gpointer main_window)
 }
 
 static void
-options_window(GtkWidget* button, GtkWidget* main_window) 
+options_window(GtkWidget* button, gpointer main_window) 
 {
 	/* set up window */
 	GtkWidget* options_dialog = gtk_dialog_new();
@@ -628,8 +690,8 @@ options_window(GtkWidget* button, GtkWidget* main_window)
 static void
 update_selected_row(gpointer** args) 
 {
-	GtkTreePath* path 		= gtk_tree_path_new();
-	GtkTreeViewColumn* column 	= gtk_tree_view_column_new();
+	GtkTreePath* 		path 	= gtk_tree_path_new();
+	GtkTreeViewColumn* 	column 	= gtk_tree_view_column_new();
 
 	gtk_tree_view_get_cursor(GTK_TREE_VIEW(&args[0]), &path, &column);
 	selected_path 		= path;
@@ -637,7 +699,7 @@ update_selected_row(gpointer** args)
 }
 
 static bookmark_data*
-create_data() 
+bookmark_data_new() 
 {
 	bookmark_data* data = malloc(sizeof(bookmark_data));
 
@@ -665,7 +727,7 @@ get_data()
 		gtk_tree_model_get_iter(GTK_TREE_MODEL(model), &iter
 			,selected_path);
 
-		bookmark_data* data = create_data();
+		bookmark_data* data = bookmark_data_new();
 
 		if(data) 
 		{
@@ -702,7 +764,7 @@ cell_renderer_create(char* color)
 static GtkWidget*
 tree_view(GtkWidget* search_entry) 
 {
-	GtkCellRenderer* 	cell_renderer_text;
+	GtkCellRenderer* cell_renderer_text;
 
 	cell_renderer_text = cell_renderer_create(opts->id_fg);
 	GtkTreeViewColumn* bookmark_id_column = 
@@ -784,7 +846,7 @@ tree_view(GtkWidget* search_entry)
 		,GTK_ENTRY(search_entry));	
 
 	/* enable searching in the tree */
-	gtk_tree_view_set_enable_search(GTK_TREE_VIEW(tree_view), TRUE);
+	//gtk_tree_view_set_enable_search(GTK_TREE_VIEW(tree_view), TRUE);
 
 	/* clickable headers */
 	gtk_tree_view_set_headers_clickable(GTK_TREE_VIEW(tree_view), TRUE);
@@ -807,6 +869,20 @@ tree_store_add_child(GtkTreeIter* iter, directory* child)
 	{
 		directory* 	d = NULL;
 		bookmark* 	b = NULL;
+
+		while((b = directory_return_next_bookmark(child)))
+		{
+			GtkTreeIter b_iter;
+
+			gtk_tree_store_append(bookmarks, &b_iter, iter);
+			gtk_tree_store_set(bookmarks, &b_iter, 0, bookmark_id(b), -1);
+			gtk_tree_store_set(bookmarks, &b_iter, 1, bookmark_name(b), -1);
+			gtk_tree_store_set(bookmarks, &b_iter, 2, bookmark_url(b), -1);
+			gtk_tree_store_set(bookmarks, &b_iter, 3, bookmark_comment(b), -1);
+			gtk_tree_store_set(bookmarks, &b_iter, 4, bookmark_tag(b), -1);
+		}
+
+		free(b);
 
 		while((d = directory_return_next_children(child)))
 		{
@@ -873,18 +949,6 @@ read_database(GtkWidget* button, gpointer** args)
 		bookmark* 	b 	= NULL;
 
 		directory_rewind(root);
-
-		while((b = directory_return_next_bookmark(root)))
-		{
-			GtkTreeIter iter;
-
-			gtk_tree_store_append(bookmarks, &iter, NULL);
-			gtk_tree_store_set(bookmarks, &iter, 0, bookmark_id(b), -1);
-			gtk_tree_store_set(bookmarks, &iter, 1, bookmark_name(b), -1);
-			gtk_tree_store_set(bookmarks, &iter, 2, bookmark_url(b), -1);
-			gtk_tree_store_set(bookmarks, &iter, 3, bookmark_comment(b), -1);
-			gtk_tree_store_set(bookmarks, &iter, 4, bookmark_tag(b), -1);
-		}
 
 		while((child = directory_return_next_children(root)))
 		{
@@ -990,7 +1054,7 @@ make_menu_bar(GtkWidget* main_window)
 static GtkWidget*
 make_tool_box(GtkWidget* main_window) 
 {
-	short icon_size 	= 16;
+	short icon_size = 16;
 
 	/* add */
 	GtkWidget* add_icon 	= gtk_image_new_from_icon_name
@@ -1123,11 +1187,11 @@ key_press(GtkWidget* window, GdkEventKey* e, gpointer** args)
 
 	else if(!strcmp(key, "h")) 
 	{
-		GtkAdjustment* adj	= gtk_scrolled_window_get_hadjustment
+		GtkAdjustment* 	adj	= gtk_scrolled_window_get_hadjustment
 						(GTK_SCROLLED_WINDOW(args[1]));
-		gdouble value 		= gtk_adjustment_get_value
+		gdouble 	value 	= gtk_adjustment_get_value
 						(GTK_ADJUSTMENT(adj));
-		gdouble step		= gtk_adjustment_get_step_increment
+		gdouble 	step	= gtk_adjustment_get_step_increment
 						(GTK_ADJUSTMENT(adj));
 
 		gtk_adjustment_set_value(GTK_ADJUSTMENT(adj), (value - step));
@@ -1135,14 +1199,15 @@ key_press(GtkWidget* window, GdkEventKey* e, gpointer** args)
 
 	else if(!strcmp(key, "l")) 
 	{
-		GtkAdjustment* adj	= gtk_scrolled_window_get_hadjustment
+		GtkAdjustment* 	adj	= gtk_scrolled_window_get_hadjustment
 						(GTK_SCROLLED_WINDOW(args[1]));
-		gdouble value 		= gtk_adjustment_get_value
+		gdouble 	value 	= gtk_adjustment_get_value
 						(GTK_ADJUSTMENT(adj));
-		gdouble step		= gtk_adjustment_get_step_increment
+		gdouble 	step	= gtk_adjustment_get_step_increment
 						(GTK_ADJUSTMENT(adj));
 
 		gtk_adjustment_set_value(GTK_ADJUSTMENT(adj), (value + step));
+		gtk_tree_view_expand_row(GTK_TREE_VIEW(args[0]), selected_path, 0);
 	}
 
 	else if(!strcmp(key, "g"))
@@ -1258,16 +1323,16 @@ key_press(GtkWidget* window, GdkEventKey* e, gpointer** args)
 		read_database(NULL, NULL);
 
 	else if(!strcmp(key, "d"))
-		delete_window(NULL, window);
+		delete_window(NULL, args[3]);
 
 	else if(!strcmp(key, "i"))
-		add_window(NULL, window);
+		add_window(NULL, args[3]);
 
 	else if(!strcmp(key, "e"))
-		edit_window(NULL, window);
+		edit_window(NULL, args[3]);
 	
 	else if(!strcmp(key, "O"))
-		options_window(NULL, window);
+		options_window(NULL, args[3]);
 }
 
 static void
@@ -1292,11 +1357,6 @@ gtk_interface(int argc, char* argv[])
 	g_signal_connect(bookmark_window, "destroy", G_CALLBACK(destroy)
 		,NULL);
 
-	/*
-	gtk_window_set_wmclass(GTK_WINDOW(bookmark_window)
-		,"Bookmarks", "gtkTraining");
-	*/
-	
 	/* tree store */
 	bookmarks = gtk_tree_store_new(
 		5
@@ -1307,18 +1367,19 @@ gtk_interface(int argc, char* argv[])
 		,G_TYPE_STRING);	//tag
 
 	/* tree view */
-	GtkWidget* search_entry = gtk_entry_new();
-	GtkWidget* t_view = tree_view(search_entry);
+	GtkWidget* search_entry	= gtk_entry_new();
+	GtkWidget* t_view 	= tree_view(search_entry);
 	gtk_tree_view_set_enable_search(GTK_TREE_VIEW(t_view), FALSE);
 
 	/* scrolled window for bookmark_view */
-	GtkWidget* s_window = gtk_scrolled_window_new(NULL, NULL);
+	GtkWidget* s_window 	= gtk_scrolled_window_new(NULL, NULL);
 	gtk_container_add(GTK_CONTAINER(s_window), t_view);
 
-	GtkWidget** key_press_args = g_new(GtkWidget*, 3);
+	GtkWidget** 	key_press_args 	= g_new(GtkWidget*, 4);
 	key_press_args[0] = t_view;
 	key_press_args[1] = s_window;
 	key_press_args[2] = search_entry;
+	key_press_args[3] = bookmark_window;
 
 	g_signal_connect(s_window, "key-press-event"
 		,G_CALLBACK(key_press), key_press_args);
@@ -1327,13 +1388,13 @@ gtk_interface(int argc, char* argv[])
 		,G_CALLBACK(search_entry_key_press), t_view);
 
 	/* menu bar */
-	GtkWidget* menu_bar = make_menu_bar(bookmark_window);
+	GtkWidget* menu_bar 	= make_menu_bar(bookmark_window);
 
 	/* tool box */
-	GtkWidget* tool_box = make_tool_box(bookmark_window);
+	GtkWidget* tool_box 	= make_tool_box(bookmark_window);
 
 	/* search box */
-	GtkWidget* search_box = make_search_box(search_entry);
+	GtkWidget* search_box 	= make_search_box(search_entry);
 
 	/* add to v_box */
 	GtkWidget* v_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
