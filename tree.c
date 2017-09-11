@@ -166,8 +166,6 @@ directory_destroy(directory* d)
 					d->children[d->children_position] = NULL;
 				}
 			}
-
-			free(ret); //
 		}
 
 		free(d->children);
@@ -229,7 +227,6 @@ directory_delete_children(directory* d, int index)
 			}
 		}
 
-		free(ret); //
 		free(d->children);
 		d->children = new_children;
 		d->n_children--;
@@ -305,8 +302,6 @@ directory_contain_children(directory* d, char* children)
 				return rret;
 			*/
 		}
-
-		free(ret); //
 	}
 
 	return NULL;
@@ -328,10 +323,7 @@ directory_contain_bookmark(directory* d, int id)
 
 		while((ret = directory_return_next_children(d)))
 			if((b = directory_contain_bookmark(ret, id)))
-			{
-				free(ret); //
 				return b;
-			}
 	}
 
 	return NULL;
@@ -643,8 +635,6 @@ directory_move_children(directory* receiver, directory* donator, char* name)
 					,donator->n_children);
 			}
 		}
-
-		free(ret); //
 	}
 }
 
@@ -664,8 +654,6 @@ directory_move_children_all(directory* receiver, directory* donator)
 			directory_delete_children(donator
 				,donator->n_children);
 		}
-
-		free(ret); //
 	}
 }
 
@@ -677,11 +665,8 @@ create_tree_from_bookmark_list(bookmark_list* bl, char* name)
 		bookmark* 	b = NULL;
 		directory* 	d = directory_create(name);
 
-		for(int i = 0; i < bookmark_list_get_size(bl) - 1; ++i) 
-		{
-			b = bookmark_list_return_next_bookmark(bl);
+		while((b = bookmark_list_return_next_bookmark(bl)))
 			directory_add_children_from_list(d, (dismember(b)), b);
-		}
 
 		return d;
 	}

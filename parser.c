@@ -120,27 +120,14 @@ bookmark_print_field(int i, char* r)
 void
 bookmark_print(bookmark_list* bl, int field) 
 {
-	for(int i = 0; i < bookmark_list_get_size(bl) - 1; ++i) 
+	char** 	result 	= NULL;
+	int 	i 	= 0;
+
+	while((result = bookmark_list_return_next(bl)))
 	{
-		char** result = bookmark_list_return_next(bl);
-
 		if(field)
-		{
-			if(field == 1) 
-				bookmark_print_field(i, result[0]);
+			bookmark_print_field(i, result[field - 1]);
 
-			if(field == 2) 
-				bookmark_print_field(i, result[1]);
-
-			if(field == 3) 
-				bookmark_print_field(i, result[2]);
-
-			if(field == 4) 
-				bookmark_print_field(i, result[3]);
-
-			if(field == 5) 
-				bookmark_print_field(i, result[4]);
-		}
 		else 
 		{
 			if(verbose)
@@ -188,6 +175,8 @@ bookmark_print(bookmark_list* bl, int field)
 						,result[4]);
 			}
 		}
+
+		++i;
 	}
 }
 
@@ -948,11 +937,12 @@ search(char* optarg)
 				{
 					bookmark_list_rewind(bl);
 
-					for(int i = 0; i < bookmark_list_get_size(bl) - 1; ++i) 
+					char** result = NULL;
+
+					while((result = bookmark_list_return_next(bl)))
 					{
-						char** 		result	= bookmark_list_return_next(bl);
-						bookmark* 	b	= bookmark_create(result[1], result[2]
-										,result[3], result[4]);
+						bookmark* b = bookmark_create(result[1], result[2]
+								,result[3], result[4]);
 
 						if(bookmark_db_write(b, e_db))
 							printf("search: failed to export bookmark\n");
@@ -970,10 +960,11 @@ search(char* optarg)
 			{
 				bookmark_list_rewind(bl);
 
-				for(int i = 0; i < bookmark_list_get_size(bl) - 1; ++i) 
+				char** result = NULL;
+
+				while((result = bookmark_list_return_next(bl)))
 				{
-					char** 	result 	= bookmark_list_return_next(bl);
-					int 	id 	= strtol(result[0], NULL, 10);	
+					int id = strtol(result[0], NULL, 10);	
 					bookmark_db_delete(db, id);
 				}
 			}
@@ -1540,6 +1531,7 @@ parse_options(int argc, char* argv[], cl_option_list* option
 			case 'V': /* version */
 				version();
 				exit(EXIT_SUCCESS);
+
 			default: /* anything else */
 				printf("unknown option\n");
 				help();

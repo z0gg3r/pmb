@@ -290,7 +290,7 @@ bookmark_list_dequeue(bookmark_list* l)
 char**
 bookmark_list_return_next(bookmark_list* l) 
 {
-	if(l->next < l->size) 
+	if(l->next < l->size - 1) 
 	{
 		char** ret = calloc(4, sizeof(char*));
 		ret[0] = l->id[l->next];
@@ -309,7 +309,7 @@ bookmark_list_return_next(bookmark_list* l)
 bookmark*
 bookmark_list_return_next_bookmark(bookmark_list* l) 
 {
-	if(l->next < l->size) 
+	if(l->next < l->size - 1) 
 	{
 		bookmark* b 	= bookmark_create();
 		b->id 		= l->id[l->next];
@@ -468,6 +468,18 @@ bookmark_set(bookmark* b, char* name, char* url, char* comment, char* tag)
 		return 1;
 
 	return 0;
+}
+
+int
+bookmark_set_id(bookmark* b, char* id)
+{
+	if(b && id)
+	{
+		b->id = id;
+		return 0;
+	}
+
+	return 1;
 }
 
 int
@@ -642,9 +654,10 @@ bookmark_db_import(sqlite3* db, sqlite3* i_db)
 
 		if(bl)
 		{
-			for(int i = 0; i < bookmark_list_get_size(bl) - 1; ++i)
+			char** result = NULL;
+
+			while((result = bookmark_list_return_next(bl)))
 			{
-				char** result 	= bookmark_list_return_next(bl);
 				bookmark* b 	= bookmark_create(result[1], result[2]
 							,result[3], result[4]);
 

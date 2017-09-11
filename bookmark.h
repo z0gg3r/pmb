@@ -43,6 +43,9 @@ char*
 bookmark_tag(bookmark*);
 
 int
+bookmark_set_id(bookmark*, char*);
+
+int
 bookmark_set_name(bookmark*, char*);
 
 int
