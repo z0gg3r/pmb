@@ -44,6 +44,10 @@ read_options();
 static GtkWidget*
 dialogs(char*, gpointer);
 
+/* generate entries for add/edit/delete bookmarks */
+static GtkWidget**
+entries(gboolean);
+
 /* the add window */
 static void 
 add_window(GtkWidget*, gpointer);
@@ -96,7 +100,6 @@ tree_view(GtkWidget*);
 static int 
 gtk_interface(int, char*[]);
 
-
 gpmb_options* 	opts 		= NULL;
 sqlite3* 	db 		= NULL;
 GtkTreeModel* 	model 		= NULL;
@@ -129,11 +132,7 @@ main(int argc, char *argv[])
 	short res = gtk_interface(argc, argv);
 
 	free(opts);
-	opts = NULL;
-
 	bookmark_db_close(db);
-	db = NULL;
-
 	return res;
 }
 
@@ -152,7 +151,7 @@ close_window(GtkWidget* button, gpointer window)
 static void 
 read_options() 
 {
-	opts 	= malloc(sizeof(gpmb_options));
+	opts = malloc(sizeof(gpmb_options));
 
 	if(opts) 
 	{
@@ -192,6 +191,7 @@ tag_box_new()
 	return tag_box;
 }
 
+/* used to set text from tag box */
 static void
 tag_entry_set_text(GtkWidget* tag_box, GtkWidget* tag_entry)
 {
@@ -221,6 +221,56 @@ dialogs(char* title, gpointer main_window)
 	}
 	
 	return NULL;
+}
+
+static GtkWidget**
+entries(gboolean editable)
+{
+	/* labels */
+	GtkWidget* name_label = gtk_label_new("Name");
+	gtk_widget_set_halign(GTK_WIDGET(name_label), GTK_ALIGN_START);
+
+	GtkWidget* url_label = gtk_label_new("Url");
+	gtk_widget_set_halign(GTK_WIDGET(url_label), GTK_ALIGN_START);
+
+	GtkWidget* comment_label = gtk_label_new("Comment");
+	gtk_widget_set_halign(GTK_WIDGET(comment_label), GTK_ALIGN_START);
+
+	GtkWidget* tag_label = gtk_label_new("Tag");
+	gtk_widget_set_halign(GTK_WIDGET(tag_label), GTK_ALIGN_START);
+
+	/* entries */
+	GtkWidget* name_entry = gtk_entry_new();
+	gtk_entry_set_placeholder_text(GTK_ENTRY(name_entry), "name");
+
+	GtkWidget* url_entry = gtk_entry_new();
+	gtk_entry_set_placeholder_text(GTK_ENTRY(url_entry), "url");
+
+	GtkWidget* comment_entry = gtk_entry_new();
+	gtk_entry_set_placeholder_text(GTK_ENTRY(comment_entry), "comment");
+
+	GtkWidget* tag_entry = gtk_entry_new();
+	gtk_entry_set_placeholder_text(GTK_ENTRY(tag_entry), "tag");
+
+	if(!editable)
+	{
+		gtk_editable_set_editable(GTK_EDITABLE(name_entry), FALSE);
+		gtk_editable_set_editable(GTK_EDITABLE(url_entry), FALSE);
+		gtk_editable_set_editable(GTK_EDITABLE(comment_entry), FALSE);
+		gtk_editable_set_editable(GTK_EDITABLE(tag_entry), FALSE);
+	}
+
+	GtkWidget** r = g_new(GtkWidget*, 8);
+	r[0] = name_label;
+	r[1] = name_entry;
+	r[2] = url_label;
+	r[3] = url_entry;
+	r[4] = comment_label;
+	r[5] = comment_entry;
+	r[6] = tag_label;
+	r[7] = tag_entry;
+
+	return r;
 }
 
 static void 
@@ -258,52 +308,27 @@ add_bookmark(GtkWidget* button, gpointer** args)
 static void 
 add_window(GtkWidget* button, gpointer main_window) 
 {
-	GtkWidget* add_window = dialogs("Add bookmark", main_window);
-
-	/* create entries and labels for each column of the database */
-	GtkWidget* name_label = gtk_label_new("Name");
-	gtk_widget_set_halign(GTK_WIDGET(name_label), GTK_ALIGN_START);
-
-	GtkWidget* name_entry = gtk_entry_new();
-	gtk_entry_set_placeholder_text(GTK_ENTRY(name_entry), "name");
-	//gtk_entry_set_width_chars(GTK_ENTRY(name_entry), 100);
-	
-	GtkWidget* url_label = gtk_label_new("Url");
-	gtk_widget_set_halign(GTK_WIDGET(url_label), GTK_ALIGN_START);
-
-	GtkWidget* url_entry = gtk_entry_new();
-	gtk_entry_set_placeholder_text(GTK_ENTRY(url_entry), "url");
-
-	GtkWidget* comment_label = gtk_label_new("Comment");
-	gtk_widget_set_halign(GTK_WIDGET(comment_label), GTK_ALIGN_START);
-
-	GtkWidget* comment_entry = gtk_entry_new();
-	gtk_entry_set_placeholder_text(GTK_ENTRY(comment_entry), "comment");
-
-	GtkWidget* tag_label = gtk_label_new("Tag");
-	gtk_widget_set_halign(GTK_WIDGET(tag_label), GTK_ALIGN_START);
-
-	GtkWidget* tag_entry = gtk_entry_new();
-	gtk_entry_set_placeholder_text(GTK_ENTRY(tag_entry), "tag");
-
-	/* get data about selected bookmark */
-	bookmark* b = get_data();
+	GtkWidget* 	window 	= dialogs("Add bookmark", main_window);
+	GtkWidget** 	e 	= entries(TRUE);
+	bookmark* 	b 	= get_data();
 
 	if(b) 
 	{
-		if(bookmark_tag(b))
-			gtk_entry_set_text(GTK_ENTRY(tag_entry), bookmark_tag(b));
+		if(strlen(bookmark_tag(b)) > 1)
+			gtk_entry_set_text(GTK_ENTRY(e[7]), bookmark_tag(b));
+		else if(bookmark_id(b))
+			gtk_entry_set_text(GTK_ENTRY(e[7]), bookmark_id(b));
 
 		free(b);
 		b = NULL;
 	}
 
 	GtkWidget** add_bookmark_args = g_new(GtkWidget*, 5);
-	add_bookmark_args[0] = name_entry;
-	add_bookmark_args[1] = url_entry;
-	add_bookmark_args[2] = comment_entry;
-	add_bookmark_args[3] = tag_entry;
-	add_bookmark_args[4] = add_window;
+	add_bookmark_args[0] = e[1];
+	add_bookmark_args[1] = e[3];
+	add_bookmark_args[2] = e[5];
+	add_bookmark_args[3] = e[7];
+	add_bookmark_args[4] = window;
 
 	/* button */
 	GtkWidget* add_button = gtk_button_new_with_mnemonic("_Add");
@@ -312,12 +337,12 @@ add_window(GtkWidget* button, gpointer main_window)
 
 	GtkWidget* cancel_button = gtk_button_new_with_mnemonic("_Cancel");
 	g_signal_connect(cancel_button, "clicked", G_CALLBACK(close_window)
-		,add_window);
+		,window);
 
 	/* tag box */
 	GtkWidget* tag_box = tag_box_new();
 	g_signal_connect(tag_box, "changed", G_CALLBACK(tag_entry_set_text)
-		,tag_entry); 
+		,e[7]); 
 
 	/* grid */
 	GtkWidget *grid = gtk_grid_new();
@@ -325,28 +350,30 @@ add_window(GtkWidget* button, gpointer main_window)
 	gtk_grid_set_row_spacing(GTK_GRID(grid), 2);
 	gtk_grid_set_column_homogeneous(GTK_GRID(grid), 1);
 
-	gtk_grid_attach(GTK_GRID(grid), name_label 	,0,  0, 30, 1);
-	gtk_grid_attach(GTK_GRID(grid), name_entry 	,20, 0, 50, 1);
+	gtk_grid_attach(GTK_GRID(grid), e[0] 		,0,  0, 30, 1);
+	gtk_grid_attach(GTK_GRID(grid), e[1] 		,20, 0, 50, 1);
 
-	gtk_grid_attach(GTK_GRID(grid), url_label 	,0,  1, 30, 1);
-	gtk_grid_attach(GTK_GRID(grid), url_entry 	,20, 1, 50, 1);
+	gtk_grid_attach(GTK_GRID(grid), e[2] 		,0,  1, 30, 1);
+	gtk_grid_attach(GTK_GRID(grid), e[3] 		,20, 1, 50, 1);
 
-	gtk_grid_attach(GTK_GRID(grid), comment_label 	,0,  2, 30, 1);
-	gtk_grid_attach(GTK_GRID(grid), comment_entry 	,20, 2, 50, 1);
+	gtk_grid_attach(GTK_GRID(grid), e[4] 		,0,  2, 30, 1);
+	gtk_grid_attach(GTK_GRID(grid), e[5] 		,20, 2, 50, 1);
 
-	gtk_grid_attach(GTK_GRID(grid), tag_label 	,0,  3, 30, 1);
-	gtk_grid_attach(GTK_GRID(grid), tag_entry 	,20, 3, 50, 1);
+	gtk_grid_attach(GTK_GRID(grid), e[6] 		,0,  3, 30, 1);
+	gtk_grid_attach(GTK_GRID(grid), e[7] 		,20, 3, 50, 1);
 
 	gtk_grid_attach(GTK_GRID(grid), tag_box 	,20, 4, 50, 1);
 
 	gtk_grid_attach(GTK_GRID(grid), add_button 	,20, 5, 20, 10);
 	gtk_grid_attach(GTK_GRID(grid), cancel_button 	,40, 5, 20, 10);
 
+	g_free(e);
+
 	/* add to window */
-	gtk_container_add(GTK_CONTAINER(add_window), grid);
+	gtk_container_add(GTK_CONTAINER(window), grid);
 
 	/* show */
-	gtk_widget_show_all(GTK_WIDGET(add_window));
+	gtk_widget_show_all(GTK_WIDGET(window));
 }
 
 static void
@@ -369,7 +396,6 @@ delete_bookmark(GtkWidget* button, gpointer** args)
 				bookmark_db_delete(db, id);
 				read_database(NULL, NULL);
 				free(result);
-				result = NULL;
 			}
 
 			bookmark_list_destroy(bl);
@@ -383,63 +409,32 @@ delete_bookmark(GtkWidget* button, gpointer** args)
 static void
 delete_window(GtkWidget* button, gpointer main_window) 
 {
-	GtkWidget* delete_window = dialogs("Delete bookmark", main_window);
-
-	/* label, entry */
-	GtkWidget* delete_entry_label = gtk_label_new("Delete");
-	gtk_widget_set_halign(GTK_WIDGET(delete_entry_label), GTK_ALIGN_START);
-	GtkWidget* delete_entry = gtk_entry_new();
-	gtk_entry_set_placeholder_text(GTK_ENTRY(delete_entry), "delete");
-
-	/* name */
-	GtkWidget* name_label = gtk_label_new("Name");
-	GtkWidget* name_entry = gtk_entry_new();
-	gtk_entry_set_placeholder_text(GTK_ENTRY(name_entry), "name");
-	gtk_widget_set_halign(GTK_WIDGET(name_label), GTK_ALIGN_START);
-
-	/* url */
-	GtkWidget* url_label = gtk_label_new("Url");
-	GtkWidget* url_entry = gtk_entry_new();
-	gtk_entry_set_placeholder_text(GTK_ENTRY(url_entry), "url");
-	gtk_widget_set_halign(GTK_WIDGET(url_label), GTK_ALIGN_START);
-	
-	/* comment */
-	GtkWidget* comment_label = gtk_label_new("Comment");
-	GtkWidget* comment_entry = gtk_entry_new();
-	gtk_entry_set_placeholder_text(GTK_ENTRY(comment_entry), "comment");
-	gtk_widget_set_halign(GTK_WIDGET(comment_label), GTK_ALIGN_START);
-
-	/* tag */
-	GtkWidget* tag_label = gtk_label_new("Delete");
-	GtkWidget* tag_entry = gtk_entry_new();
-	gtk_entry_set_placeholder_text(GTK_ENTRY(tag_entry), "tag");
-	gtk_widget_set_halign(GTK_WIDGET(tag_label), GTK_ALIGN_START);
-
-	/* get data about selected bookmark */
-	bookmark* b = get_data();
+	GtkWidget* 	window 	= dialogs("Delete bookmark", main_window);
+	GtkWidget** 	e 	= entries(FALSE);
+	bookmark* 	b 	= get_data();
 
 	if(b) 
 	{
 		if(bookmark_name(b))
-			gtk_entry_set_text(GTK_ENTRY(name_entry), bookmark_name(b));
+			gtk_entry_set_text(GTK_ENTRY(e[1]), bookmark_name(b));
 
 		if(bookmark_url(b))
-			gtk_entry_set_text(GTK_ENTRY(url_entry), bookmark_url(b));
+			gtk_entry_set_text(GTK_ENTRY(e[3]), bookmark_url(b));
 
 		if(bookmark_comment(b))
-			gtk_entry_set_text(GTK_ENTRY(comment_entry)
+			gtk_entry_set_text(GTK_ENTRY(e[5])
 				,bookmark_comment(b));
 
 		if(bookmark_tag(b))
-			gtk_entry_set_text(GTK_ENTRY(tag_entry), bookmark_tag(b));
+			gtk_entry_set_text(GTK_ENTRY(e[7]), bookmark_tag(b));
 
 		free(b);
 		b = NULL;
 	}
 
 	GtkWidget** delete_bookmark_args = g_new(GtkWidget*, 2);
-	delete_bookmark_args[0] = url_entry;
-	delete_bookmark_args[1] = delete_window;
+	delete_bookmark_args[0] = e[3];
+	delete_bookmark_args[1] = window;
 
 	/* button */
 	GtkWidget* delete_button = gtk_button_new_with_mnemonic("_Delete");
@@ -448,7 +443,7 @@ delete_window(GtkWidget* button, gpointer main_window)
 
 	GtkWidget* cancel_button = gtk_button_new_with_mnemonic("_Cancel");
 	g_signal_connect(cancel_button, "clicked", G_CALLBACK(close_window)
-		,delete_window);
+		,window);
 
 	/* grid */
 	GtkWidget* grid = gtk_grid_new();
@@ -456,26 +451,29 @@ delete_window(GtkWidget* button, gpointer main_window)
 	gtk_grid_set_row_spacing(GTK_GRID(grid), 2);
 	gtk_grid_set_column_homogeneous(GTK_GRID(grid), 1);
 
-	gtk_grid_attach(GTK_GRID(grid), name_label 	,0,  0, 30, 1);
-	gtk_grid_attach(GTK_GRID(grid), name_entry	,20, 0, 50, 1);
+	gtk_grid_attach(GTK_GRID(grid), e[0] 		,0,  0, 30, 1);
+	gtk_grid_attach(GTK_GRID(grid), e[1]		,20, 0, 50, 1);
 
-	gtk_grid_attach(GTK_GRID(grid), url_label 	,0,  1, 30, 1);
-	gtk_grid_attach(GTK_GRID(grid), url_entry	,20, 1, 50, 1);
+	gtk_grid_attach(GTK_GRID(grid), e[2] 		,0,  1, 30, 1);
+	gtk_grid_attach(GTK_GRID(grid), e[3]		,20, 1, 50, 1);
 
-	gtk_grid_attach(GTK_GRID(grid), comment_label 	,0,  2, 30, 1);
-	gtk_grid_attach(GTK_GRID(grid), comment_entry	,20, 2, 50, 1);
+	gtk_grid_attach(GTK_GRID(grid), e[4] 		,0,  2, 30, 1);
+	gtk_grid_attach(GTK_GRID(grid), e[5]		,20, 2, 50, 1);
 
-	gtk_grid_attach(GTK_GRID(grid), tag_label 	,0,  3, 30, 1);
-	gtk_grid_attach(GTK_GRID(grid), tag_entry	,20, 3, 50, 1);
+	gtk_grid_attach(GTK_GRID(grid), e[6] 		,0,  3, 30, 1);
+	gtk_grid_attach(GTK_GRID(grid), e[7]		,20, 3, 50, 1);
 
 	gtk_grid_attach(GTK_GRID(grid), delete_button	,20, 4, 20, 10);
 	gtk_grid_attach(GTK_GRID(grid), cancel_button 	,40, 4, 20, 10);
 
+	g_free(e);
+
 	/* add to window */
-	gtk_container_add(GTK_CONTAINER(delete_window), grid);
+	gtk_container_add(GTK_CONTAINER(window), grid);
 
 	/* show */
-	gtk_widget_show_all(GTK_WIDGET(delete_window));
+	gtk_widget_show_all(GTK_WIDGET(window));
+	gtk_widget_grab_focus(GTK_WIDGET(cancel_button));
 }
 
 static void
@@ -495,16 +493,10 @@ edit(GtkWidget* button, gpointer main_window)
 static void
 edit_bookmark(GtkWidget* button, gpointer** args) 
 {
-	char*  name 	= NULL;
-	char*  url 	= NULL;
-	char*  comment 	= NULL;
-	char*  tag 	= NULL;
-	char** result	= NULL;
-
-	name 	= (char*)gtk_entry_get_text(GTK_ENTRY(args[0]));
-	url 	= (char*)gtk_entry_get_text(GTK_ENTRY(args[1]));
-	comment = (char*)gtk_entry_get_text(GTK_ENTRY(args[2]));
-	tag 	= (char*)gtk_entry_get_text(GTK_ENTRY(args[3]));
+	char* name 	= (char*)gtk_entry_get_text(GTK_ENTRY(args[0]));
+	char* url 	= (char*)gtk_entry_get_text(GTK_ENTRY(args[1]));
+	char* comment 	= (char*)gtk_entry_get_text(GTK_ENTRY(args[2]));
+	char* tag 	= (char*)gtk_entry_get_text(GTK_ENTRY(args[3]));
 
 	if(url) 
 	{
@@ -512,7 +504,7 @@ edit_bookmark(GtkWidget* button, gpointer** args)
 		
 		if(bl) 
 		{
-			result = bookmark_list_return_next(bl);
+			char** result = bookmark_list_return_next(bl);
 
 			if(result[0]) 
 			{
@@ -532,7 +524,6 @@ edit_bookmark(GtkWidget* button, gpointer** args)
 
 				read_database(NULL, NULL);
 				free(result);
-				result = NULL;
 			}
 
 			bookmark_list_destroy(bl);
@@ -552,58 +543,33 @@ edit_directory(GtkWidget* button, gpointer** args)
 static void
 edit_bookmark_window(bookmark* b, gpointer main_window) 
 {
-	GtkWidget* window = dialogs("Edit bookmark", main_window);
-
-	GtkWidget* name_entry_label = gtk_label_new("Name");
-	gtk_widget_set_halign(GTK_WIDGET(name_entry_label), GTK_ALIGN_START);
-
-	GtkWidget* name_entry = gtk_entry_new();
-	gtk_entry_set_placeholder_text(GTK_ENTRY(name_entry), "name");
-	//gtk_entry_set_width_chars(GTK_ENTRY(name_entry), 100);
-	
-	GtkWidget* url_entry_label = gtk_label_new("Url");
-	gtk_widget_set_halign(GTK_WIDGET(url_entry_label), GTK_ALIGN_START);
-
-	GtkWidget* url_entry = gtk_entry_new();
-	gtk_entry_set_placeholder_text(GTK_ENTRY(url_entry), "url");
-
-	GtkWidget* comment_entry_label = gtk_label_new("Comment");
-	gtk_widget_set_halign(GTK_WIDGET(comment_entry_label)
-		,GTK_ALIGN_START);
-
-	GtkWidget* comment_entry = gtk_entry_new();
-	gtk_entry_set_placeholder_text(GTK_ENTRY(comment_entry), "comment");
-
-	GtkWidget* tag_entry_label = gtk_label_new("Tag");
-	gtk_widget_set_halign(GTK_WIDGET(tag_entry_label), GTK_ALIGN_START);
-
-	GtkWidget* tag_entry = gtk_entry_new();
-	gtk_entry_set_placeholder_text(GTK_ENTRY(tag_entry), "tag");
+	GtkWidget* 	window 	= dialogs("Edit bookmark", main_window);
+	GtkWidget** 	e 	= entries(FALSE);
 
 	if(b) 
 	{
 		if(bookmark_name(b))
-			gtk_entry_set_text(GTK_ENTRY(name_entry), bookmark_name(b));
+			gtk_entry_set_text(GTK_ENTRY(e[1]), bookmark_name(b));
 
 		if(bookmark_url(b))
-			gtk_entry_set_text(GTK_ENTRY(url_entry), bookmark_url(b));
+			gtk_entry_set_text(GTK_ENTRY(e[3]), bookmark_url(b));
 
 		if(bookmark_comment(b))
-			gtk_entry_set_text(GTK_ENTRY(comment_entry)
+			gtk_entry_set_text(GTK_ENTRY(e[5])
 				,bookmark_comment(b));
 
 		if(bookmark_tag(b))
-			gtk_entry_set_text(GTK_ENTRY(tag_entry), bookmark_tag(b));
+			gtk_entry_set_text(GTK_ENTRY(e[7]), bookmark_tag(b));
 
 		free(b);
 		b = NULL;
 	}
 
 	GtkWidget** edit_bookmark_args = g_new(GtkWidget*, 5);
-	edit_bookmark_args[0] = name_entry;
-	edit_bookmark_args[1] = url_entry;
-	edit_bookmark_args[2] = comment_entry;
-	edit_bookmark_args[3] = tag_entry;
+	edit_bookmark_args[0] = e[1];
+	edit_bookmark_args[1] = e[3];
+	edit_bookmark_args[2] = e[5];
+	edit_bookmark_args[3] = e[7];
 	edit_bookmark_args[4] = window;
 
 	/* button */
@@ -618,7 +584,7 @@ edit_bookmark_window(bookmark* b, gpointer main_window)
 	/* tag box */
 	GtkWidget* tag_box = tag_box_new();
 	g_signal_connect(tag_box, "changed", G_CALLBACK(tag_entry_set_text)
-		,tag_entry); 
+		,e[7]); 
 
 	/* grid */
 	GtkWidget* grid = gtk_grid_new();
@@ -626,22 +592,24 @@ edit_bookmark_window(bookmark* b, gpointer main_window)
 	gtk_grid_set_row_spacing(GTK_GRID(grid), 2);
 	gtk_grid_set_column_homogeneous(GTK_GRID(grid), 1);
 
-	gtk_grid_attach(GTK_GRID(grid), name_entry_label 	,0,  0, 30, 1);
-	gtk_grid_attach(GTK_GRID(grid), name_entry 		,20, 0, 50, 1);
+	gtk_grid_attach(GTK_GRID(grid), e[0] 		,0,  0, 30, 1);
+	gtk_grid_attach(GTK_GRID(grid), e[1] 		,20, 0, 50, 1);
 
-	gtk_grid_attach(GTK_GRID(grid), url_entry_label 	,0,  1, 30, 1);
-	gtk_grid_attach(GTK_GRID(grid), url_entry 		,20, 1, 50, 1);
+	gtk_grid_attach(GTK_GRID(grid), e[2] 		,0,  1, 30, 1);
+	gtk_grid_attach(GTK_GRID(grid), e[3] 		,20, 1, 50, 1);
 
-	gtk_grid_attach(GTK_GRID(grid), comment_entry_label 	,0,  2, 30, 1);
-	gtk_grid_attach(GTK_GRID(grid), comment_entry 		,20, 2, 50, 1);
+	gtk_grid_attach(GTK_GRID(grid), e[4] 		,0,  2, 30, 1);
+	gtk_grid_attach(GTK_GRID(grid), e[5] 		,20, 2, 50, 1);
 
-	gtk_grid_attach(GTK_GRID(grid), tag_entry_label 	,0,  3, 30, 1);
-	gtk_grid_attach(GTK_GRID(grid), tag_entry 		,20, 3, 50, 1);
+	gtk_grid_attach(GTK_GRID(grid), e[6] 		,0,  3, 30, 1);
+	gtk_grid_attach(GTK_GRID(grid), e[7] 		,20, 3, 50, 1);
 
-	gtk_grid_attach(GTK_GRID(grid), tag_box 		,20, 4, 50, 1);
+	gtk_grid_attach(GTK_GRID(grid), tag_box 	,20, 4, 50, 1);
 
-	gtk_grid_attach(GTK_GRID(grid), edit_button 		,20, 5, 20, 10);
-	gtk_grid_attach(GTK_GRID(grid), cancel_button 		,40, 5, 20, 10);
+	gtk_grid_attach(GTK_GRID(grid), edit_button 	,20, 5, 20, 10);
+	gtk_grid_attach(GTK_GRID(grid), cancel_button 	,40, 5, 20, 10);
+
+	g_free(e);
 
 	/* add to window */
 	gtk_container_add(GTK_CONTAINER(window), grid);
@@ -670,10 +638,8 @@ edit_directory_window(bookmark* b, gpointer main_window)
 
 	/* button */
 	GtkWidget* edit_button = gtk_button_new_with_mnemonic("_edit");
-	/*
-	g_signal_connect(edit_button, "clicked", G_CALLBACK(edit_bookmark)
-		,edit_bookmark_args);
-	*/
+	g_signal_connect(edit_button, "clicked", G_CALLBACK(edit_directory)
+		,NULL);
 
 	GtkWidget* cancel_button = gtk_button_new_with_mnemonic("_Cancel");
 	g_signal_connect(cancel_button, "clicked", G_CALLBACK(close_window)
