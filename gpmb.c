@@ -16,87 +16,99 @@ typedef struct gpmb_options
 	char* tag_fg;
 } gpmb_options;
 
-/* when click 'add' button inside add bookmark window */
+/* -- when click 'add' button inside add bookmark window -- */
 static void 
 add_bookmark(GtkWidget*, gpointer**);
 
-/* when click 'delete' inside delete bookmark window */
+/* -- delete wrapper -- */
+static void
+delete(GtkWidget*, gpointer);
+
+/* -- when click 'delete' inside delete bookmark window -- */
 static void 
 delete_bookmark(GtkWidget*, gpointer**);
 
-/* edit wrapper */
+/* -- when click 'delete' inside delete directory window -- */
+static void 
+delete_directory(GtkWidget*, gpointer**);
+
+/* -- edit wrapper -- */
 static void
 edit(GtkWidget*, gpointer);
 
-/* when click 'edit' inside edit bookmark window */
+/* -- when click 'edit' inside edit bookmark window -- */
 static void 
 edit_bookmark(GtkWidget*, gpointer**);
 
-/* when click 'edit' inside edit directory window */
+/* -- when click 'edit' inside edit directory window -- */
 static void 
 edit_directory(GtkWidget*, gpointer**);
 
-/* options */
+/* -- options -- */
 static void 
 read_options();
 
-/* set up dialog windows */
+/* -- set up dialog windows -- */
 static GtkWidget*
 dialogs(char*, gpointer);
 
-/* generate entries for add/edit/delete bookmarks */
+/* -- generate entries for add/edit/delete bookmarks -- */
 static GtkWidget**
 entries(gboolean);
 
-/* the add window */
+/* -- the add window -- */
 static void 
 add_window(GtkWidget*, gpointer);
 
-/* the delete window */
+/* -- the delete bookmark window -- */
 static void 
-delete_window(GtkWidget*, gpointer);
+delete_bookmark_window(bookmark*, gpointer);
 
-/* the edit bookmark window */
+/* -- the delete directory window -- */
+static void 
+delete_directory_window(bookmark*, gpointer);
+
+/* -- the edit bookmark window -- */
 static void 
 edit_bookmark_window(bookmark*, gpointer);
 
-/* the edit directory window */
+/* -- the edit directory window -- */
 static void 
 edit_directory_window(bookmark*, gpointer);
 
-/* the option window */
+/* -- the option window -- */
 static void 
 options_window(GtkWidget*, gpointer);
 
-/* cancel */
+/* -- cancel -- */
 static void 
 close_window(GtkWidget*, gpointer);
 
-/* quit */
+/* -- quit -- */
 static void 
 destroy(); 	
 
-/* create a tag combo box */
+/* -- create a tag combo box -- */
 static GtkWidget*
 tag_box_new();
 
-/* read database */
+/* -- read database -- */
 static void 
 read_database(GtkWidget*, gpointer**); 
 
-/* update selected_path and selected_column globals */
+/* -- update selected_path and selected_column globals -- */
 static void 
 update_selected_row(gpointer**);
 
-/* get data of current selected bookmark */
+/* -- get data of current selected bookmark -- */
 static bookmark* 
 get_data(); 
 
-/* create tree view */
+/* -- create tree view -- */
 static GtkWidget* 
 tree_view(GtkWidget*);
 
-/* gtk interface */
+/* -- gtk interface -- */
 static int 
 gtk_interface(int, char*[]);
 
@@ -123,9 +135,8 @@ main(int argc, char *argv[])
 
 		db = bookmark_db_open(file);
 		free(file);
-		file = NULL;
 	}
-	else /* going out if we can't allocate memory */
+	else
 		exit(EXIT_FAILURE);
 
 	read_options();
@@ -352,28 +363,33 @@ add_window(GtkWidget* button, gpointer main_window)
 
 	gtk_grid_attach(GTK_GRID(grid), e[0] 		,0,  0, 30, 1);
 	gtk_grid_attach(GTK_GRID(grid), e[1] 		,20, 0, 50, 1);
-
 	gtk_grid_attach(GTK_GRID(grid), e[2] 		,0,  1, 30, 1);
 	gtk_grid_attach(GTK_GRID(grid), e[3] 		,20, 1, 50, 1);
-
 	gtk_grid_attach(GTK_GRID(grid), e[4] 		,0,  2, 30, 1);
 	gtk_grid_attach(GTK_GRID(grid), e[5] 		,20, 2, 50, 1);
-
 	gtk_grid_attach(GTK_GRID(grid), e[6] 		,0,  3, 30, 1);
 	gtk_grid_attach(GTK_GRID(grid), e[7] 		,20, 3, 50, 1);
-
 	gtk_grid_attach(GTK_GRID(grid), tag_box 	,20, 4, 50, 1);
-
 	gtk_grid_attach(GTK_GRID(grid), add_button 	,20, 5, 20, 10);
 	gtk_grid_attach(GTK_GRID(grid), cancel_button 	,40, 5, 20, 10);
 
 	g_free(e);
-
-	/* add to window */
 	gtk_container_add(GTK_CONTAINER(window), grid);
-
-	/* show */
 	gtk_widget_show_all(GTK_WIDGET(window));
+}
+
+static void
+delete(GtkWidget* button, gpointer main_window)
+{
+	bookmark* b = get_data();
+
+	if(b)
+	{
+		if(strlen(bookmark_url(b)) > 1)
+			delete_bookmark_window(b, main_window);
+		else
+			delete_directory_window(b, main_window);
+	}
 }
 
 static void
@@ -407,11 +423,16 @@ delete_bookmark(GtkWidget* button, gpointer** args)
 }
 
 static void
-delete_window(GtkWidget* button, gpointer main_window) 
+delete_directory(GtkWidget* button, gpointer** args)
+{
+
+}
+
+static void
+delete_bookmark_window(bookmark* b, gpointer main_window) 
 {
 	GtkWidget* 	window 	= dialogs("Delete bookmark", main_window);
 	GtkWidget** 	e 	= entries(FALSE);
-	bookmark* 	b 	= get_data();
 
 	if(b) 
 	{
@@ -453,25 +474,61 @@ delete_window(GtkWidget* button, gpointer main_window)
 
 	gtk_grid_attach(GTK_GRID(grid), e[0] 		,0,  0, 30, 1);
 	gtk_grid_attach(GTK_GRID(grid), e[1]		,20, 0, 50, 1);
-
 	gtk_grid_attach(GTK_GRID(grid), e[2] 		,0,  1, 30, 1);
 	gtk_grid_attach(GTK_GRID(grid), e[3]		,20, 1, 50, 1);
-
 	gtk_grid_attach(GTK_GRID(grid), e[4] 		,0,  2, 30, 1);
 	gtk_grid_attach(GTK_GRID(grid), e[5]		,20, 2, 50, 1);
-
 	gtk_grid_attach(GTK_GRID(grid), e[6] 		,0,  3, 30, 1);
 	gtk_grid_attach(GTK_GRID(grid), e[7]		,20, 3, 50, 1);
-
 	gtk_grid_attach(GTK_GRID(grid), delete_button	,20, 4, 20, 10);
 	gtk_grid_attach(GTK_GRID(grid), cancel_button 	,40, 4, 20, 10);
 
 	g_free(e);
-
-	/* add to window */
 	gtk_container_add(GTK_CONTAINER(window), grid);
+	gtk_widget_show_all(GTK_WIDGET(window));
+	gtk_widget_grab_focus(GTK_WIDGET(cancel_button));
+}
 
-	/* show */
+static void
+delete_directory_window(bookmark* b, gpointer main_window)
+{
+	GtkWidget* window = dialogs("Delete directory", main_window);
+
+	GtkWidget* name_entry_label = gtk_label_new("Name");
+	gtk_widget_set_halign(GTK_WIDGET(name_entry_label), GTK_ALIGN_START);
+
+	GtkWidget* name_entry = gtk_entry_new();
+	gtk_entry_set_placeholder_text(GTK_ENTRY(name_entry), "name");
+	gtk_editable_set_editable(GTK_EDITABLE(name_entry), FALSE);
+
+	if(b && bookmark_id(b))
+	{
+		gtk_entry_set_text(GTK_ENTRY(name_entry), bookmark_id(b));
+		free(b);
+		b = NULL;
+	}
+
+	/* button */
+	GtkWidget* edit_button = gtk_button_new_with_mnemonic("_edit");
+	g_signal_connect(edit_button, "clicked", G_CALLBACK(delete_directory)
+		,NULL);
+
+	GtkWidget* cancel_button = gtk_button_new_with_mnemonic("_Cancel");
+	g_signal_connect(cancel_button, "clicked", G_CALLBACK(close_window)
+		,window);
+
+	/* grid */
+	GtkWidget* grid = gtk_grid_new();
+	gtk_grid_set_column_spacing(GTK_GRID(grid), 2);
+	gtk_grid_set_row_spacing(GTK_GRID(grid), 2);
+	gtk_grid_set_column_homogeneous(GTK_GRID(grid), 1);
+
+	gtk_grid_attach(GTK_GRID(grid), name_entry_label 	,0,  0, 30, 1);
+	gtk_grid_attach(GTK_GRID(grid), name_entry 		,20, 0, 50, 1);
+	gtk_grid_attach(GTK_GRID(grid), edit_button 		,20, 5, 20, 10);
+	gtk_grid_attach(GTK_GRID(grid), cancel_button 		,40, 5, 20, 10);
+
+	gtk_container_add(GTK_CONTAINER(window), grid);
 	gtk_widget_show_all(GTK_WIDGET(window));
 	gtk_widget_grab_focus(GTK_WIDGET(cancel_button));
 }
@@ -594,27 +651,18 @@ edit_bookmark_window(bookmark* b, gpointer main_window)
 
 	gtk_grid_attach(GTK_GRID(grid), e[0] 		,0,  0, 30, 1);
 	gtk_grid_attach(GTK_GRID(grid), e[1] 		,20, 0, 50, 1);
-
 	gtk_grid_attach(GTK_GRID(grid), e[2] 		,0,  1, 30, 1);
 	gtk_grid_attach(GTK_GRID(grid), e[3] 		,20, 1, 50, 1);
-
 	gtk_grid_attach(GTK_GRID(grid), e[4] 		,0,  2, 30, 1);
 	gtk_grid_attach(GTK_GRID(grid), e[5] 		,20, 2, 50, 1);
-
 	gtk_grid_attach(GTK_GRID(grid), e[6] 		,0,  3, 30, 1);
 	gtk_grid_attach(GTK_GRID(grid), e[7] 		,20, 3, 50, 1);
-
 	gtk_grid_attach(GTK_GRID(grid), tag_box 	,20, 4, 50, 1);
-
 	gtk_grid_attach(GTK_GRID(grid), edit_button 	,20, 5, 20, 10);
 	gtk_grid_attach(GTK_GRID(grid), cancel_button 	,40, 5, 20, 10);
 
 	g_free(e);
-
-	/* add to window */
 	gtk_container_add(GTK_CONTAINER(window), grid);
-
-	/* show */
 	gtk_widget_show_all(GTK_WIDGET(window));
 }
 
@@ -653,53 +701,76 @@ edit_directory_window(bookmark* b, gpointer main_window)
 
 	gtk_grid_attach(GTK_GRID(grid), name_entry_label 	,0,  0, 30, 1);
 	gtk_grid_attach(GTK_GRID(grid), name_entry 		,20, 0, 50, 1);
-
 	gtk_grid_attach(GTK_GRID(grid), edit_button 		,20, 5, 20, 10);
 	gtk_grid_attach(GTK_GRID(grid), cancel_button 		,40, 5, 20, 10);
 
-	/* add to window */
 	gtk_container_add(GTK_CONTAINER(window), grid);
-
-	/* show */
 	gtk_widget_show_all(GTK_WIDGET(window));
 }
 
 static void
 options_window(GtkWidget* button, gpointer main_window) 
 {
-	/* set up window */
-	GtkWidget* options_dialog = gtk_dialog_new();
-	GtkWidget* dialog_box = gtk_dialog_get_content_area
-		(GTK_DIALOG(options_dialog));
-	gtk_window_set_transient_for(GTK_WINDOW(options_dialog)
-		,GTK_WINDOW(main_window));
-	//gtk_window_set_type_hint(GTK_WINDOW(options_dialog), GDK_WINDOW_TYPE_HINT_DIALOG);
-
-	g_signal_connect(options_dialog, "destroy", G_CALLBACK(close_window)
-		,options_dialog);
+	GtkWidget* window = dialogs("Options", main_window);
 
 	/* page 1 */
-	GtkWidget* page_1_label = gtk_label_new("page 1");
-	GtkWidget* test_1_button = gtk_button_new_with_label("test 1");
+	GtkWidget* page_color_l = gtk_label_new("Colors");
+	GtkWidget* page_color_b = gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
 
-	GtkWidget* page_1_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
-	gtk_container_add(GTK_CONTAINER(page_1_box), test_1_button);
+	GdkRGBA id;
+	GdkRGBA name;
+	GdkRGBA url;
+	GdkRGBA comment;
+
+	gdk_rgba_parse(&id, opts->id_fg);
+	gdk_rgba_parse(&name, opts->name_fg);
+	gdk_rgba_parse(&url, opts->url_fg);
+	gdk_rgba_parse(&comment, opts->comment_fg);
+
+	GtkWidget* id_fg 	= gtk_color_button_new_with_rgba(&id);
+	GtkWidget* name_fg	= gtk_color_button_new_with_rgba(&name);
+	GtkWidget* url_fg 	= gtk_color_button_new_with_rgba(&url);
+	GtkWidget* comment_fg 	= gtk_color_button_new_with_rgba(&comment);
+
+	GtkWidget* id_label		= gtk_label_new("Dir / Id");
+	GtkWidget* name_label		= gtk_label_new("Name");
+	GtkWidget* url_label		= gtk_label_new("Url");
+	GtkWidget* comment_label	= gtk_label_new("Comment");
+
+	GtkWidget* color_grid = gtk_grid_new();
+	gtk_grid_set_column_spacing(GTK_GRID(color_grid), 2);
+	gtk_grid_set_row_spacing(GTK_GRID(color_grid), 2);
+	gtk_grid_set_column_homogeneous(GTK_GRID(color_grid), 1);
+
+	gtk_grid_attach(GTK_GRID(color_grid), id_label 		,0,  0, 30, 1);
+	gtk_grid_attach(GTK_GRID(color_grid), id_fg 		,40, 0, 50, 1);
+	gtk_grid_attach(GTK_GRID(color_grid), name_label 	,0,  1, 30, 1);
+	gtk_grid_attach(GTK_GRID(color_grid), name_fg 		,40, 1, 50, 1);
+	gtk_grid_attach(GTK_GRID(color_grid), url_label		,0,  2, 30, 1);
+	gtk_grid_attach(GTK_GRID(color_grid), url_fg 		,40, 2, 50, 1);
+	gtk_grid_attach(GTK_GRID(color_grid), comment_label 	,0,  3, 30, 1);
+	gtk_grid_attach(GTK_GRID(color_grid), comment_fg 	,40, 3, 50, 1);
+
+	//gtk_grid_attach(GTK_GRID(color_grid), edit_button 	,20, 5, 20, 10);
+	//gtk_grid_attach(GTK_GRID(color_grid), cancel_button 	,40, 5, 20, 10);
+
+	gtk_container_add(GTK_CONTAINER(page_color_b), color_grid);
 
 	/* page 2 */
 	GtkWidget* page_2_label = gtk_label_new("page 2");
+	GtkWidget* page_2_box 	= gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
+
 	GtkWidget* test_2_button = gtk_button_new_with_label("test 2");
 
-	GtkWidget* page_2_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
 	gtk_container_add(GTK_CONTAINER(page_2_box), test_2_button);
 
 	/* notebook */
 	GtkWidget* notebook = gtk_notebook_new();
-	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), page_1_box, page_1_label);
+	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), page_color_b, page_color_l);
 	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), page_2_box, page_2_label);
 
-	/* show */
-	gtk_container_add(GTK_CONTAINER(dialog_box), notebook);
-	gtk_widget_show_all(GTK_WIDGET(options_dialog));
+	gtk_container_add(GTK_CONTAINER(window), notebook);
+	gtk_widget_show_all(GTK_WIDGET(window));
 }
 
 static void
@@ -872,13 +943,16 @@ tree_view(GtkWidget* search_entry)
 		,GTK_ENTRY(search_entry));	
 
 	/* enable searching in the tree */
-	gtk_tree_view_set_enable_search(GTK_TREE_VIEW(tree_view), TRUE);
+	gtk_tree_view_set_enable_search(GTK_TREE_VIEW(tree_view), FALSE);
 
 	/* clickable headers */
 	gtk_tree_view_set_headers_clickable(GTK_TREE_VIEW(tree_view), FALSE);
 
 	/* visible headers */
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(tree_view), TRUE);
+
+	/* lines */
+	gtk_tree_view_set_enable_tree_lines(GTK_TREE_VIEW(tree_view), TRUE);
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(tree_view));
 
@@ -974,7 +1048,6 @@ read_database(GtkWidget* button, gpointer** args)
 			tree_store_add_child(NULL, child);
 
 		free(root);
-		free(child);
 		bookmark_list_destroy(bl);
 	}
 }
@@ -1038,7 +1111,7 @@ make_menu_bar(GtkWidget* main_window)
 	GtkWidget* delete	= gtk_menu_item_new_with_mnemonic("_Delete");
 	gtk_menu_shell_append(GTK_MENU_SHELL(edit_menu), delete);
 	g_signal_connect(GTK_WIDGET(delete), "activate"
-		,G_CALLBACK(delete_window), main_window);
+		,G_CALLBACK(delete), main_window);
 
 	GtkWidget* preferences	= gtk_menu_item_new_with_mnemonic
 		("_Preferences");
@@ -1095,7 +1168,7 @@ make_tool_box(GtkWidget* main_window)
 	gtk_tool_button_set_use_underline(GTK_TOOL_BUTTON(delete), TRUE);
 	gtk_tool_item_set_tooltip_text(GTK_TOOL_ITEM(delete), "delete");
 
-	g_signal_connect(delete, "clicked", G_CALLBACK(delete_window)
+	g_signal_connect(delete, "clicked", G_CALLBACK(delete)
 		,main_window);
 
 	/* options */
@@ -1182,11 +1255,44 @@ key_press(GtkWidget* window, GdkEventKey* e, gpointer** args)
 		GtkTreeIter iter;
 		gtk_tree_model_get_iter(GTK_TREE_MODEL(model), &iter, selected_path);
 
-		if(gtk_tree_model_iter_next(GTK_TREE_MODEL(model), &iter))
+		if((gtk_tree_model_iter_has_child(GTK_TREE_MODEL(model), &iter))
+		&&(gtk_tree_view_row_expanded(GTK_TREE_VIEW(args[0]), selected_path)))
+		{
+			GtkTreeIter child;
+			gtk_tree_model_iter_children(GTK_TREE_MODEL(model), &child, &iter);
+			GtkTreePath* path = gtk_tree_model_get_path(GTK_TREE_MODEL(model), &child);
+			gtk_tree_view_set_cursor(GTK_TREE_VIEW(args[0])
+				,path, NULL, 0);
+
+		}
+		else if(gtk_tree_model_iter_next(GTK_TREE_MODEL(model), &iter))
 		{
 			gtk_tree_path_next(selected_path);
 			gtk_tree_view_set_cursor(GTK_TREE_VIEW(args[0])
 				,selected_path, NULL, 0);
+		}
+		else
+		{
+			GtkTreeIter iter;
+			GtkTreeIter parent;
+			gtk_tree_model_get_iter(GTK_TREE_MODEL(model), &iter, selected_path);
+			gtk_tree_model_iter_parent(GTK_TREE_MODEL(model), &parent, &iter);
+			gtk_tree_model_iter_next(GTK_TREE_MODEL(model), &parent);
+
+			GtkTreePath* path = gtk_tree_model_get_path(GTK_TREE_MODEL(model), &parent);
+			gtk_tree_view_set_cursor(GTK_TREE_VIEW(args[0])
+				,path, NULL, 0);
+
+			/*
+			if(gtk_tree_model_iter_has_child(GTK_TREE_MODEL(model), &iter))
+			{
+				printf("here\n");
+				GtkTreeIter child;
+				gboolean t = gtk_tree_model_iter_children(GTK_TREE_MODEL(model), &child, &iter);
+				if(t) printf("true\n");
+			}
+			*/
+
 		}
 	}
 
@@ -1335,7 +1441,7 @@ key_press(GtkWidget* window, GdkEventKey* e, gpointer** args)
 		read_database(NULL, NULL);
 
 	else if(!strcmp(key, "d"))
-		delete_window(NULL, args[3]);
+		delete(NULL, args[3]);
 
 	else if(!strcmp(key, "i"))
 		add_window(NULL, args[3]);

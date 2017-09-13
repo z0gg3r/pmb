@@ -25,17 +25,22 @@ directory_create(char* name)
 {
 	directory* d 		= malloc(sizeof(directory));
 
-	d->n_children 		= 0;
-	d->n_bookmark 		= 0;
-	d->children_position 	= 0;
-	d->bookmark_position 	= 0;
-	d->name			= name;
-	d->bookmark 		= calloc(1, sizeof(bookmark*));
-	d->children		= calloc(1, sizeof(directory*));
-	
-	d->bookmark[0]		= NULL;
-	d->children[0]		= NULL;
-	return d;
+	if(d)
+	{
+		d->n_children 		= 0;
+		d->n_bookmark 		= 0;
+		d->children_position 	= 0;
+		d->bookmark_position 	= 0;
+		d->name			= name;
+		d->bookmark 		= calloc(1, sizeof(bookmark*));
+		d->children		= calloc(1, sizeof(directory*));
+		
+		d->bookmark[0]		= NULL;
+		d->children[0]		= NULL;
+		return d;
+	}
+
+	return NULL;
 }
 
 char*
@@ -334,12 +339,16 @@ directory_name_list_create()
 {
 	directory_name_list* d = malloc(sizeof(directory_name_list));
 
-	d->size 	= 0;
-	d->position	= 0;
-	d->list 	= calloc(1, sizeof(char*));
-	d->list[0] 	= NULL;
+	if(d)
+	{
+		d->size 	= 0;
+		d->position	= 0;
+		d->list 	= calloc(1, sizeof(char*));
+		d->list[0] 	= NULL;
+		return d;
+	}
 
-	return d;
+	return NULL;
 }
 
 void
@@ -416,11 +425,12 @@ dismember(bookmark* b)
 {
 	if(b)
 	{
-		char* 			name;
-		char* 			path 	= malloc(strlen((bookmark_tag(b))) * sizeof(char));
+		char* 			name	= NULL;
+		char*			tag	= bookmark_tag(b);
+		char* 			path 	= malloc(strlen(tag) * sizeof(char));
 		directory_name_list* 	l	= directory_name_list_create();
 
-		strcpy(path, (bookmark_tag(b)));
+		strcpy(path, tag);
 
 		while((name = strsep(&path, "/")))
 			directory_name_list_add_dir(l, name);
