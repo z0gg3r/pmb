@@ -1,7 +1,6 @@
 #define _GNU_SOURCE 
 
 #include <gtk/gtk.h>
-//#include <gtk/gtktreeview.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -48,6 +47,10 @@ edit_directory(GtkWidget*, gpointer**);
 /* -- options -- */
 static void 
 read_options();
+
+/* -- copy the selected bookmark url to clipboard -- */
+static void
+copy_to_clipboard();
 
 /* -- set up dialog windows -- */
 static GtkWidget*
@@ -175,6 +178,23 @@ read_options()
 	}
 }
 
+static void
+copy_to_clipboard()
+{
+	GtkClipboard* 	primary	= gtk_clipboard_get(GDK_SELECTION_PRIMARY);
+	GtkClipboard* 	clip	= gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
+	bookmark* 	b 	= get_data();
+	char*		url	= bookmark_url(b);
+
+	if(url)
+	{
+		gtk_clipboard_set_text(clip, url, -1);
+		gtk_clipboard_set_text(primary, url, -1);
+	}
+
+	bookmark_destroy(b);
+}
+
 static GtkWidget*
 tag_box_new()
 {
@@ -200,6 +220,12 @@ tag_box_new()
 	}
 
 	bookmark_list_destroy(bl);
+	
+	GtkTreeIter iter;	
+	GtkTreeModel* tag_model = gtk_combo_box_get_model(GTK_COMBO_BOX(tag_box));
+	gtk_tree_model_get_iter_first(GTK_TREE_MODEL(tag_model), &iter);
+	gtk_combo_box_set_active_iter(GTK_COMBO_BOX(tag_box), &iter);
+
 	return tag_box;
 }
 
@@ -426,7 +452,13 @@ delete_bookmark(GtkWidget* button, gpointer** args)
 static void
 delete_directory(GtkWidget* button, gpointer** args)
 {
+	/*
+	GtkTreeIter iter, child;
+	gtk_tree_model_get_iter(GTK_TREE_MODEL(model), &iter, selected_path);
 
+	while(gtk_tree_model_iter_children(GTK_TREE_MODEL(model), &child, &iter))
+		iter = child;
+	*/
 }
 
 static void
@@ -510,8 +542,8 @@ delete_directory_window(bookmark* b, gpointer main_window)
 	}
 
 	/* button */
-	GtkWidget* edit_button = gtk_button_new_with_mnemonic("_edit");
-	g_signal_connect(edit_button, "clicked", G_CALLBACK(delete_directory)
+	GtkWidget* delete_button = gtk_button_new_with_mnemonic("_Delete");
+	g_signal_connect(delete_button, "clicked", G_CALLBACK(delete_directory)
 		,NULL);
 
 	GtkWidget* cancel_button = gtk_button_new_with_mnemonic("_Cancel");
@@ -526,7 +558,7 @@ delete_directory_window(bookmark* b, gpointer main_window)
 
 	gtk_grid_attach(GTK_GRID(grid), name_entry_label 	,0,  0, 30, 1);
 	gtk_grid_attach(GTK_GRID(grid), name_entry 		,20, 0, 50, 1);
-	gtk_grid_attach(GTK_GRID(grid), edit_button 		,20, 5, 20, 10);
+	gtk_grid_attach(GTK_GRID(grid), delete_button 		,20, 5, 20, 10);
 	gtk_grid_attach(GTK_GRID(grid), cancel_button 		,40, 5, 20, 10);
 
 	gtk_container_add(GTK_CONTAINER(window), grid);
@@ -631,7 +663,7 @@ edit_bookmark_window(bookmark* b, gpointer main_window)
 	edit_bookmark_args[4] = window;
 
 	/* button */
-	GtkWidget* edit_button = gtk_button_new_with_mnemonic("_edit");
+	GtkWidget* edit_button = gtk_button_new_with_mnemonic("_Edit");
 	g_signal_connect(edit_button, "clicked", G_CALLBACK(edit_bookmark)
 		,edit_bookmark_args);
 
@@ -686,7 +718,7 @@ edit_directory_window(bookmark* b, gpointer main_window)
 	}
 
 	/* button */
-	GtkWidget* edit_button = gtk_button_new_with_mnemonic("_edit");
+	GtkWidget* edit_button = gtk_button_new_with_mnemonic("_Edit");
 	g_signal_connect(edit_button, "clicked", G_CALLBACK(edit_directory)
 		,NULL);
 
@@ -1099,6 +1131,11 @@ make_menu_bar(GtkWidget* main_window)
 	g_signal_connect(GTK_WIDGET(reload), "activate"
 		,G_CALLBACK(read_database), NULL);
 
+	GtkWidget* copy		= gtk_menu_item_new_with_mnemonic("_Copy");
+	gtk_menu_shell_append(GTK_MENU_SHELL(edit_menu), copy);
+	g_signal_connect(GTK_WIDGET(copy), "activate"
+		,G_CALLBACK(copy_to_clipboard), NULL);
+
 	GtkWidget* insert 	= gtk_menu_item_new_with_mnemonic("_Insert");
 	gtk_menu_shell_append(GTK_MENU_SHELL(edit_menu), insert);
 	g_signal_connect(GTK_WIDGET(insert), "activate"
@@ -1194,6 +1231,17 @@ make_tool_box(GtkWidget* main_window)
 	g_signal_connect(reload, "clicked", G_CALLBACK(read_database)
 		,NULL);
 
+	/* copy */
+	GtkWidget* copy_icon 	= gtk_image_new_from_icon_name
+		("gtk-paste", icon_size);
+	GtkToolItem* copy 	= gtk_tool_button_new(copy_icon, "_Copy");
+	gtk_tool_button_set_use_underline(GTK_TOOL_BUTTON(copy), TRUE);
+	gtk_tool_item_set_tooltip_text(GTK_TOOL_ITEM(copy)
+		,"copy to clipboard");
+
+	g_signal_connect(copy, "clicked", G_CALLBACK(copy_to_clipboard)
+		,NULL);
+
 	/* tool bar */
 	GtkWidget* tool_bar 	= gtk_toolbar_new();
 	gtk_toolbar_set_style(GTK_TOOLBAR(tool_bar), GTK_TOOLBAR_BOTH);
@@ -1201,7 +1249,8 @@ make_tool_box(GtkWidget* main_window)
 	gtk_toolbar_insert(GTK_TOOLBAR(tool_bar), edit, 1);
 	gtk_toolbar_insert(GTK_TOOLBAR(tool_bar), delete, 2);
 	gtk_toolbar_insert(GTK_TOOLBAR(tool_bar), reload, 3);
-	gtk_toolbar_insert(GTK_TOOLBAR(tool_bar), options, 4);
+	gtk_toolbar_insert(GTK_TOOLBAR(tool_bar), copy, 4);
+	gtk_toolbar_insert(GTK_TOOLBAR(tool_bar), options, 5);
 
 	return tool_bar;
 }
@@ -1237,7 +1286,8 @@ make_search_box(GtkWidget* search_entry)
 static void
 key_press(GtkWidget* window, GdkEventKey* e, gpointer** args)
 {
-	char* key = gdk_keyval_name(e->keyval);
+	char* 		key = gdk_keyval_name(e->keyval);
+	gboolean 	r;
 
 	if(!strcmp(key, "Down") 
 	||(!strcmp(key, "Up"))
@@ -1251,48 +1301,28 @@ key_press(GtkWidget* window, GdkEventKey* e, gpointer** args)
 			,selected_path, NULL, 0);
 
 	else if(!strcmp(key, "j"))
-	{
-		gboolean r;
 		g_signal_emit_by_name(args[0], "move-cursor", GTK_MOVEMENT_DISPLAY_LINES, 1, &r);
-	}
 
 	else if(!strcmp(key, "k"))
-	{
-		gboolean r;
 		g_signal_emit_by_name(args[0], "move-cursor", GTK_MOVEMENT_DISPLAY_LINES, -1, &r);
-	}
 
 	else if(!strcmp(key, "h")) 
-	{
-		gboolean r;
 		g_signal_emit_by_name(args[0], "move-cursor", GTK_MOVEMENT_LOGICAL_POSITIONS, -1, &r);
-	}
 
 	else if(!strcmp(key, "l")) 
-	{
-		gboolean r;
 		g_signal_emit_by_name(args[0], "move-cursor", GTK_MOVEMENT_LOGICAL_POSITIONS, 1, &r);
-	}
 
-	else if(!strcmp(key, "x"))
-	{
-		if(gtk_tree_view_row_expanded(GTK_TREE_VIEW(args[0]), selected_path))
-			gtk_tree_view_collapse_row(GTK_TREE_VIEW(args[0]), selected_path);
-		else
-			gtk_tree_view_expand_row(GTK_TREE_VIEW(args[0]), selected_path, 0);
-	}
-	
 	else if(!strcmp(key, "g"))
-	{
-		gboolean r;
 		g_signal_emit_by_name(args[0], "move-cursor", GTK_MOVEMENT_BUFFER_ENDS, -1, &r);
-	}
 
 	else if(!strcmp(key, "G"))
-	{
-		gboolean r;
 		g_signal_emit_by_name(args[0], "move-cursor", GTK_MOVEMENT_BUFFER_ENDS, 1, &r);
-	}
+
+	else if(!strcmp(key, "b"))
+		g_signal_emit_by_name(args[0], "move-cursor", GTK_MOVEMENT_PAGES, -1, &r);
+
+	else if(!strcmp(key, "f"))
+		g_signal_emit_by_name(args[0], "move-cursor", GTK_MOVEMENT_PAGES, 1, &r);
 
 	else if(!strcmp(key, "dollar"))
 	{
@@ -1319,17 +1349,16 @@ key_press(GtkWidget* window, GdkEventKey* e, gpointer** args)
 			,selected_path, NULL, 0);
 	}
 
-	else if(!strcmp(key, "b"))
+	else if(!strcmp(key, "x"))
 	{
-		gboolean r;
-		g_signal_emit_by_name(args[0], "move-cursor", GTK_MOVEMENT_PAGES, -1, &r);
+		if(gtk_tree_view_row_expanded(GTK_TREE_VIEW(args[0]), selected_path))
+			gtk_tree_view_collapse_row(GTK_TREE_VIEW(args[0]), selected_path);
+		else
+			gtk_tree_view_expand_row(GTK_TREE_VIEW(args[0]), selected_path, 0);
 	}
 
-	else if(!strcmp(key, "f"))
-	{
-		gboolean r;
-		g_signal_emit_by_name(args[0], "move-cursor", GTK_MOVEMENT_PAGES, 1, &r);
-	}
+	else if(!strcmp(key, "c"))
+		copy_to_clipboard();
 
 	else if(!strcmp(key, "s"))
 		gtk_widget_grab_focus(GTK_WIDGET(args[2]));
@@ -1346,7 +1375,7 @@ key_press(GtkWidget* window, GdkEventKey* e, gpointer** args)
 	else if(!strcmp(key, "e"))
 		edit(NULL, args[3]);
 	
-	else if(!strcmp(key, "O"))
+	else if(!strcmp(key, "o"))
 		options_window(NULL, args[3]);
 }
 
@@ -1379,7 +1408,8 @@ gtk_interface(int argc, char* argv[])
 		,G_TYPE_STRING		//name
 		,G_TYPE_STRING		//url
 		,G_TYPE_STRING		//comment
-		,G_TYPE_STRING);	//tag
+		,G_TYPE_STRING		//tag
+		,-1);	
 
 	/* tree view */
 	GtkWidget* search_entry	= gtk_entry_new();
