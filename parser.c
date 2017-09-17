@@ -226,35 +226,28 @@ html_tree_table_row(directory* d, int depth, int* canvas)
 {
 	if(d)
 	{
-		printf("<tr>\n");
+		for(int i = 0; i <= depth; ++i)
+			printf("<ul>\n");
 
-		for(int i = 0; i < depth; ++i)
-			printf("<td></td>\n");
-
-		printf("<td>\n");
 		print_folder_icon(canvas);
-		printf("<span style='color:brown; font-weight:bold;'>"
-			"%s</span></td>\n</tr>\n"
-			,directory_name(d));
-
+		printf("%s\n", directory_name(d));
 		bookmark* b = NULL;
 
-		while((b = directory_return_next_bookmark(d)))
+		while((b = directory_next_bookmark(d)))
 		{
-			printf("<tr>\n");
-
-			for(int i = 0; i < depth; ++i)
-				printf("<td></td>\n");
-
-			printf("<td width=\'200\'>\n"
-				"+ <a href=\'%s\'>%s</a></td>\n</tr>\n"
+			printf("<ul><li><a href=\'%s\'>%s"
 				,bookmark_url(b), bookmark_name(b));
 
+			if(strcmp(bookmark_comment(b), "none"))
+				printf(" - %s", bookmark_comment(b));
+
+			printf("</a></li></ul>\n");
 		}
 
-		free(b);
+		for(int i = 0; i <= depth; ++i)
+			printf("</ul>\n");
 
-		printf("<tr></tr>\n");
+		free(b);
 		return ++depth;
 	}
 
@@ -271,11 +264,11 @@ html_tree_branch(directory* d, int depth, int* canvas)
 
 		depth = html_tree_table_row(d, depth, canvas);
 
-		while((ret = directory_return_next_children(d)))
+		while((ret = directory_next_children(d)))
 		{
 			directory_rewind(ret);
 			html_tree_table_row(ret, depth, canvas);
-			html_tree_branch(directory_return_next_children(ret), depth + 1, canvas);
+			html_tree_branch(directory_next_children(ret), depth + 1, canvas);
 		}
 
 		free(ret);
@@ -312,21 +305,20 @@ bookmark_html_tree(bookmark_list* bl)
 			"margin-top: 10px;"
 			"border-radius:3px;"
 			"background-color:lavender;"
-			"padding:4px;'>\n"
-			"<table>\n");
+			"padding:4px;'>\n");
 
 		html_tree_table_row(root, 0, &canvas);
 
-		while((child = directory_return_next_children(root)))
+		while((child = directory_next_children(root)))
 		{
 			directory_rewind(child);
 			html_tree_table_row(child, 1, &canvas);
 
-			while((ret = directory_return_next_children(child)))
+			while((ret = directory_next_children(child)))
 				html_tree_branch(ret, 2, &canvas);
 		}
 
-		printf("</table>\n</div>\n<br />\nGenerated in: "
+		printf("</div>\n<br />\nGenerated in: "
 			"<span style='color:green;'>%s</span>\n"
 			"</body>\n</html>\n"
 			,date(buf, 50));

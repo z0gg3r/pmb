@@ -49,12 +49,12 @@ directory_rewind(directory*);
 
 /* -- return next directory children -- */
 directory*
-directory_return_next_children(directory*);
+directory_next_children(directory*);
 
 /* -- return next bookmark of directory -- */
 /* directory* d */
 bookmark*
-directory_return_next_bookmark(directory*);
+directory_next_bookmark(directory*);
 
 /* -- destroy a directory -- */
 void

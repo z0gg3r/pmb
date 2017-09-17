@@ -44,6 +44,10 @@ edit_bookmark(GtkWidget*, gpointer**);
 static void 
 edit_directory(GtkWidget*, gpointer**);
 
+/* -- get data of current selected bookmark -- */
+static bookmark* 
+get_data(); 
+
 /* -- options -- */
 static void 
 read_options();
@@ -103,10 +107,6 @@ read_database(GtkWidget*, gpointer**);
 /* -- update selected_path and selected_column globals -- */
 static void 
 update_selected_row(gpointer**);
-
-/* -- get data of current selected bookmark -- */
-static bookmark* 
-get_data(); 
 
 /* -- create tree view -- */
 static GtkWidget* 
@@ -178,11 +178,68 @@ read_options()
 	}
 }
 
+static bookmark*
+get_data() 
+{
+	if(selected_path) 
+	{
+		GtkTreeIter iter;
+		gtk_tree_model_get_iter(GTK_TREE_MODEL(model), &iter
+			,selected_path);
+
+		bookmark* b = bookmark_create();
+
+		if(b) 
+		{
+			char* temp[4];
+
+			gtk_tree_model_get(GTK_TREE_MODEL(model), &iter
+				,0, &temp[0]
+				,1, &temp[1]
+				,2, &temp[2]
+				,3, &temp[3]
+				,4, &temp[4]
+				,-1);
+
+			if(temp[0])
+				bookmark_set_id(b, temp[0]);
+			else
+				bookmark_set_id(b, "");
+
+			if(temp[1])
+				bookmark_set_name(b, temp[1]);
+			else
+				bookmark_set_name(b, "");
+
+			if(temp[2])
+				bookmark_set_url(b, temp[2]);
+			else
+				bookmark_set_url(b, "");
+
+			if(temp[3])
+				bookmark_set_comment(b, temp[3]);
+			else
+				bookmark_set_comment(b, "");
+
+			if(temp[4])
+				bookmark_set_tag(b, temp[4]);
+			else
+				bookmark_set_tag(b, "");
+
+			return b;
+		}
+		else
+			return NULL;
+	}
+	else
+		return NULL;
+}
+
 static void
 copy_to_clipboard()
 {
-	GtkClipboard* 	primary	= gtk_clipboard_get(GDK_SELECTION_PRIMARY);
 	GtkClipboard* 	clip	= gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
+	GtkClipboard* 	primary	= gtk_clipboard_get(GDK_SELECTION_PRIMARY);
 	bookmark* 	b 	= get_data();
 	char*		url	= bookmark_url(b);
 
@@ -817,63 +874,6 @@ update_selected_row(gpointer** args)
 	selected_column 	= column;
 }
 
-static bookmark*
-get_data() 
-{
-	if(selected_path) 
-	{
-		GtkTreeIter iter;
-		gtk_tree_model_get_iter(GTK_TREE_MODEL(model), &iter
-			,selected_path);
-
-		bookmark* b = bookmark_create();
-
-		if(b) 
-		{
-			char* temp[4];
-
-			gtk_tree_model_get(GTK_TREE_MODEL(model), &iter
-				,0, &temp[0]
-				,1, &temp[1]
-				,2, &temp[2]
-				,3, &temp[3]
-				,4, &temp[4]
-				,-1);
-
-			if(temp[0])
-				bookmark_set_id(b, temp[0]);
-			else
-				bookmark_set_id(b, "");
-
-			if(temp[1])
-				bookmark_set_name(b, temp[1]);
-			else
-				bookmark_set_name(b, "");
-
-			if(temp[2])
-				bookmark_set_url(b, temp[2]);
-			else
-				bookmark_set_url(b, "");
-
-			if(temp[3])
-				bookmark_set_comment(b, temp[3]);
-			else
-				bookmark_set_comment(b, "");
-
-			if(temp[4])
-				bookmark_set_tag(b, temp[4]);
-			else
-				bookmark_set_tag(b, "");
-
-			return b;
-		}
-		else
-			return NULL;
-	}
-	else
-		return NULL;
-}
-
 static GtkCellRenderer*
 cell_renderer_create(char* color) 
 {
@@ -1016,7 +1016,7 @@ tree_store_add_child(GtkTreeIter* iter, directory* child)
 		directory* d = NULL;
 		bookmark*  b = NULL;
 
-		while((d = directory_return_next_children(child)))
+		while((d = directory_next_children(child)))
 		{
 			GtkTreeIter d_iter;
 
@@ -1026,7 +1026,7 @@ tree_store_add_child(GtkTreeIter* iter, directory* child)
 			tree_store_add_child(&d_iter, d);
 		}
 
-		while((b = directory_return_next_bookmark(child)))
+		while((b = directory_next_bookmark(child)))
 		{
 			GtkTreeIter b_iter;
 
@@ -1077,7 +1077,7 @@ read_database(GtkWidget* button, gpointer** args)
 
 		directory_rewind(root);
 
-		while((child = directory_return_next_children(root)))
+		while((child = directory_next_children(root)))
 			tree_store_add_child(NULL, child);
 
 		free(root);

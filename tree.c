@@ -113,7 +113,7 @@ directory_rewind(directory* d)
 }
 
 directory*
-directory_return_next_children(directory* d)
+directory_next_children(directory* d)
 {
 	if(d && d->children_position <= d->n_children)
 	{
@@ -125,7 +125,7 @@ directory_return_next_children(directory* d)
 }
 
 bookmark*
-directory_return_next_bookmark(directory* d)
+directory_next_bookmark(directory* d)
 {
 	if(d && d->bookmark_position <= d->n_bookmark)
 	{
@@ -147,7 +147,7 @@ directory_destroy(directory* d)
 		{
 			bookmark* b = NULL;
 
-			while((b = directory_return_next_bookmark(d)))
+			while((b = directory_next_bookmark(d)))
 			{
 				if(b)
 				{
@@ -162,11 +162,11 @@ directory_destroy(directory* d)
 		{
 			directory* ret = NULL;
 
-			while((ret = directory_return_next_children(d)))
+			while((ret = directory_next_children(d)))
 			{
 				if(ret)
 				{
-					directory_destroy(directory_return_next_children(d));
+					directory_destroy(directory_next_children(d));
 					free(d->children[d->children_position]);
 					d->children[d->children_position] = NULL;
 				}
@@ -221,7 +221,7 @@ directory_delete_children(directory* d, int index)
 							,sizeof(directory*));
 		int 		j 		= 0;
 
-		while((ret = directory_return_next_children(d)))
+		while((ret = directory_next_children(d)))
 		{
 			if(ret)
 			{
@@ -295,7 +295,7 @@ directory_contain_children(directory* d, char* children)
 
 		directory_rewind(d);
 
-		while((ret = directory_return_next_children(d)))
+		while((ret = directory_next_children(d)))
 		{
 			directory_rewind(ret);
 
@@ -322,11 +322,11 @@ directory_contain_bookmark(directory* d, int id)
 
 		directory_rewind(d);
 
-		while((b = directory_return_next_bookmark(d)))
+		while((b = directory_next_bookmark(d)))
 			if(b && id == (strtol((bookmark_id(b)), NULL, 10)))
 				return b;
 
-		while((ret = directory_return_next_children(d)))
+		while((ret = directory_next_children(d)))
 			if((b = directory_contain_bookmark(ret, id)))
 				return b;
 	}
@@ -636,7 +636,7 @@ directory_move_children(directory* receiver, directory* donator, char* name)
 		directory_rewind(donator);
 		directory_rewind(receiver);
 
-		while((ret = directory_return_next_children(donator)))
+		while((ret = directory_next_children(donator)))
 		{
 			if(!(strcmp(name, (directory_name(ret)))))
 			{
@@ -658,7 +658,7 @@ directory_move_children_all(directory* receiver, directory* donator)
 		directory_rewind(donator);
 		directory_rewind(receiver);
 
-		while((ret = directory_return_next_children(donator)))
+		while((ret = directory_next_children(donator)))
 		{
 			directory_add_children(receiver, ret);
 			directory_delete_children(donator
