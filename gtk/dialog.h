@@ -1,7 +1,7 @@
 #ifndef DIALOG_H
 #define DIALOG_H
 
-#include "gpmb.h"
+#include "interface.h"
 
 /* -- generate entries for add/edit/delete bookmarks -- */
 GtkWidget**

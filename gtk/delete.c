@@ -34,19 +34,19 @@ static void
 delete_directory(GtkWidget* button, gpointer window)
 {
 	GtkTreeIter 	iter, child;
-	int		size		= 1;
-	char**		urls 		= calloc(size, sizeof(char*));
-	int		index 		= 0;
+	directory_url*	dir_url	= directory_url_new();
 
 	if(gtk_tree_model_get_iter(GTK_TREE_MODEL(model), &iter, selected_path))
 	{
 		if(gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(model), &child, &iter, 0))
-			collect_directory_url(child, urls, &index, &size);
+			collect_directory_url(child, dir_url);
 	}
 
-	for(int i = 0; i < size - 1; ++i)
+	directory_url_position_first(dir_url);
+
+	for(int i = 0; i < (directory_url_size(dir_url)) - 1; ++i)
 	{
-		bookmark_list* 	bl 	= bookmark_db_search(db, URL, urls[i]);
+		bookmark_list* 	bl 	= bookmark_db_search(db, URL, directory_url_next(dir_url));
 		char** 		result	= NULL;
 
 		if(bl) 
@@ -62,14 +62,9 @@ delete_directory(GtkWidget* button, gpointer window)
 
 			bookmark_list_destroy(bl);
 		}
-
-		if(urls[i])
-			free(urls[i]);
 	}
 
-	if(urls)
-		free(urls);
-
+	directory_url_destroy(dir_url);
 	gtk_tree_store_remove(GTK_TREE_STORE(bookmarks), &iter);
 	close_window(NULL, window);
 }

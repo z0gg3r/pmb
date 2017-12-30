@@ -1,7 +1,7 @@
 #ifndef TOOLBOX_H
 #define TOOLBOX_H
 
-#include "gpmb.h"
+#include "interface.h"
 #include "add.h"
 #include "edit.h"
 #include "delete.h"

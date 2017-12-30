@@ -1,7 +1,7 @@
 #ifndef DELETE_H
 #define DELETE_H
 
-#include "gpmb.h"
+#include "interface.h"
 #include "dialog.h"
 #include "treeview.h"
 

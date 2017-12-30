@@ -1,7 +1,7 @@
 #ifndef EDIT_H
 #define EDIT_H
 
-#include "gpmb.h"
+#include "interface.h"
 #include "dialog.h"
 #include "treeview.h"
 

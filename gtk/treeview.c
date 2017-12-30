@@ -1,5 +1,86 @@
 #include "treeview.h"
 
+struct directory_url
+{
+	int 	size;
+	int 	index;
+	char** 	urls;	
+};
+
+directory_url*
+directory_url_new()
+{
+	directory_url* dir_url = calloc(1, sizeof(directory_url));
+
+	dir_url->size 	= 1;
+	dir_url->index 	= 0;
+	dir_url->urls	= calloc(1, sizeof(char*));
+
+	return dir_url;
+}
+
+void
+directory_url_destroy(directory_url* dir_url)
+{
+	for(int i = 0; i < dir_url->size - 1; ++i)
+	{
+		if(dir_url->urls[i])
+			free(dir_url->urls[i]);
+	}
+
+	if(dir_url)
+		free(dir_url);
+}
+
+int
+directory_url_size(directory_url* dir_url)
+{
+	return dir_url->size;
+}
+
+void
+directory_url_position_first(directory_url* dir_url)
+{
+	dir_url->index = 0;
+}
+
+char*
+directory_url_next(directory_url* dir_url)
+{
+	char* url = dir_url->urls[dir_url->index];
+	dir_url->index++;
+
+	return url;
+}
+
+void
+directory_url_insert(directory_url* dir_url, char* url)
+{
+	dir_url->urls[dir_url->index] 	= calloc(strlen(url) + 1, sizeof(char));
+
+	strcpy(dir_url->urls[dir_url->index], url);
+	dir_url->index++;
+	dir_url->size++;
+	dir_url->urls 			= realloc(dir_url->urls, dir_url->size * sizeof(char*));
+}
+
+void
+copy_to_clipboard()
+{
+	GtkClipboard* 	clip	= gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
+	GtkClipboard* 	primary	= gtk_clipboard_get(GDK_SELECTION_PRIMARY);
+	bookmark* 	b 	= get_data(NULL);
+	char*		url	= bookmark_url(b);
+
+	if(url)
+	{
+		gtk_clipboard_set_text(clip, url, -1);
+		gtk_clipboard_set_text(primary, url, -1);
+	}
+
+	bookmark_destroy(b);
+}
+
 static GtkCellRenderer*
 cell_renderer_new(char* color) 
 {
@@ -212,7 +293,7 @@ get_data(GtkTreePath* path)
 }
 
 void
-collect_directory_url(GtkTreeIter iter, char** urls, int* index, int* size)
+collect_directory_url(GtkTreeIter iter, directory_url* dir_url)
 {
 	GtkTreeIter 	child;
 	GtkTreePath*	path;
@@ -223,20 +304,12 @@ collect_directory_url(GtkTreeIter iter, char** urls, int* index, int* size)
 		bookmark* 	b 	= get_data(path);
 
 		if(strlen(bookmark_url(b)) > 1)
-		{
-			urls[*index] 		= calloc(strlen(bookmark_url(b)) + 1, sizeof(char));
-
-			strcpy(urls[*index], bookmark_url(b));
-
-			*index 			= *index + 1;
-			*size 			= *size + 1;
-			urls 			= realloc(urls, *size + 1 * sizeof(char*));
-		}
+			directory_url_insert(dir_url, bookmark_url(b));
 
 		bookmark_destroy(b);
 
 		if(gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(model), &child, &iter, 0))
-			collect_directory_url(child, urls, index, size);
+			collect_directory_url(child, dir_url);
 	}
 	while(gtk_tree_model_iter_next(GTK_TREE_MODEL(model), &iter));
 }

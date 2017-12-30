@@ -1,7 +1,7 @@
 #ifndef ADD_H
 #define ADD_H
 
-#include "gpmb.h"
+#include "interface.h"
 #include "dialog.h"
 #include "treeview.h"
 

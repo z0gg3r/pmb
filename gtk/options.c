@@ -1,5 +1,20 @@
 #include "options.h"
 
+void 
+read_options() 
+{
+	opts = malloc(sizeof(gpmb_options));
+
+	if(opts) 
+	{
+		opts->id_fg 		= "#00ff00";
+		opts->name_fg 		= "#ff0000";
+		opts->url_fg 		= "#0000ff";
+		opts->comment_fg 	= "#ff00ff";
+		opts->tag_fg 		= "#f0a243";
+	}
+}
+
 void
 options_window(GtkWidget* button, gpointer main_window) 
 {

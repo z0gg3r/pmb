@@ -48,21 +48,24 @@ static void
 edit_directory(GtkWidget* button, gpointer** args) 
 {
 	GtkTreeIter 	iter, child;
-	int		size		= 1;
-	char**		urls 		= calloc(size, sizeof(char*));
-	int		index 		= 0;
+	directory_url*	dir_url	= directory_url_new();
 
 	if(gtk_tree_model_get_iter(GTK_TREE_MODEL(model), &iter, selected_path))
 	{
 		if(gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(model), &child, &iter, 0))
-			collect_directory_url(child, urls, &index, &size);
+			collect_directory_url(child, dir_url);
 	}
 
-	for(int i = 0; i < size - 1; ++i)
+	directory_url_position_first(dir_url);
+
+	for(int i = 0; i < directory_url_size(dir_url) - 1; ++i)
 	{
-		bookmark_list* 	bl 	= bookmark_db_search(db, URL, urls[i]);
+		char* 		url	= directory_url_next(dir_url);
+		bookmark_list* 	bl 	= bookmark_db_search(db, URL, url);
 		char** 		result	= NULL;
 		char* 		tag 	= (char*)gtk_entry_get_text(GTK_ENTRY(args[0]));
+
+		printf("--%s\n", url);
 
 		if(bl) 
 		{
@@ -78,14 +81,9 @@ edit_directory(GtkWidget* button, gpointer** args)
 
 			bookmark_list_destroy(bl);
 		}
-
-		if(urls[i])
-			free(urls[i]);
 	}
 
-	if(urls)
-		free(urls);
-
+	directory_url_destroy(dir_url);
 	close_window(NULL, args[1]);
 	g_free(args);
 }

@@ -123,9 +123,14 @@ bookmarks easily.
 
 	pmb will automatically look for ~/.pmb.conf file.
 	
-	For now we do have only two options:
+	For now we do have those options:
 		color=(0|1)
 		verbose=(0|1)
+		id_color=color
+		name_color=color
+		url_color=color
+		comment_color=color
+		tag_color=color
 
 	It does not understand spaces between name and value, for
 	example: 

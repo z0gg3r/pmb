@@ -1,7 +1,7 @@
 #ifndef KEYPRESS_H
 #define KEYPRESS_H
 
-#include "gpmb.h"
+#include "interface.h"
 #include "add.h"
 #include "edit.h"
 #include "delete.h"
