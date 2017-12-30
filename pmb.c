@@ -3,7 +3,7 @@
  * version:	0.1, 17/07/2017        * 
  ***************************************/
 
-#include "parser.h"
+#include "include/parser.h"
 
 int 
 main(int argc, char *argv[]) 
@@ -32,8 +32,8 @@ main(int argc, char *argv[])
 	free(config_file);
 
 	/* parse options */
-	cl_option_list* option 	= option_list_create();
-	cl_option_list* command = option_list_create();
+	cl_option_list* option 	= option_list_new();
+	cl_option_list* command = option_list_new();
 	parse_options(argc, argv, option, command);
 	exec_option(option);
 
