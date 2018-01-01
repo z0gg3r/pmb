@@ -21,8 +21,8 @@ main(int argc, char *argv[])
 	read_options();
 	short res = gtk_interface(argc, argv);
 
-	//free(opts);
-	//bookmark_db_close(db);
+	free(opts);
+	bookmark_db_close(db);
 	return res;
 }
 
