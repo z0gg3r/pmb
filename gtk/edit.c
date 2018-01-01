@@ -109,8 +109,7 @@ edit_bookmark_window(bookmark* b, gpointer main_window)
 		if(bookmark_tag(b))
 			gtk_entry_set_text(GTK_ENTRY(e[7]), bookmark_tag(b));
 
-		free(b);
-		b = NULL;
+		bookmark_destroy(b);
 	}
 
 	GtkWidget** edit_bookmark_args = g_new(GtkWidget*, 5);
@@ -171,8 +170,7 @@ edit_directory_window(bookmark* b, gpointer main_window)
 	if(b && bookmark_id(b))
 	{
 		gtk_entry_set_text(GTK_ENTRY(name_entry), bookmark_id(b));
-		free(b);
-		b = NULL;
+		bookmark_destroy(b);
 	}
 
 	GtkWidget** edit_directory_args = g_new(GtkWidget*, 2);
@@ -188,6 +186,11 @@ edit_directory_window(bookmark* b, gpointer main_window)
 	g_signal_connect(cancel_button, "clicked", G_CALLBACK(close_window)
 		,window);
 
+	/* tag box */
+	GtkWidget* tag_box = tag_box_new();
+	g_signal_connect(tag_box, "changed", G_CALLBACK(tag_entry_set_text)
+		,name_entry); 
+
 	/* grid */
 	GtkWidget* grid = gtk_grid_new();
 	gtk_grid_set_column_spacing(GTK_GRID(grid), 2);
@@ -196,8 +199,9 @@ edit_directory_window(bookmark* b, gpointer main_window)
 
 	gtk_grid_attach(GTK_GRID(grid), name_entry_label 	,0,  0, 30, 1);
 	gtk_grid_attach(GTK_GRID(grid), name_entry 		,20, 0, 50, 1);
-	gtk_grid_attach(GTK_GRID(grid), edit_button 		,20, 5, 20, 10);
-	gtk_grid_attach(GTK_GRID(grid), cancel_button 		,40, 5, 20, 10);
+	gtk_grid_attach(GTK_GRID(grid), tag_box 		,20, 1, 50, 1);
+	gtk_grid_attach(GTK_GRID(grid), edit_button 		,20, 2, 20, 10);
+	gtk_grid_attach(GTK_GRID(grid), cancel_button 		,40, 2, 20, 10);
 
 	gtk_container_add(GTK_CONTAINER(window), grid);
 	gtk_widget_show_all(GTK_WIDGET(window));

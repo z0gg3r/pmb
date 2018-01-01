@@ -31,18 +31,6 @@ gtk_interface(int argc, char* argv[])
 	g_signal_connect(bookmark_window, "destroy", G_CALLBACK(destroy)
 		,NULL);
 
-	/* tree store */
-	bookmarks = gtk_tree_store_new(
-		6
-		,G_TYPE_STRING		//bookmark id
-		,G_TYPE_STRING		//bookmark name
-		,G_TYPE_STRING		//bookmark url
-		,G_TYPE_STRING		//bookmark comment
-		,G_TYPE_STRING		//tag
-		,GDK_TYPE_PIXBUF	//directory icon
-		,G_TYPE_STRING		//directory tag
-		,-1);	
-
 	/* tree view */
 	GtkWidget* search_entry	= gtk_entry_new();
 	GtkWidget* t_view 	= tree_view(search_entry);
@@ -51,6 +39,7 @@ gtk_interface(int argc, char* argv[])
 	GtkWidget* s_window 	= gtk_scrolled_window_new(NULL, NULL);
 	gtk_container_add(GTK_CONTAINER(s_window), t_view);
 
+	/* key press */
 	GtkWidget** 	key_press_args 	= g_new(GtkWidget*, 4);
 	key_press_args[0] = t_view;
 	key_press_args[1] = s_window;
@@ -79,24 +68,24 @@ gtk_interface(int argc, char* argv[])
 	gtk_container_add(GTK_CONTAINER(v_box), search_box);
 	gtk_box_pack_start(GTK_BOX(v_box), s_window, TRUE, TRUE, 1);
 
-	/* read database and append to tree */
-	read_database(NULL, NULL);
-
 	/* add v_box into window */
 	gtk_container_add(GTK_CONTAINER(bookmark_window), v_box);
 	gtk_widget_show_all(bookmark_window);
 
+	/* read database and append to tree */
+	read_database(NULL, NULL);
+
 	/* focus tree view */
 	gtk_widget_grab_focus(GTK_WIDGET(t_view));
 
+	/* focus n the first tree view item */
 	GtkTreeIter iter;
 	gtk_tree_model_get_iter_first(GTK_TREE_MODEL(model), &iter);
+
 	GtkTreePath* path = gtk_tree_model_get_path(GTK_TREE_MODEL(model)
 		,&iter);
 	gtk_tree_view_set_cursor(GTK_TREE_VIEW(t_view), path, NULL, 0);
-
-	/* sink */
-	g_object_unref(bookmarks);
+	gtk_tree_path_free(path);
 
 	gtk_main();
 	return 0;

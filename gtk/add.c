@@ -26,10 +26,8 @@ add_bookmark(GtkWidget* button, gpointer** args)
 		bookmark_db_write(b, db);
 		bookmark_destroy(b);
 
-		read_database(NULL, NULL);
 		close_window(NULL, args[4]);
 		g_free(args);
-
 		read_database(NULL, NULL);
 	}
 }

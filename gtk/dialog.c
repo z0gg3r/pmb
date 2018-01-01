@@ -67,6 +67,15 @@ close_window(GtkWidget* button, gpointer window)
 	gtk_widget_destroy(window);
 }
 
+void
+dialog_key_press(GtkWidget* window, GdkEventKey* e)
+{
+	char* key = gdk_keyval_name(e->keyval);
+
+	if(!strcmp(key, "Escape"))
+		close_window(NULL, window);
+}
+
 GtkWidget*
 dialogs(char* title, gpointer main_window)
 {
@@ -77,6 +86,9 @@ dialogs(char* title, gpointer main_window)
 		gtk_window_set_resizable(GTK_WINDOW(window), FALSE);
 		gtk_window_set_transient_for(GTK_WINDOW(window)
 			,GTK_WINDOW(main_window));
+
+		g_signal_connect(window, "key-release-event"
+			,G_CALLBACK(dialog_key_press), NULL);
 
 		g_signal_connect(window, "destroy", G_CALLBACK(close_window)
 			,window);

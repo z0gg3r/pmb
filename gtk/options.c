@@ -8,8 +8,8 @@ read_options()
 	if(opts) 
 	{
 		opts->id_fg 		= "#00ff00";
-		opts->name_fg 		= "#ff0000";
-		opts->url_fg 		= "#0000ff";
+		opts->name_fg 		= "#FD4040";
+		opts->url_fg 		= "#4094FD";
 		opts->comment_fg 	= "#ff00ff";
 		opts->tag_fg 		= "#f0a243";
 	}

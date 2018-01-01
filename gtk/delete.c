@@ -90,8 +90,7 @@ delete_bookmark_window(bookmark* b, gpointer main_window)
 		if(bookmark_tag(b))
 			gtk_entry_set_text(GTK_ENTRY(e[7]), bookmark_tag(b));
 
-		free(b);
-		b = NULL;
+		bookmark_destroy(b);
 	}
 
 	GtkWidget** delete_bookmark_args = g_new(GtkWidget*, 2);
@@ -145,8 +144,7 @@ delete_directory_window(bookmark* b, gpointer main_window)
 	if(b && bookmark_id(b))
 	{
 		gtk_entry_set_text(GTK_ENTRY(name_entry), bookmark_id(b));
-		free(b);
-		b = NULL;
+		bookmark_destroy(b);
 	}
 
 	/* button */

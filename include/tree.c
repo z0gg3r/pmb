@@ -429,15 +429,15 @@ dismember(bookmark* b)
 	{
 		char* 			name	= NULL;
 		char*			tag	= bookmark_tag(b);
-		char* 			path 	= malloc(strlen(tag) * sizeof(char));
+		//char* 			path 	= malloc(strlen(tag) * sizeof(char));
 		directory_name_list* 	l	= directory_name_list_new();
 
-		strcpy(path, tag);
+		//strcpy(path, tag);
 
-		while((name = strsep(&path, "/")))
+		while((name = strsep(&tag, "/")))
 			directory_name_list_add_dir(l, name);
 
-		free(path);
+		//free(path);
 
 		if(l)
 			return l;
@@ -685,4 +685,5 @@ create_tree_from_bookmark_list(bookmark_list* bl, char* name)
 
 	return NULL;
 }
+
 

@@ -6,6 +6,7 @@ key_press(GtkWidget* window, GdkEventKey* e, gpointer** args)
 	char* 		key = gdk_keyval_name(e->keyval);
 	gboolean 	r;
 	//guint		state = e->state;
+	//printf("%s\n", key);
 
 	if(!strcmp(key, "Down") 
 	||(!strcmp(key, "Up"))

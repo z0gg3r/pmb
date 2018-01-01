@@ -4,6 +4,7 @@
 #include "interface.h"
 #include "dialog.h"
 #include "treeview.h"
+#include "directory_url.h"
 
 /* -- edit wrapper -- */
 void

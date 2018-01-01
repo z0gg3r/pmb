@@ -24,7 +24,11 @@ tag_box_new()
 		}
 	}
 
-	bookmark_list_destroy(bl);
+	if(bl)
+		bookmark_list_destroy(bl);
+
+	if(b)
+		bookmark_destroy(b);
 	
 	GtkTreeIter iter;	
 	GtkTreeModel* tag_model = gtk_combo_box_get_model(GTK_COMBO_BOX(tag_box));

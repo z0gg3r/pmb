@@ -4,7 +4,7 @@ int
 main(int argc, char *argv[]) 
 {
 	const char* 	home = secure_getenv("HOME");	
-	char* 		file = calloc((strlen(home) + strlen(DATABASE)
+	char*		file = calloc((strlen(home) + strlen(DATABASE)
 				 + 2), sizeof(char));
 
 	if(file) 
@@ -21,8 +21,8 @@ main(int argc, char *argv[])
 	read_options();
 	short res = gtk_interface(argc, argv);
 
-	free(opts);
-	bookmark_db_close(db);
+	//free(opts);
+	//bookmark_db_close(db);
 	return res;
 }
 

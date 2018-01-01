@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include "option.h"
 #include "tree.h"
+#include "html.h"
 
 extern char* red;
 extern char* green;

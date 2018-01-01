@@ -8,8 +8,8 @@ tool_box_new(GtkWidget* main_window)
 	/* add */
 	GtkWidget* add_icon 	= gtk_image_new_from_icon_name
 		("bookmark_add", icon_size);
-	GtkToolItem* add 	= gtk_tool_button_new(add_icon, "_Add");
-	gtk_tool_button_set_use_underline(GTK_TOOL_BUTTON(add), TRUE);
+	GtkToolItem* add 	= gtk_tool_button_new(add_icon, "Add");
+	//gtk_tool_button_set_use_underline(GTK_TOOL_BUTTON(add), TRUE);
 	gtk_tool_item_set_tooltip_text(GTK_TOOL_ITEM(add), "add");
 
 	g_signal_connect(add, "clicked", G_CALLBACK(add_window)
@@ -18,8 +18,8 @@ tool_box_new(GtkWidget* main_window)
 	/* edit */
 	GtkWidget* edit_icon 	= gtk_image_new_from_icon_name
 		("document-page-setup", icon_size);
-	GtkToolItem* edit 	= gtk_tool_button_new(edit_icon, "_Edit");
-	gtk_tool_button_set_use_underline(GTK_TOOL_BUTTON(edit), TRUE);
+	GtkToolItem* edit 	= gtk_tool_button_new(edit_icon, "Edit");
+	//gtk_tool_button_set_use_underline(GTK_TOOL_BUTTON(edit), TRUE);
 	gtk_tool_item_set_tooltip_text(GTK_TOOL_ITEM(edit), "edit");
 
 	g_signal_connect(edit, "clicked", G_CALLBACK(edit)
@@ -28,8 +28,8 @@ tool_box_new(GtkWidget* main_window)
 	/* delete */
 	GtkWidget* delete_icon	= gtk_image_new_from_icon_name
 		("edit-delete", icon_size);
-	GtkToolItem* delete 	= gtk_tool_button_new(delete_icon, "_Delete");
-	gtk_tool_button_set_use_underline(GTK_TOOL_BUTTON(delete), TRUE);
+	GtkToolItem* delete 	= gtk_tool_button_new(delete_icon, "Delete");
+	//gtk_tool_button_set_use_underline(GTK_TOOL_BUTTON(delete), TRUE);
 	gtk_tool_item_set_tooltip_text(GTK_TOOL_ITEM(delete), "delete");
 
 	g_signal_connect(delete, "clicked", G_CALLBACK(delete)
@@ -49,8 +49,8 @@ tool_box_new(GtkWidget* main_window)
 	/* reload */
 	GtkWidget* reload_icon 	= gtk_image_new_from_icon_name
 		("view-refresh", icon_size);
-	GtkToolItem* reload 	= gtk_tool_button_new(reload_icon, "_Reload");
-	gtk_tool_button_set_use_underline(GTK_TOOL_BUTTON(reload), TRUE);
+	GtkToolItem* reload 	= gtk_tool_button_new(reload_icon, "Reload");
+	//gtk_tool_button_set_use_underline(GTK_TOOL_BUTTON(reload), TRUE);
 	gtk_tool_item_set_tooltip_text(GTK_TOOL_ITEM(reload)
 		,"reload");
 
@@ -60,8 +60,8 @@ tool_box_new(GtkWidget* main_window)
 	/* copy */
 	GtkWidget* copy_icon 	= gtk_image_new_from_icon_name
 		("gtk-paste", icon_size);
-	GtkToolItem* copy 	= gtk_tool_button_new(copy_icon, "_Copy");
-	gtk_tool_button_set_use_underline(GTK_TOOL_BUTTON(copy), TRUE);
+	GtkToolItem* copy 	= gtk_tool_button_new(copy_icon, "Copy");
+	//gtk_tool_button_set_use_underline(GTK_TOOL_BUTTON(copy), TRUE);
 	gtk_tool_item_set_tooltip_text(GTK_TOOL_ITEM(copy)
 		,"copy to clipboard");
 

@@ -72,6 +72,16 @@ menu_bar_new(GtkWidget* main_window)
 	g_signal_connect(GTK_WIDGET(preferences), "activate"
 		,G_CALLBACK(options_window), main_window);
 
+	/* view menu */
+	GtkWidget* view_menu 	= gtk_menu_new();
+	GtkWidget* view_top 	= gtk_menu_item_new_with_mnemonic("_View");
+	gtk_menu_item_set_submenu(GTK_MENU_ITEM(view_top), view_menu);
+
+	GtkWidget* toolbar 	= gtk_menu_item_new_with_mnemonic("_Toolbar");
+	gtk_menu_shell_append(GTK_MENU_SHELL(view_menu), toolbar);
+	//g_signal_connect(GTK_WIDGET(insert), "activate"
+	//	,G_CALLBACK(NULL), main_window);
+
 	/* help menu */
 	GtkWidget* help_menu	= gtk_menu_new();
 	GtkWidget* help_top	= gtk_menu_item_new_with_mnemonic("_Help");
@@ -84,6 +94,7 @@ menu_bar_new(GtkWidget* main_window)
 	GtkWidget *menu_bar 	= gtk_menu_bar_new();
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu_bar), file_top);
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu_bar), edit_top);
+	gtk_menu_shell_append(GTK_MENU_SHELL(menu_bar), view_top);
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu_bar), help_top);
 
 	return menu_bar;
