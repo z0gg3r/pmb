@@ -31,41 +31,27 @@ delete_bookmark(GtkWidget* button, gpointer** args)
 }
 
 static void
-delete_directory(GtkWidget* button, gpointer window)
+delete_directory(GtkWidget* button, gpointer window) 
 {
 	GtkTreeIter 	iter, child;
-	directory_url*	dir_url	= directory_url_new();
+
+	bookmark_list* 	bl 	= bookmark_list_new(); 
+	bookmark* 	b 	= NULL;
 
 	if(gtk_tree_model_get_iter(GTK_TREE_MODEL(model), &iter, selected_path))
 	{
 		if(gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(model), &child, &iter, 0))
-			collect_directory_url(child, dir_url);
+			collect_bookmark(child, bl);
 	}
 
-	directory_url_position_first(dir_url);
-
-	for(int i = 0; i < (directory_url_size(dir_url)) - 1; ++i)
+	while((b = bookmark_list_return_next_bookmark(bl)))
 	{
-		bookmark_list* 	bl 	= bookmark_db_search(db, URL, directory_url_next(dir_url));
-		char** 		result	= NULL;
-
-		if(bl) 
-		{
-			result = bookmark_list_return_next(bl);
-
-			if(result[0]) 
-			{
-				int id = strtol(result[0], NULL, 10);
-				bookmark_db_delete(db, id);
-				free(result);
-			}
-
-			bookmark_list_destroy(bl);
-		}
+		bookmark_db_delete(db, (strtol(bookmark_id(b), NULL, 10)));
+		bookmark_destroy(b);
 	}
 
-	directory_url_destroy(dir_url);
-	gtk_tree_store_remove(GTK_TREE_STORE(bookmarks), &iter);
+	bookmark_list_destroy(bl);
+	read_database(NULL, NULL);
 	close_window(NULL, window);
 }
 

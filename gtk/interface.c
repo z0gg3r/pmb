@@ -5,10 +5,12 @@ gpmb_options* 		opts 		= NULL;
 sqlite3* 		db 		= NULL;
 GtkTreeModel* 		model 		= NULL;
 GtkTreeStore* 		bookmarks	= NULL;
+GtkWidget* 		treeview 	= NULL;
+GtkWidget*		tool_box	= NULL;
+GtkWidget*		main_box	= NULL;
 
-/* selected path and column in tree view */
+/* selected path in tree view */
 GtkTreePath* 		selected_path 	= NULL;
-GtkTreeViewColumn* 	selected_column = NULL;
 
 void 
 destroy() 
@@ -33,15 +35,15 @@ gtk_interface(int argc, char* argv[])
 
 	/* tree view */
 	GtkWidget* search_entry	= gtk_entry_new();
-	GtkWidget* t_view 	= tree_view(search_entry);
+	treeview 		= tree_view(search_entry);
 
 	/* scrolled window for bookmark_view */
 	GtkWidget* s_window 	= gtk_scrolled_window_new(NULL, NULL);
-	gtk_container_add(GTK_CONTAINER(s_window), t_view);
+	gtk_container_add(GTK_CONTAINER(s_window), treeview);
 
 	/* key press */
 	GtkWidget** 	key_press_args 	= g_new(GtkWidget*, 4);
-	key_press_args[0] = t_view;
+	key_press_args[0] = treeview;
 	key_press_args[1] = s_window;
 	key_press_args[2] = search_entry;
 	key_press_args[3] = bookmark_window;
@@ -50,42 +52,33 @@ gtk_interface(int argc, char* argv[])
 		,G_CALLBACK(key_press), key_press_args);
 
 	g_signal_connect(search_entry, "key-release-event"
-		,G_CALLBACK(search_entry_key_press), t_view);
+		,G_CALLBACK(search_entry_key_press), treeview);
 
 	/* menu bar */
 	GtkWidget* menu_bar 	= menu_bar_new(bookmark_window);
 
 	/* tool box */
-	GtkWidget* tool_box 	= tool_box_new(bookmark_window);
+	tool_box 		= tool_box_new(bookmark_window);
 
 	/* search box */
 	GtkWidget* search_box 	= search_box_new(search_entry);
 
-	/* add to v_box */
-	GtkWidget* v_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
-	gtk_container_add(GTK_CONTAINER(v_box), menu_bar);
-	gtk_container_add(GTK_CONTAINER(v_box), tool_box);
-	gtk_container_add(GTK_CONTAINER(v_box), search_box);
-	gtk_box_pack_start(GTK_BOX(v_box), s_window, TRUE, TRUE, 1);
+	/* add to main */
+	main_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
+	gtk_container_add(GTK_CONTAINER(main_box), menu_bar);
+	gtk_container_add(GTK_CONTAINER(main_box), tool_box);
+	gtk_container_add(GTK_CONTAINER(main_box), search_box);
+	gtk_box_pack_start(GTK_BOX(main_box), s_window, TRUE, TRUE, 1);
 
-	/* add v_box into window */
-	gtk_container_add(GTK_CONTAINER(bookmark_window), v_box);
+	/* add main_box into window */
+	gtk_container_add(GTK_CONTAINER(bookmark_window), main_box);
 	gtk_widget_show_all(bookmark_window);
 
 	/* read database and append to tree */
 	read_database(NULL, NULL);
 
 	/* focus tree view */
-	gtk_widget_grab_focus(GTK_WIDGET(t_view));
-
-	/* focus n the first tree view item */
-	GtkTreeIter iter;
-	gtk_tree_model_get_iter_first(GTK_TREE_MODEL(model), &iter);
-
-	GtkTreePath* path = gtk_tree_model_get_path(GTK_TREE_MODEL(model)
-		,&iter);
-	gtk_tree_view_set_cursor(GTK_TREE_VIEW(t_view), path, NULL, 0);
-	gtk_tree_path_free(path);
+	gtk_widget_grab_focus(GTK_WIDGET(treeview));
 
 	gtk_main();
 	return 0;

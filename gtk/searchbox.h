@@ -2,7 +2,6 @@
 #define SEARCHBOX_H
 
 #include "interface.h"
-#include "treeview.h"
 
 GtkWidget*
 search_box_new(GtkWidget*);

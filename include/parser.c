@@ -276,6 +276,7 @@ parse_config_file(char* optarg)
 		if(res[6])
 			tag_color 	= find_color(res[6]);
 
+		free(res);
 	}
 	else
 		return 1;
@@ -1447,6 +1448,7 @@ read_config(char* filename)
 			}
 		}
 
+		free(option);
 		fclose(fp);
 		return ret;
 	}

@@ -7,6 +7,10 @@
 GtkWidget**
 entries(gboolean);
 
+/* collect bookmarks from selected_path */
+void
+collect_bookmark(GtkTreeIter iter, bookmark_list* bl);
+
 /* used to set text from tag box */
 void
 tag_entry_set_text(GtkWidget*, GtkWidget*);

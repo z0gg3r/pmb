@@ -2,9 +2,6 @@
 #define DELETE_H
 
 #include "interface.h"
-#include "dialog.h"
-#include "treeview.h"
-#include "directory_url.h"
 
 /* -- delete wrapper -- */
 void

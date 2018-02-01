@@ -1,6 +1,5 @@
 #ifndef INTERFACE_H
 #define INTERFACE_H
-
 #define _GNU_SOURCE 
 
 #include <gtk/gtk.h>
@@ -24,6 +23,9 @@
 extern sqlite3* 	db;
 extern GtkTreeModel* 	model;
 extern GtkTreeStore* 	bookmarks;
+extern GtkWidget* 	treeview;
+extern GtkWidget* 	tool_box;
+extern GtkWidget* 	main_box;
 
 /* -- quit -- */
 void 

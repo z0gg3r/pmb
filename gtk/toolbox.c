@@ -1,9 +1,18 @@
 #include "toolbox.h"
 
+void
+toolbox_hide(GtkWidget* button, gpointer tb)
+{
+	//gtk_widget_hide(tb);	
+	//gtk_container_remove(GTK_CONTAINER(main_box), tb);
+	//gtk_widget_set_visible(GTK_WIDGET(tb), FALSE);
+	gtk_widget_destroy(tb);
+}
+
 GtkWidget*
 tool_box_new(GtkWidget* main_window) 
 {
-	short icon_size = GTK_ICON_SIZE_MENU;
+	short icon_size 	= GTK_ICON_SIZE_MENU;
 
 	/* add */
 	GtkWidget* add_icon 	= gtk_image_new_from_icon_name
@@ -18,21 +27,21 @@ tool_box_new(GtkWidget* main_window)
 	/* edit */
 	GtkWidget* edit_icon 	= gtk_image_new_from_icon_name
 		("document-page-setup", icon_size);
-	GtkToolItem* edit 	= gtk_tool_button_new(edit_icon, "Edit");
+	GtkToolItem* edit_t 	= gtk_tool_button_new(edit_icon, "Edit");
 	//gtk_tool_button_set_use_underline(GTK_TOOL_BUTTON(edit), TRUE);
-	gtk_tool_item_set_tooltip_text(GTK_TOOL_ITEM(edit), "edit");
+	gtk_tool_item_set_tooltip_text(GTK_TOOL_ITEM(edit_t), "edit");
 
-	g_signal_connect(edit, "clicked", G_CALLBACK(edit)
+	g_signal_connect(edit_t, "clicked", G_CALLBACK(edit)
 		,main_window);
 
 	/* delete */
 	GtkWidget* delete_icon	= gtk_image_new_from_icon_name
 		("edit-delete", icon_size);
-	GtkToolItem* delete 	= gtk_tool_button_new(delete_icon, "Delete");
+	GtkToolItem* delete_t 	= gtk_tool_button_new(delete_icon, "Delete");
 	//gtk_tool_button_set_use_underline(GTK_TOOL_BUTTON(delete), TRUE);
-	gtk_tool_item_set_tooltip_text(GTK_TOOL_ITEM(delete), "delete");
+	gtk_tool_item_set_tooltip_text(GTK_TOOL_ITEM(delete_t), "delete");
 
-	g_signal_connect(delete, "clicked", G_CALLBACK(delete)
+	g_signal_connect(delete_t, "clicked", G_CALLBACK(delete)
 		,main_window);
 
 	/* options */
@@ -72,8 +81,8 @@ tool_box_new(GtkWidget* main_window)
 	GtkWidget* tool_bar 	= gtk_toolbar_new();
 	gtk_toolbar_set_style(GTK_TOOLBAR(tool_bar), GTK_TOOLBAR_BOTH);
 	gtk_toolbar_insert(GTK_TOOLBAR(tool_bar), add, 0);
-	gtk_toolbar_insert(GTK_TOOLBAR(tool_bar), edit, 1);
-	gtk_toolbar_insert(GTK_TOOLBAR(tool_bar), delete, 2);
+	gtk_toolbar_insert(GTK_TOOLBAR(tool_bar), edit_t, 1);
+	gtk_toolbar_insert(GTK_TOOLBAR(tool_bar), delete_t, 2);
 	gtk_toolbar_insert(GTK_TOOLBAR(tool_bar), reload, 3);
 	gtk_toolbar_insert(GTK_TOOLBAR(tool_bar), copy, 4);
 	gtk_toolbar_insert(GTK_TOOLBAR(tool_bar), options, 5);

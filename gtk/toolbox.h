@@ -2,11 +2,9 @@
 #define TOOLBOX_H
 
 #include "interface.h"
-#include "add.h"
-#include "edit.h"
-#include "delete.h"
-#include "options.h"
-#include "treeview.h"
+
+void
+toolbox_hide(GtkWidget*, gpointer);
 
 GtkWidget*
 tool_box_new(GtkWidget*); 

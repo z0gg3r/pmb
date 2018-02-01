@@ -32,7 +32,6 @@ edit_bookmark(GtkWidget* button, gpointer** args)
 				if(tag)
 					bookmark_db_edit(db, id, 3, tag);
 
-				read_database(NULL, NULL);
 				free(result);
 			}
 
@@ -42,50 +41,66 @@ edit_bookmark(GtkWidget* button, gpointer** args)
 
 	close_window(NULL, args[4]);
 	g_free(args);
+	read_database(NULL, NULL);
 }
 
 static void
 edit_directory(GtkWidget* button, gpointer** args) 
 {
 	GtkTreeIter 	iter, child;
-	directory_url*	dir_url	= directory_url_new();
+
+	bookmark_list* 	bl 	= bookmark_list_new(); 
+	bookmark* 	b 	= NULL;
+	bookmark*	sb	= get_data(NULL);
+	char* 		tag	= (char*)gtk_entry_get_text(GTK_ENTRY(args[0]));
 
 	if(gtk_tree_model_get_iter(GTK_TREE_MODEL(model), &iter, selected_path))
 	{
 		if(gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(model), &child, &iter, 0))
-			collect_directory_url(child, dir_url);
+			collect_bookmark(child, bl);
 	}
 
-	directory_url_position_first(dir_url);
-
-	for(int i = 0; i < directory_url_size(dir_url) - 1; ++i)
+	while((b = bookmark_list_return_next_bookmark(bl)))
 	{
-		char* 		url	= directory_url_next(dir_url);
-		bookmark_list* 	bl 	= bookmark_db_search(db, URL, url);
-		char** 		result	= NULL;
-		char* 		tag 	= (char*)gtk_entry_get_text(GTK_ENTRY(args[0]));
+		int	id	= strtol(bookmark_id(b), NULL, 10);
+		char*	bm_tag	= bookmark_tag(b);
 
-		printf("--%s\n", url);
+		strsep(&bm_tag, "//");
 
-		if(bl) 
+		/*
+		printf("--- %s ---\nbookmark_id(sb) = \t %s\n", bookmark_id(sb), bookmark_id(sb));
+		printf("bookmark_tag(b) = \t %s\n", bookmark_tag(b));
+		printf("bm_tag = \t\t%s\n\n", bm_tag);
+		*/
+
+		if(!bm_tag)
+			bookmark_db_edit(db, id, 3, tag);
+		else
 		{
-			result = bookmark_list_return_next(bl);
+			char* new_tag = calloc(strlen(tag) + strlen(bm_tag) + 2, sizeof(char));
 
-			if(result[0]) 
-			{
-				int id = strtol(result[0], NULL, 10);
-				bookmark_db_edit(db, id, 3, tag);
-				free(result);
-				read_database(NULL, NULL);
-			}
+			snprintf(new_tag, strlen(new_tag) - 1, "%s/%s"
+					,tag, bm_tag);
 
-			bookmark_list_destroy(bl);
+			bookmark_db_edit(db, id, 3, new_tag);
+			free(new_tag);
 		}
-	}
 
-	directory_url_destroy(dir_url);
+		bookmark_destroy(b);
+	}
+	
+	if(sb)
+		bookmark_destroy(sb);
+
+	if(b)
+		bookmark_destroy(b);
+
+	if(bl)
+		bookmark_list_destroy(bl);
+
 	close_window(NULL, args[1]);
 	g_free(args);
+	read_database(NULL, NULL);
 }
 
 static void
@@ -218,6 +233,7 @@ edit(GtkWidget* button, gpointer main_window)
 			edit_bookmark_window(b, main_window);
 		else
 			edit_directory_window(b, main_window);
+
 	}
 }
 

@@ -1,10 +1,9 @@
 #ifndef EDIT_H
 #define EDIT_H
+#define _GNU_SOURCE 	/* strsep */
 
+#include <string.h>
 #include "interface.h"
-#include "dialog.h"
-#include "treeview.h"
-#include "directory_url.h"
 
 /* -- edit wrapper -- */
 void

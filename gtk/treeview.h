@@ -3,9 +3,8 @@
 
 #include "interface.h"
 
-/* selected path and column in tree view */
-extern GtkTreePath* 		selected_path;
-extern GtkTreeViewColumn* 	selected_column;
+/* selected path in tree view */
+extern GtkTreePath* 	selected_path;
 
 /* -- copy the selected bookmark url to clipboard -- */
 void
@@ -21,6 +20,7 @@ get_data(GtkTreePath*);
 
 /* -- read database -- */
 void 
-read_database(GtkWidget*, gpointer**); 
+read_database(GtkWidget*, GtkWidget*); 
 
 #endif
+

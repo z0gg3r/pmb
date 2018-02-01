@@ -1,6 +1,33 @@
 #include "dialog.h"
 
 void
+collect_bookmark(GtkTreeIter iter, bookmark_list* bl)
+{
+	GtkTreeIter 	child;
+	GtkTreePath*	path;
+
+	do
+	{
+		path 			= gtk_tree_model_get_path(GTK_TREE_MODEL(model), &iter);
+		bookmark* 	b 	= get_data(path);
+
+		if(b)
+		{
+			if(strlen(bookmark_url(b)) > 1)
+				bookmark_list_enqueue_bookmark(bl, b);
+
+			bookmark_destroy(b);
+		}
+
+		if(gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(model), &child, &iter, 0))
+			collect_bookmark(child, bl);
+	}
+	while(gtk_tree_model_iter_next(GTK_TREE_MODEL(model), &iter));
+
+	gtk_tree_path_free(path);
+}
+
+void
 tag_entry_set_text(GtkWidget* tag_box, GtkWidget* tag_entry)
 {
 	if(tag_entry && tag_box)

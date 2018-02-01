@@ -97,6 +97,7 @@ destroy_option_list(cl_option_list* l)
 		for(int i = 0; i < l->size - 1; ++i)
 			destroy_option(l->opt[i]);
 
+		free(l->opt);
 		free(l);
 		return 0;		
 	}

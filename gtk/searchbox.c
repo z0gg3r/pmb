@@ -10,14 +10,11 @@ search_box_new(GtkWidget* search_entry)
 	/* search button */
 	GtkWidget* search_button = gtk_button_new_with_mnemonic("_Go");
 
-	GtkWidget** read_database_args = g_new(GtkWidget*, 1);
-	read_database_args[0] = search_entry;
-
 	g_signal_connect(GTK_WIDGET(search_button), "clicked"
-		,G_CALLBACK(read_database), read_database_args);
+		,G_CALLBACK(read_database), search_entry);
 
 	g_signal_connect(GTK_WIDGET(search_entry), "activate"
-		,G_CALLBACK(read_database), read_database_args);
+		,G_CALLBACK(read_database), search_entry);
 
 	/* search box */
 	GtkWidget* search_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 3);

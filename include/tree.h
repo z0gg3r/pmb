@@ -1,10 +1,11 @@
 #ifndef TREE_H
 #define TREE_H
+#define _GNU_SOURCE 	/* strsep */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "bookmark.h"
+#include "database.h"
 
 typedef struct directory directory;
 typedef struct directory_name_list directory_name_list;
@@ -18,7 +19,7 @@ directory_new(char*);
 char*
 directory_name(directory*);
 
-/* -- return how many childrens adirectory have -- */
+/* -- return how many childrens directory have -- */
 int
 directory_childrens(directory*);
 
@@ -94,47 +95,6 @@ directory_contain_children(directory*, char*);
 bookmark*
 directory_contain_bookmark(directory*, int);
 
-/* -- create a new directory_name_list object -- */
-directory_name_list*
-directory_name_list_new();
-
-/* -- destroy a directory_name_list object -- */
-void
-directory_name_list_destroy(directory_name_list*);
-
-/* -- return size of directory_name_list -- */
-int
-directory_name_list_size(directory_name_list*);
-
-/* -- return position on directory_name_list -- */
-int
-directory_name_list_position(directory_name_list*);
-
-/* -- add a name to directory_name_list -- */
-/* directory_name_list* l, char* name */
-void
-directory_name_list_add_dir(directory_name_list*, char*);
-
-/* -- return the next name of directory_name_list -- */
-char*
-directory_name_list_return_next(directory_name_list*);
-
-/* -- return the last name of directory_name_list -- */
-char*
-directory_name_list_return_last(directory_name_list*);
-
-/* -- set position of directory_name_list to 0 -- */
-void
-directory_name_list_rewind(directory_name_list*);
-
-/* -- cut the bookmark* b->tag string and return it in directory_name_list* -- */
-directory_name_list*
-dismember(bookmark*);
-
-/* -- pop out last name of directory_name_list -- */
-char*
-directory_name_list_pop(directory_name_list*);
-
 /* -- create a array of directory* from a directory_name_list* -- */
 directory**
 create_directory_tree_from_list(directory_name_list*, int);
@@ -175,6 +135,47 @@ directory_move_children_all(directory*, directory*);
 /* bookmark_list* bl, char* name */
 directory*
 create_tree_from_bookmark_list(bookmark_list*, char*);
+
+/* -- create a new directory_name_list object -- */
+directory_name_list*
+directory_name_list_new();
+
+/* -- destroy a directory_name_list object -- */
+void
+directory_name_list_destroy(directory_name_list*);
+
+/* -- return size of directory_name_list -- */
+int
+directory_name_list_size(directory_name_list*);
+
+/* -- return position on directory_name_list -- */
+int
+directory_name_list_position(directory_name_list*);
+
+/* -- add a name to directory_name_list -- */
+/* directory_name_list* l, char* name */
+void
+directory_name_list_add_dir(directory_name_list*, char*);
+
+/* -- return the next name of directory_name_list -- */
+char*
+directory_name_list_return_next(directory_name_list*);
+
+/* -- return the last name of directory_name_list -- */
+char*
+directory_name_list_return_last(directory_name_list*);
+
+/* -- set position of directory_name_list to 0 -- */
+void
+directory_name_list_rewind(directory_name_list*);
+
+/* -- cut the bookmark* b->tag string and return it in directory_name_list* -- */
+directory_name_list*
+dismember(bookmark*);
+
+/* -- pop out last name of directory_name_list -- */
+char*
+directory_name_list_pop(directory_name_list*);
 
 #endif
 

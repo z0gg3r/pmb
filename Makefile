@@ -16,6 +16,8 @@ PMB=pmb
 PARSER=parser
 OPTION=option
 BOOKMARK=bookmark
+BOOKMARK_LIST=bookmark_list
+DATABASE=database
 TREE=tree
 HTML=html
 
@@ -32,7 +34,7 @@ G_OPTIONS=options
 G_SEARCHBOX=searchbox
 G_TAGBOX=tagbox
 G_INTERFACE=interface
-G_DIR_URL=directory_url
+#G_DIR_URL=directory_url
 
 #PMB_SOURCE_FILES=$(INC_DIR)/$(BOOKMARK).c $(INC_DIR)/$(PARSER).c \
 #	$(INC_DIR)/$(OPTION).c $(INC_DIR)/$(TREE).c \
@@ -52,6 +54,10 @@ $(shell if [ ! -e "./build" ]; then mkdir build; fi)
 define BUILD_DEP
 	$(CC) $(CCFLAGS) -c $(INC_DIR)/$(BOOKMARK).c \
 	-o $(BUILD_DIR)/$(BOOKMARK).o
+	$(CC) $(CCFLAGS) -c $(INC_DIR)/$(BOOKMARK_LIST).c \
+	-o $(BUILD_DIR)/$(BOOKMARK_LIST).o
+	$(CC) $(CCFLAGS) -c $(INC_DIR)/$(DATABASE).c \
+	-o $(BUILD_DIR)/$(DATABASE).o
 	$(CC) $(CCFLAGS) -c $(INC_DIR)/$(PARSER).c \
 	-o $(BUILD_DIR)/$(PARSER).o
 	$(CC) $(CCFLAGS) -c $(INC_DIR)/$(OPTION).c \
@@ -63,8 +69,6 @@ define BUILD_DEP
 endef
 
 define BUILD_GPMB_DEP
-	$(CC) $(CCFLAGS) $(GTKFLAGS) -c $(GPMB_DIR)/$(G_DIR_URL).c \
-	-o $(BUILD_DIR)/$(G_DIR_URL).o
 	$(CC) $(CCFLAGS) $(GTKFLAGS) -c $(GPMB_DIR)/$(G_TREEVIEW).c \
 	-o $(BUILD_DIR)/$(G_TREEVIEW).o
 	$(CC) $(CCFLAGS) $(GTKFLAGS) -c $(GPMB_DIR)/$(G_KEYPRESS).c \
@@ -94,6 +98,8 @@ endef
 define BUILD_GPMB
 	$(CC) $(CCFLAGS) $(GTKFLAGS) $(SQLITE_FLAGS) \
 	$(BUILD_DIR)/$(BOOKMARK).o \
+	$(BUILD_DIR)/$(BOOKMARK_LIST).o \
+	$(BUILD_DIR)/$(DATABASE).o \
 	$(BUILD_DIR)/$(TREE).o \
 	$(BUILD_DIR)/$(G_TREEVIEW).o \
 	$(BUILD_DIR)/$(G_KEYPRESS).o \
@@ -106,7 +112,6 @@ define BUILD_GPMB
 	$(BUILD_DIR)/$(G_TOOLBOX).o \
 	$(BUILD_DIR)/$(G_SEARCHBOX).o \
 	$(BUILD_DIR)/$(G_TAGBOX).o \
-	$(BUILD_DIR)/$(G_DIR_URL).o \
 	$(BUILD_DIR)/$(G_INTERFACE).o\
 	$(GPMB).c -o $(GPMB)
 endef
@@ -114,6 +119,8 @@ endef
 define BUILD_PMB
 	$(CC) $(CCFLAGS) $(SQLITE_FLAGS) \
 	$(BUILD_DIR)/$(BOOKMARK).o \
+	$(BUILD_DIR)/$(BOOKMARK_LIST).o \
+	$(BUILD_DIR)/$(DATABASE).o \
 	$(BUILD_DIR)/$(PARSER).o \
 	$(BUILD_DIR)/$(OPTION).o \
 	$(BUILD_DIR)/$(TREE).o \
@@ -196,12 +203,18 @@ $(G_INTERFACE):$(GPMB_DIR)/$(G_INTERFACE).c
 	-o $(BUILD_DIR)/$(G_INTERFACE).o
 	$(BUILD_GPMB)
 
-$(G_DIR_URL):$(GPMB_DIR)/$(G_DIR_URL).c
-	$(CC) $(CCFLAGS) $(GTKFLAGS) -c $(GPMB_DIR)/$(G_DIR_URL).c \
-	-o $(BUILD_DIR)/$(G_DIR_URL).o
-	$(BUILD_GPMB)
+#$(G_DIR_URL):$(GPMB_DIR)/$(G_DIR_URL).c
+#	$(CC) $(CCFLAGS) $(GTKFLAGS) -c $(GPMB_DIR)/$(G_DIR_URL).c \
+#	-o $(BUILD_DIR)/$(G_DIR_URL).o
+#	$(BUILD_GPMB)
 
 $(TREE):
 	$(CC) $(CCFLAGS) -c $(INC_DIR)/$(TREE).c \
 	-o $(BUILD_DIR)/$(TREE).o
+
+valgrind_gpmb:
+	valgrind --leak-check=full --track-origins=yes --log-file=log.txt -v ./gpmb 
+
+valgrind_pmb:
+	valgrind --leak-check=full --track-origins=yes --log-file=log.txt -v ./pmb 
 

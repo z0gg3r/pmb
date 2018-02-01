@@ -9,7 +9,7 @@ copy_to_clipboard()
 
 	if(b)
 	{
-		char*		url	= bookmark_url(b);
+		char*	url	= bookmark_url(b);
 
 		if(url)
 		{
@@ -42,19 +42,15 @@ cell_renderer_new(char* color)
 
 /* -- update selected_path and selected_column globals -- */
 static void
-update_selected_row(gpointer** args) 
+update_selected_row(GtkWidget* tree_view) 
 {
-	GtkTreePath* 		path 	= gtk_tree_path_new();
-	GtkTreeViewColumn* 	column 	= gtk_tree_view_column_new();
+	GtkTreePath* 	path 	= gtk_tree_path_new();
 
-	gtk_tree_view_get_cursor(GTK_TREE_VIEW(&args[0]), &path, NULL);
+	gtk_tree_view_get_cursor(GTK_TREE_VIEW(tree_view), &path, NULL);
 
 	gtk_tree_path_free(selected_path);
-	g_object_ref_sink(G_OBJECT(selected_column));
-	g_object_unref(G_OBJECT(selected_column));
 
 	selected_path 		= path;
-	selected_column 	= column;
 }
 
 static void
@@ -137,6 +133,8 @@ tree_store_add_child(GtkTreeIter* iter, directory* child)
 
 			gtk_tree_store_set(bookmarks, &b_iter, 5
 				,star, -1);
+
+			//bookmark_destroy(b);
 		}
 
 		if(d)
@@ -151,16 +149,14 @@ tree_store_add_child(GtkTreeIter* iter, directory* child)
 }
 
 void 
-read_database(GtkWidget* button, gpointer** args) 
+read_database(GtkWidget* button, GtkWidget* entry) 
 {
 	bookmark_list* 	bl = NULL;
 
 	gtk_tree_store_clear(bookmarks);
 
-	if(&args[0]) 
+	if(entry) 
 	{
-		GtkWidget* entry = GTK_WIDGET(args[0]);
-
 		if(entry) 
 		{
 			char* tag = (char*)gtk_entry_get_text(GTK_ENTRY
@@ -186,21 +182,31 @@ read_database(GtkWidget* button, gpointer** args)
 		directory* 	root 	= create_tree_from_bookmark_list(bl
 						,"root");
 
-		directory_rewind(root);
-
-		while((child = directory_next_children(root)))
-			tree_store_add_child(NULL, child);
-
-		if(child)
-			directory_destroy(child);
-
 		if(root)
+		{
+			directory_rewind(root);
+
+			while((child = directory_next_children(root)))
+				tree_store_add_child(NULL, child);
+
+			if(child)
+				directory_destroy(child);
+
 			directory_destroy(root);
+		}
 
 		bookmark_list_destroy(bl);
 	}
 
-	g_free(args);
+	/* focus n the first tree view item */
+	GtkTreeIter iter;
+	gtk_tree_model_get_iter_first(GTK_TREE_MODEL(model), &iter);
+
+	GtkTreePath* path = gtk_tree_model_get_path(GTK_TREE_MODEL(model)
+		,&iter);
+
+	gtk_tree_view_set_cursor(GTK_TREE_VIEW(treeview), path, NULL, 0);
+	gtk_tree_path_free(path);
 }
 
 bookmark*
@@ -289,7 +295,6 @@ tree_view(GtkWidget* search_entry)
 	gtk_tree_view_column_add_attribute(GTK_TREE_VIEW_COLUMN(dir_column)
 		,dir_icon, "pixbuf", 5);
 
-	/* title of dir_column */
 	g_object_set(G_OBJECT(dir_column), "title", "Tag/Id", NULL);
 
 	/* name column */
@@ -396,11 +401,8 @@ tree_view(GtkWidget* search_entry)
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(tree_view));
 
-	GtkWidget** update_selected_row_args = g_new(GtkWidget*, 1);
-	update_selected_row_args[0] = tree_view;
-
 	g_signal_connect(tree_view, "cursor-changed"
-		,G_CALLBACK(update_selected_row), update_selected_row_args);
+		,G_CALLBACK(update_selected_row), tree_view);
 
 	return tree_view;	
 }
