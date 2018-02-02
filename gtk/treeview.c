@@ -401,6 +401,10 @@ tree_view(GtkWidget* search_entry)
 
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(tree_view));
 
+	/* multiple selections */
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(tree_view));
+	gtk_tree_selection_set_mode(GTK_TREE_SELECTION(selection), GTK_SELECTION_MULTIPLE);
+
 	g_signal_connect(tree_view, "cursor-changed"
 		,G_CALLBACK(update_selected_row), tree_view);
 

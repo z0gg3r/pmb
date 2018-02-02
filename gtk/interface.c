@@ -8,6 +8,7 @@ GtkTreeStore* 		bookmarks	= NULL;
 GtkWidget* 		treeview 	= NULL;
 GtkWidget*		tool_box	= NULL;
 GtkWidget*		main_box	= NULL;
+GtkTreeSelection*	selection	= NULL;
 
 /* selected path in tree view */
 GtkTreePath* 		selected_path 	= NULL;

@@ -9,7 +9,7 @@ entries(gboolean);
 
 /* collect bookmarks from selected_path */
 void
-collect_bookmark(GtkTreeIter iter, bookmark_list* bl);
+collect_bookmark(GtkTreeIter, bookmark_list*);
 
 /* used to set text from tag box */
 void

@@ -4,7 +4,7 @@
 #include "interface.h"
 
 /* selected path in tree view */
-extern GtkTreePath* 	selected_path;
+extern GtkTreePath* 		selected_path;
 
 /* -- copy the selected bookmark url to clipboard -- */
 void

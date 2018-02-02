@@ -20,12 +20,13 @@
 #include "tagbox.h"
 
 /* globals */
-extern sqlite3* 	db;
-extern GtkTreeModel* 	model;
-extern GtkTreeStore* 	bookmarks;
-extern GtkWidget* 	treeview;
-extern GtkWidget* 	tool_box;
-extern GtkWidget* 	main_box;
+extern sqlite3* 		db;
+extern GtkTreeModel* 		model;
+extern GtkTreeStore* 		bookmarks;
+extern GtkWidget* 		treeview;
+extern GtkWidget* 		tool_box;
+extern GtkWidget* 		main_box;
+extern GtkTreeSelection*	selection;
 
 /* -- quit -- */
 void 
