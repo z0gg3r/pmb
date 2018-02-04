@@ -25,7 +25,6 @@ get_full_path(bookmark* b)
 					bookmark* bp 	= get_data(path);
 					iter 		= parent;
 
-					parents[size - 1] = malloc((strlen(bookmark_id(bp))) * sizeof(char));
 					parents[size - 1] = bookmark_id(bp);
 					parents		  = realloc(parents, (size + 1) * sizeof(char*));
 					++size;
@@ -81,7 +80,6 @@ get_full_path(bookmark* b)
 				free(parents);
 				free(complete_path);
 				return full_path;
-
 			}
 			else
 				return bookmark_id(b);

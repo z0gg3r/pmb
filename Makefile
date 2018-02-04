@@ -163,6 +163,11 @@ $(G_TREEVIEW):$(GPMB_DIR)/$(G_TREEVIEW).c
 	-o $(BUILD_DIR)/$(G_TREEVIEW).o
 	$(BUILD_GPMB)
 
+$(G_ADD):$(GPMB_DIR)/$(G_ADD).c
+	$(CC) $(CCFLAGS) $(GTKFLAGS) -c $(GPMB_DIR)/$(G_ADD).c \
+	-o $(BUILD_DIR)/$(G_ADD).o
+	$(BUILD_GPMB)
+
 $(G_DELETE):$(GPMB_DIR)/$(G_DELETE).c
 	$(CC) $(CCFLAGS) $(GTKFLAGS) -c $(GPMB_DIR)/$(G_DELETE).c \
 	-o $(BUILD_DIR)/$(G_DELETE).o
