@@ -41,12 +41,8 @@ add_window(GtkWidget* button, gpointer main_window)
 
 	if(b) 
 	{
-		if(strlen(bookmark_tag(b)) > 1)
-			gtk_entry_set_text(GTK_ENTRY(e[7]), bookmark_tag(b));
-		else if(bookmark_id(b))
-			gtk_entry_set_text(GTK_ENTRY(e[7]), bookmark_id(b));
-
-		free(b);
+		gtk_entry_set_text(GTK_ENTRY(e[7]), get_full_path(b));
+		bookmark_destroy(b);
 		b = NULL;
 	}
 

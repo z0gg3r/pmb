@@ -1,5 +1,96 @@
 #include "dialog.h"
 
+char*
+get_full_path(bookmark* b)
+{
+	if(b) 
+	{
+		if(strlen(bookmark_tag(b)) > 1)
+			return bookmark_tag(b);
+		else if(bookmark_id(b))
+		{
+			GtkTreeIter iter, parent;
+
+			if(gtk_tree_model_get_iter(GTK_TREE_MODEL(model), &iter, selected_path))
+			{
+				GtkTreePath*	path;
+				unsigned int	size 	= 1;
+				char**		parents = calloc(size, sizeof(char*));
+				char*		dir 	= bookmark_id(b);
+
+				while(gtk_tree_model_iter_parent(GTK_TREE_MODEL(model)
+					,&parent, &iter))
+				{
+					path 		= gtk_tree_model_get_path(GTK_TREE_MODEL(model), &parent);
+					bookmark* bp 	= get_data(path);
+					iter 		= parent;
+
+					parents[size - 1] = malloc((strlen(bookmark_id(bp))) * sizeof(char));
+					parents[size - 1] = bookmark_id(bp);
+					parents		  = realloc(parents, (size + 1) * sizeof(char*));
+					++size;
+
+					bookmark_destroy(bp);
+					gtk_tree_path_free(path);
+				}
+
+				char*		complete_path 	= calloc(1, 1 * sizeof(char));
+				unsigned int	size_bkp	= size - 1;
+
+				while(size_bkp)
+				{
+					char* t_path = calloc(1, (strlen(complete_path) + 2) * sizeof(char));
+					strcpy(t_path, complete_path);
+
+					free(complete_path);
+					complete_path = calloc(1, ((strlen(complete_path) * sizeof(char)) 
+							+ ((strlen(parents[size_bkp - 1]) + 1) 
+							* sizeof(char))));
+
+					if(strlen(t_path) > 1)
+						snprintf(complete_path, (
+							((strlen(t_path) + 1) * sizeof(char)) 
+							+ ((strlen(parents[size_bkp - 1]) + 1) * sizeof(char))) 
+							* sizeof(char)
+							,"%s/%s"
+							,t_path, parents[size_bkp - 1]);
+					else
+						snprintf(complete_path, 
+							((strlen(parents[size_bkp - 1]) + 1) * sizeof(char)) 
+							,"%s"
+							,parents[size_bkp - 1]);
+
+					free(parents[size_bkp - 1]);
+					free(t_path);
+					size_bkp--;
+				}
+	
+				if(strlen(complete_path) > 1)
+					complete_path[strlen(complete_path)] = '/';
+
+				char* full_path = malloc((strlen(complete_path) * sizeof(char)) 
+						+ (strlen(dir) * sizeof(char)) 
+						+ (3 * sizeof(char)));
+
+				snprintf(full_path, 
+					((strlen(complete_path) + 1) * sizeof(char)) 
+					 + ((strlen(dir) + 1) * sizeof(char)) 
+					,"%s%s"
+					,complete_path, dir);
+
+				free(parents);
+				free(complete_path);
+				return full_path;
+
+			}
+			else
+				return bookmark_id(b);
+		}
+	}
+
+	return NULL;
+}
+
 void
 collect_bookmark(GtkTreeIter iter, bookmark_list* bl)
 {

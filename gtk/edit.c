@@ -243,9 +243,9 @@ edit_directory_window(bookmark* b, gpointer main_window)
 	GtkWidget* name_entry = gtk_entry_new();
 	gtk_entry_set_placeholder_text(GTK_ENTRY(name_entry), "name");
 
-	if(b && bookmark_id(b))
+	if(b)
 	{
-		gtk_entry_set_text(GTK_ENTRY(name_entry), bookmark_id(b));
+		gtk_entry_set_text(GTK_ENTRY(name_entry), get_full_path(b));
 		bookmark_destroy(b);
 	}
 

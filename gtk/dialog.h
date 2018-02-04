@@ -11,6 +11,10 @@ entries(gboolean);
 void
 collect_bookmark(GtkTreeIter, bookmark_list*);
 
+/* -- get full path of selected bookmark/directory -- */
+char*
+get_full_path(bookmark*);
+
 /* used to set text from tag box */
 void
 tag_entry_set_text(GtkWidget*, GtkWidget*);

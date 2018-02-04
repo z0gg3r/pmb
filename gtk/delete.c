@@ -160,9 +160,9 @@ delete_directory_window(bookmark* b, gpointer main_window)
 	gtk_entry_set_placeholder_text(GTK_ENTRY(name_entry), "name");
 	gtk_editable_set_editable(GTK_EDITABLE(name_entry), FALSE);
 
-	if(b && bookmark_id(b))
+	if(b)
 	{
-		gtk_entry_set_text(GTK_ENTRY(name_entry), bookmark_id(b));
+		gtk_entry_set_text(GTK_ENTRY(name_entry), get_full_path(b));
 		bookmark_destroy(b);
 	}
 
@@ -183,8 +183,8 @@ delete_directory_window(bookmark* b, gpointer main_window)
 
 	gtk_grid_attach(GTK_GRID(grid), name_entry_label 	,0,  0, 30, 1);
 	gtk_grid_attach(GTK_GRID(grid), name_entry 		,20, 0, 50, 1);
-	gtk_grid_attach(GTK_GRID(grid), delete_button 		,20, 5, 20, 10);
-	gtk_grid_attach(GTK_GRID(grid), cancel_button 		,40, 5, 20, 10);
+	gtk_grid_attach(GTK_GRID(grid), delete_button 		,20, 1, 20, 10);
+	gtk_grid_attach(GTK_GRID(grid), cancel_button 		,40, 1, 20, 10);
 
 	gtk_container_add(GTK_CONTAINER(window), grid);
 	gtk_widget_show_all(GTK_WIDGET(window));
