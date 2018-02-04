@@ -833,7 +833,6 @@ print_bookmark(char* optarg)
 
 		bookmark_list* bl = NULL;
 
-
 		enum 
 		{ 
 			id_option

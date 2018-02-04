@@ -8,7 +8,7 @@ move_directory(char* tag)
 	bookmark_list* 	bl 	= bookmark_list_new(); 
 	bookmark* 	b 	= NULL;
 	bookmark*	sb	= get_data(NULL);
-	int 		parents = 0;
+	unsigned int 	parents = 0;
 
 	if(gtk_tree_model_get_iter(GTK_TREE_MODEL(model), &iter, selected_path))
 	{
@@ -27,9 +27,9 @@ move_directory(char* tag)
 
 	while((b = bookmark_list_return_next_bookmark(bl)))
 	{
-		int	id	= strtol(bookmark_id(b), NULL, 10);
-		char*	bm_tag	= bookmark_tag(b);
-		char*	res	= NULL;
+		unsigned int	id	= strtol(bookmark_id(b), NULL, 10);
+		char*		bm_tag	= bookmark_tag(b);
+		char*		res	= NULL;
 
 		strsep(&bm_tag, "//");
 
@@ -94,7 +94,7 @@ edit_bookmark(GtkWidget* button, gpointer** args)
 
 			if(result[0]) 
 			{
-				int id = strtol(result[0], NULL, 10);
+				unsigned int id = strtol(result[0], NULL, 10);
 
 				if(name)
 					bookmark_db_edit(db, id, 0, name);
@@ -158,7 +158,7 @@ edit_multiple(GtkWidget* button, gpointer** args)
 	}
 	while((rows = rows->next));
 
-	g_list_free_full (rows, (GDestroyNotify) gtk_tree_path_free);
+	g_list_free_full(rows, (GDestroyNotify) gtk_tree_path_free);
 	close_window(NULL, args[1]);
 	g_free(args);
 	read_database(NULL, NULL);
@@ -331,23 +331,22 @@ edit_multiple_window(gpointer main_window)
 void
 edit(GtkWidget* button, gpointer main_window)
 {
-	bookmark* 	b 	 = get_data(NULL);
-	int 		selected = gtk_tree_selection_count_selected_rows
-					(GTK_TREE_SELECTION(selection));
-
-	if(b)
+	if(gtk_tree_selection_count_selected_rows
+		(GTK_TREE_SELECTION(selection)) > 1)
 	{
-		if(selected > 1)
+		edit_multiple_window(main_window);
+	}
+	else
+	{
+		bookmark* b = get_data(NULL);
+
+		if(b)
 		{
-			edit_multiple_window(main_window);
-			bookmark_destroy(b);
+			if(strlen(bookmark_url(b)) > 1)
+				edit_bookmark_window(b, main_window);
+			else
+				edit_directory_window(b, main_window);
 		}
-
-		else if(strlen(bookmark_url(b)) > 1)
-			edit_bookmark_window(b, main_window);
-		else
-			edit_directory_window(b, main_window);
-
 	}
 }
 

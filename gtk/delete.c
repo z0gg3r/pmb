@@ -16,7 +16,7 @@ delete_bookmark(GtkWidget* button, gpointer** args)
 
 			if(result[0]) 
 			{
-				int id = strtol(result[0], NULL, 10);
+				unsigned int id = strtol(result[0], NULL, 10);
 				bookmark_db_delete(db, id);
 				read_database(NULL, NULL);
 				free(result);
@@ -53,6 +53,39 @@ delete_directory(GtkWidget* button, gpointer window)
 	bookmark_list_destroy(bl);
 	read_database(NULL, NULL);
 	close_window(NULL, window);
+}
+
+static void
+delete_multiple(GtkWidget* button, gpointer window)
+{
+	GList* rows = gtk_tree_selection_get_selected_rows
+			(GTK_TREE_SELECTION(selection)
+			,&model);
+
+	do
+	{
+		if(rows)
+		{
+			bookmark* b = get_data(rows->data);
+
+			if(strlen(bookmark_url(b)) > 1)
+				bookmark_db_delete(db, (strtol(bookmark_id(b), NULL, 10)));
+			else
+			{
+				selected_path = rows->data;	
+				delete_directory(button, window);
+			}
+
+			bookmark_destroy(b);
+		}
+		else
+			break;
+	}
+	while((rows = rows->next));
+
+	g_list_free_full(rows, (GDestroyNotify) gtk_tree_path_free);
+	close_window(NULL, window);
+	read_database(NULL, NULL);
 }
 
 static void
@@ -158,17 +191,55 @@ delete_directory_window(bookmark* b, gpointer main_window)
 	gtk_widget_grab_focus(GTK_WIDGET(cancel_button));
 }
 
+static void
+delete_multiple_window(GtkWidget* main_window)
+{
+	GtkWidget* window = dialogs("Delete multiple bookmarks", main_window);
+	GtkWidget* advice = gtk_label_new("Delete all selected bookmarks/directories?");
+
+	/* button */
+	GtkWidget* delete_button = gtk_button_new_with_mnemonic("_Delete");
+	g_signal_connect(delete_button, "clicked", G_CALLBACK(delete_multiple)
+		,window);
+
+	GtkWidget* cancel_button = gtk_button_new_with_mnemonic("_Cancel");
+	g_signal_connect(cancel_button, "clicked", G_CALLBACK(close_window)
+		,window);
+
+	/* grid */
+	GtkWidget* grid = gtk_grid_new();
+	gtk_grid_set_column_spacing(GTK_GRID(grid), 2);
+	gtk_grid_set_row_spacing(GTK_GRID(grid), 2);
+	gtk_grid_set_column_homogeneous(GTK_GRID(grid), 1);
+
+	gtk_grid_attach(GTK_GRID(grid), advice 		,0,  0, 30, 1);
+	gtk_grid_attach(GTK_GRID(grid), delete_button 	,0,  1, 20, 10);
+	gtk_grid_attach(GTK_GRID(grid), cancel_button 	,20, 1, 20, 10);
+
+	gtk_container_add(GTK_CONTAINER(window), grid);
+	gtk_widget_show_all(GTK_WIDGET(window));
+	gtk_widget_grab_focus(GTK_WIDGET(cancel_button));
+}
+
 void
 delete(GtkWidget* button, gpointer main_window)
 {
-	bookmark* b = get_data(NULL);
-
-	if(b)
+	if(gtk_tree_selection_count_selected_rows
+		(GTK_TREE_SELECTION(selection)) > 1)
 	{
-		if(strlen(bookmark_url(b)) > 1)
-			delete_bookmark_window(b, main_window);
-		else
-			delete_directory_window(b, main_window);
+		delete_multiple_window(main_window);
+	}
+	else
+	{
+		bookmark* b = get_data(NULL);
+
+		if(b)
+		{
+			if(strlen(bookmark_url(b)) > 1)
+				delete_bookmark_window(b, main_window);
+			else
+				delete_directory_window(b, main_window);
+		}
 	}
 }
 

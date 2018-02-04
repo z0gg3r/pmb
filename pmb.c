@@ -18,7 +18,7 @@ main(int argc, char *argv[])
 	const char* 	home 	= secure_getenv("HOME");	
 
 	/* database file */
-	char* 		file 	= calloc((strlen(home) 
+	char* 	file 		= calloc((strlen(home) 
 				+ strlen(DATABASE) + 2), sizeof(char));
 
 	/* config file */
