@@ -47,8 +47,32 @@ move_directory(char* tag)
 
 		else if(strlen(tag) < 2)
 		{
-			tag = strsep(&bm_tag, "//");
-			bookmark_db_edit(db, id, 3, tag);
+			char* n_tag = NULL;
+
+			while(bm_tag)
+			{
+				n_tag = strsep(&bm_tag, "//");
+
+				if(!(strcmp(n_tag, bookmark_id(sb))))
+					break;
+			}
+
+			//bookmark_db_edit(db, id, 3, tag);
+			//move_directory(tag);
+
+			if(bm_tag)
+			{
+				char* new_tag = calloc(1, (strlen(n_tag) + strlen(bm_tag) + 2) * sizeof(char));
+
+				snprintf(new_tag, strlen(new_tag) - 1, "%s/%s"
+					,n_tag, bm_tag);
+
+				printf("++ %s\n", new_tag);
+				bookmark_db_edit(db, id, 3, new_tag);
+				free(new_tag);
+			}
+			else
+				bookmark_db_edit(db, id, 3, n_tag);
 		}
 		else
 		{
@@ -68,6 +92,7 @@ move_directory(char* tag)
 			snprintf(new_tag, strlen(new_tag) - 1, "%s/%s"
 					,tag, bm_tag);
 
+			printf("%s\n", new_tag);
 			bookmark_db_edit(db, id, 3, new_tag);
 			free(new_tag);
 		}
