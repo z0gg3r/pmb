@@ -57,9 +57,6 @@ move_directory(char* tag)
 					break;
 			}
 
-			//bookmark_db_edit(db, id, 3, tag);
-			//move_directory(tag);
-
 			if(bm_tag)
 			{
 				char* new_tag = calloc(1, (strlen(n_tag) + strlen(bm_tag) + 2) * sizeof(char));
