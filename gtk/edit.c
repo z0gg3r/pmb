@@ -32,16 +32,24 @@ move_directory(char* tag)
 		char*		bm_tag_bkp 	= strdup(bm_tag);
 		char*		res		= NULL;
 
-		strsep(&bm_tag, "//");
+		if(parents > 0)
+			strsep(&bm_tag, "//");
 
 		/*
 		printf("--- %s ---\nbookmark_id(sb) = \t %s\n", bookmark_id(sb), bookmark_id(sb));
 		printf("bookmark_tag(b) = \t %s\n", bookmark_tag(b));
 		printf("bm_tag = \t\t%s\n\n", bm_tag);
+		printf("%d\n", parents);
 		*/
 
 		if(!bm_tag)
 			bookmark_db_edit(db, id, 3, tag);
+
+		else if(strlen(tag) < 2)
+		{
+			tag = strsep(&bm_tag, "//");
+			bookmark_db_edit(db, id, 3, tag);
+		}
 		else
 		{
 			if(parents > 1)
@@ -85,6 +93,7 @@ edit_bookmark(GtkWidget* button, gpointer** args)
 	char* url 	= (char*)gtk_entry_get_text(GTK_ENTRY(args[1]));
 	char* comment 	= (char*)gtk_entry_get_text(GTK_ENTRY(args[2]));
 	char* tag 	= (char*)gtk_entry_get_text(GTK_ENTRY(args[3]));
+	char* message	= NULL;
 
 	if(url) 
 	{
@@ -92,11 +101,11 @@ edit_bookmark(GtkWidget* button, gpointer** args)
 		
 		if(bl) 
 		{
-			char** result = bookmark_list_return_next(bl);
+			bookmark* b = bookmark_list_return_next_bookmark(bl);
 
-			if(result[0]) 
+			if(b) 
 			{
-				unsigned int id = strtol(result[0], NULL, 10);
+				unsigned int id = strtol(bookmark_id(b), NULL, 10);
 
 				if(name)
 					bookmark_db_edit(db, id, 0, name);
@@ -110,7 +119,17 @@ edit_bookmark(GtkWidget* button, gpointer** args)
 				if(tag)
 					bookmark_db_edit(db, id, 3, tag);
 
-				free(result);
+				unsigned int size = (strlen(bookmark_id(b))
+						+ strlen(bookmark_url(b)) 
+						+ strlen("editing id =   , url =  ") + 1)
+						* sizeof(char);
+
+				message = calloc(1, size);
+
+				snprintf(message, size, "editing id = %s, url = %s "
+					,bookmark_id(b), bookmark_url(b));
+
+				bookmark_destroy(b);
 			}
 
 			bookmark_list_destroy(bl);
@@ -120,6 +139,8 @@ edit_bookmark(GtkWidget* button, gpointer** args)
 	close_window(NULL, args[4]);
 	g_free(args);
 	read_database(NULL, NULL);
+	gtk_label_set_text(GTK_LABEL(info_label), message);
+	free(message);
 }
 
 static void
@@ -129,6 +150,7 @@ edit_directory(GtkWidget* button, gpointer** args)
 	close_window(NULL, args[1]);
 	g_free(args);
 	read_database(NULL, NULL);
+	g_signal_emit_by_name(treeview, "move-cursor", GTK_MOVEMENT_DISPLAY_LINES, -1, NULL);
 }
 
 static void
@@ -164,6 +186,7 @@ edit_multiple(GtkWidget* button, gpointer** args)
 	close_window(NULL, args[1]);
 	g_free(args);
 	read_database(NULL, NULL);
+	g_signal_emit_by_name(treeview, "move-cursor", GTK_MOVEMENT_DISPLAY_LINES, -1, NULL);
 }
 
 static void
@@ -348,8 +371,6 @@ edit(GtkWidget* button, gpointer main_window)
 				edit_bookmark_window(b, main_window);
 			else
 				edit_directory_window(b, main_window);
-
-			g_signal_emit_by_name(treeview, "move-cursor", GTK_MOVEMENT_DISPLAY_LINES, -1, NULL);
 		}
 	}
 }
