@@ -26,6 +26,7 @@ extern GtkTreeStore* 		bookmarks;
 extern GtkWidget* 		treeview;
 extern GtkWidget* 		tool_box;
 extern GtkWidget* 		main_box;
+extern GtkWidget* 		info_label;
 extern GtkTreeSelection*	selection;
 
 /* -- quit -- */

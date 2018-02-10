@@ -80,20 +80,10 @@ key_press(GtkWidget* window, GdkEventKey* e, gpointer** args)
 		gtk_tree_view_collapse_row(GTK_TREE_VIEW(args[0]), selected_path);
 
 	else if(!strcmp(key, "x"))
-	{
-		if(gtk_tree_view_row_expanded(GTK_TREE_VIEW(args[0]), selected_path))
-			gtk_tree_view_collapse_row(GTK_TREE_VIEW(args[0]), selected_path);
-		else
-			gtk_tree_view_expand_row(GTK_TREE_VIEW(args[0]), selected_path, FALSE);
-	}
+		row_expander(selected_path, 0);
 
 	else if(!strcmp(key, "X"))
-	{
-		if(gtk_tree_view_row_expanded(GTK_TREE_VIEW(args[0]), selected_path))
-			gtk_tree_view_collapse_row(GTK_TREE_VIEW(args[0]), selected_path);
-		else
-			gtk_tree_view_expand_row(GTK_TREE_VIEW(args[0]), selected_path, TRUE);
-	}
+		row_expander(selected_path, 1);
 
 	else if(!strcmp(key, "c"))
 		copy_to_clipboard();

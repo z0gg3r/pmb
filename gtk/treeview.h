@@ -4,11 +4,16 @@
 #include "interface.h"
 
 /* selected path in tree view */
-extern GtkTreePath* 		selected_path;
+extern GtkTreePath* selected_path;
 
 /* -- copy the selected bookmark url to clipboard -- */
 void
 copy_to_clipboard();
+
+/* -- expand/collapse row -- */
+//unsigned int recursive
+void
+row_expander(GtkTreePath*, unsigned int);
 
 /* -- create tree view -- */
 GtkWidget* 

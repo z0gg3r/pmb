@@ -120,14 +120,36 @@ bookmark_print_field(int i, char* r)
 void
 bookmark_print(bookmark_list* bl, int field) 
 {
-	char** 	result 	= NULL;
-	int 	i 	= 0;
+	bookmark* 	b 	= NULL;
+	unsigned int 	i 	= 0;
 
-	while((result = bookmark_list_return_next(bl)))
+	while((b = bookmark_list_return_next_bookmark(bl)))
 	{
 		if(field)
-			bookmark_print_field(i, result[field - 1]);
-
+		{
+			char* str = NULL;
+			
+			switch(field)	
+			{
+				case 1:
+					str = bookmark_id(b);
+					break;
+				case 2:
+					str = bookmark_name(b);
+					break;
+				case 3:
+					str = bookmark_url(b);
+					break;
+				case 4:
+					str = bookmark_comment(b);	
+					break;
+				case 5:
+					str = bookmark_tag(b);
+					break;
+			}
+			
+			bookmark_print_field(i, str);
+		}
 		else 
 		{
 			if(verbose)
@@ -138,19 +160,22 @@ bookmark_print(bookmark_list* bl, int field)
 						"url\t\t%s%s%s\n"
 						"comment\t\t%s%s%s\n"
 						"tag\t\t%s%s%s\n\n"
-						,id_color, result[0], reset 
-						,name_color, result[1], reset
-						,url_color, result[2], reset
-						,comment_color, result[3], reset
-						,tag_color, result[4], reset);
+						,id_color, bookmark_id(b), reset 
+						,name_color, bookmark_name(b), reset
+						,url_color, bookmark_url(b), reset
+						,comment_color, bookmark_comment(b), reset
+						,tag_color, bookmark_tag(b), reset);
 				else
 					printf("id\t\t%s\n"
 						"name\t\t%s\n"
 						"url\t\t%s\n"
 						"comment\t\t%s\n"
 						"tag\t\t%s\n\n"
-						,result[0], result[1], result[2], result[3]
-						,result[4]);
+						,bookmark_id(b)
+						,bookmark_name(b)
+						,bookmark_url(b)
+						,bookmark_comment(b)
+						,bookmark_tag(b));
 			}
 			else
 			{
@@ -160,22 +185,26 @@ bookmark_print(bookmark_list* bl, int field)
 						"%s%s%s\n"
 						"%s%s%s\n"
 						"%s%s%s\n\n"
-						,id_color, result[0], reset
-						,name_color, result[1], reset
-						,url_color, result[2], reset
-						,comment_color, result[3], reset
-						,tag_color, result[4], reset);
+						,id_color, bookmark_id(b), reset 
+						,name_color, bookmark_name(b), reset
+						,url_color, bookmark_url(b), reset
+						,comment_color, bookmark_comment(b), reset
+						,tag_color, bookmark_tag(b), reset);
 				else
 					printf("%s\n"
 						"%s\n"
 						"%s\n"
 						"%s\n"
 						"%s\n\n"
-						,result[0], result[1], result[2], result[3]
-						,result[4]);
+						,bookmark_id(b)
+						,bookmark_name(b)
+						,bookmark_url(b)
+						,bookmark_comment(b)
+						,bookmark_tag(b));
 			}
 		}
 
+		bookmark_destroy(b);
 		++i;
 	}
 }
@@ -776,13 +805,10 @@ search(char* optarg)
 				{
 					bookmark_list_rewind(bl);
 
-					char** result = NULL;
+					bookmark* b = NULL;
 
-					while((result = bookmark_list_return_next(bl)))
+					while((b = bookmark_list_return_next_bookmark(bl)))
 					{
-						bookmark* b = bookmark_new(result[1], result[2]
-								,result[3], result[4]);
-
 						if(bookmark_db_write(b, e_db))
 							printf("search: failed to export bookmark\n");
 
@@ -799,12 +825,13 @@ search(char* optarg)
 			{
 				bookmark_list_rewind(bl);
 
-				char** result = NULL;
+				bookmark* b = NULL;
 
-				while((result = bookmark_list_return_next(bl)))
+				while((b = bookmark_list_return_next_bookmark(bl)))
 				{
-					int id = strtol(result[0], NULL, 10);	
+					int id = strtol(bookmark_id(b), NULL, 10);	
 					bookmark_db_delete(db, id);
+					bookmark_destroy(b);
 				}
 			}
 

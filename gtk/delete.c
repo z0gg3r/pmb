@@ -3,8 +3,7 @@
 static void
 delete_bookmark(GtkWidget* button, gpointer** args) 
 {
-	char*  url 	= (char*)gtk_entry_get_text(GTK_ENTRY(args[0]));
-	char** result	= NULL;
+	char* url = (char*)gtk_entry_get_text(GTK_ENTRY(args[0]));
 
 	if(url) 
 	{
@@ -12,14 +11,14 @@ delete_bookmark(GtkWidget* button, gpointer** args)
 		
 		if(bl) 
 		{
-			result = bookmark_list_return_next(bl);
+			bookmark* b = bookmark_list_return_next(bl);
 
-			if(result[0]) 
+			if(b) 
 			{
-				unsigned int id = strtol(result[0], NULL, 10);
+				unsigned int id = strtol(bookmark_id(b), NULL, 10);
 				bookmark_db_delete(db, id);
 				read_database(NULL, NULL);
-				free(result);
+				bookmark_destroy(b);
 			}
 
 			bookmark_list_destroy(bl);
@@ -28,6 +27,7 @@ delete_bookmark(GtkWidget* button, gpointer** args)
 
 	close_window(NULL, args[1]);
 	g_free(args);
+	g_signal_emit_by_name(treeview, "move-cursor", GTK_MOVEMENT_DISPLAY_LINES, -1, NULL);
 }
 
 static void
@@ -53,6 +53,7 @@ delete_directory(GtkWidget* button, gpointer window)
 	bookmark_list_destroy(bl);
 	read_database(NULL, NULL);
 	close_window(NULL, window);
+	g_signal_emit_by_name(treeview, "move-cursor", GTK_MOVEMENT_DISPLAY_LINES, -1, NULL);
 }
 
 static void
@@ -86,6 +87,7 @@ delete_multiple(GtkWidget* button, gpointer window)
 	g_list_free_full(rows, (GDestroyNotify) gtk_tree_path_free);
 	close_window(NULL, window);
 	read_database(NULL, NULL);
+	g_signal_emit_by_name(treeview, "move-cursor", GTK_MOVEMENT_DISPLAY_LINES, -1, NULL);
 }
 
 static void
@@ -239,8 +241,6 @@ delete(GtkWidget* button, gpointer main_window)
 				delete_bookmark_window(b, main_window);
 			else
 				delete_directory_window(b, main_window);
-
-			g_signal_emit_by_name(treeview, "move-cursor", GTK_MOVEMENT_DISPLAY_LINES, -1, NULL);
 		}
 	}
 }

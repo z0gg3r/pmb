@@ -27,6 +27,15 @@ copy_to_clipboard()
 	g_object_unref(G_OBJECT(primary));
 }
 
+void
+row_expander(GtkTreePath* path, unsigned int recursive)
+{
+	if(gtk_tree_view_row_expanded(GTK_TREE_VIEW(treeview), path))
+		gtk_tree_view_collapse_row(GTK_TREE_VIEW(treeview), path);
+	else
+		gtk_tree_view_expand_row(GTK_TREE_VIEW(treeview), path, recursive);
+}
+
 static GtkCellRenderer*
 cell_renderer_new(char* color) 
 {
@@ -202,7 +211,7 @@ read_database(GtkWidget* button, GtkWidget* entry)
 		bookmark_list_destroy(bl);
 	}
 
-	/* focus in the first row or previous selected */
+	/* focus in the first row or previous selected before reload */
 	if(path_s)
 	{
 		selected_path = gtk_tree_path_new_from_string(path_s);
@@ -290,12 +299,7 @@ row_activated(GtkWidget* tree, GtkTreePath* path, GtkTreeViewColumn* column, gpo
 	if(strlen(bookmark_url(b)) > 1)
 		copy_to_clipboard();
 	else
-	{
-		if(gtk_tree_view_row_expanded(GTK_TREE_VIEW(tree), path))
-			gtk_tree_view_collapse_row(GTK_TREE_VIEW(tree), path);
-		else
-			gtk_tree_view_expand_row(GTK_TREE_VIEW(tree), path, FALSE);
-	}
+		row_expander(path, 0);
 
 	bookmark_destroy(b);
 }

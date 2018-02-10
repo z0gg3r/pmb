@@ -64,7 +64,6 @@ move_directory(char* tag)
 				snprintf(new_tag, strlen(new_tag) - 1, "%s/%s"
 					,n_tag, bm_tag);
 
-				printf("++ %s\n", new_tag);
 				bookmark_db_edit(db, id, 3, new_tag);
 				free(new_tag);
 			}
@@ -89,7 +88,6 @@ move_directory(char* tag)
 			snprintf(new_tag, strlen(new_tag) - 1, "%s/%s"
 					,tag, bm_tag);
 
-			printf("%s\n", new_tag);
 			bookmark_db_edit(db, id, 3, new_tag);
 			free(new_tag);
 		}
