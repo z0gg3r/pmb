@@ -38,19 +38,19 @@ get_full_path(bookmark* b)
 
 				while(size_bkp)
 				{
-					char* t_path = calloc(1, (strlen(complete_path) + 2) * sizeof(char));
+					char* t_path = calloc(1, (strlen(complete_path) + 3) * sizeof(char));
 					strcpy(t_path, complete_path);
 
 					free(complete_path);
-					complete_path = calloc(1, ((strlen(complete_path) * sizeof(char)) 
-							+ ((strlen(parents[size_bkp - 1]) + 1) 
+
+					complete_path = calloc(1, ((strlen(t_path) * sizeof(char)) 
+							+ ((strlen(parents[size_bkp - 1]) + 3) 
 							* sizeof(char))));
 
 					if(strlen(t_path) > 1)
 						snprintf(complete_path, (
 							((strlen(t_path) + 1) * sizeof(char)) 
-							+ ((strlen(parents[size_bkp - 1]) + 1) * sizeof(char))) 
-							* sizeof(char)
+							+ ((strlen(parents[size_bkp - 1]) + 1) * sizeof(char)))
 							,"%s/%s"
 							,t_path, parents[size_bkp - 1]);
 					else
@@ -69,7 +69,7 @@ get_full_path(bookmark* b)
 
 				char* full_path = malloc((strlen(complete_path) * sizeof(char)) 
 						+ (strlen(dir) * sizeof(char)) 
-						+ (3 * sizeof(char)));
+						+ (2 * sizeof(char)));
 
 				snprintf(full_path, 
 					((strlen(complete_path) + 1) * sizeof(char)) 

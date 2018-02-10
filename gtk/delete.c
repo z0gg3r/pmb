@@ -239,6 +239,8 @@ delete(GtkWidget* button, gpointer main_window)
 				delete_bookmark_window(b, main_window);
 			else
 				delete_directory_window(b, main_window);
+
+			g_signal_emit_by_name(treeview, "move-cursor", GTK_MOVEMENT_DISPLAY_LINES, -1, NULL);
 		}
 	}
 }

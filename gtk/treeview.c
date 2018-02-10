@@ -42,11 +42,11 @@ cell_renderer_new(char* color)
 
 /* -- update selected_path and selected_column globals -- */
 static void
-update_selected_row(GtkWidget* tree_view) 
+update_selected_row(GtkWidget* tree, gpointer data) 
 {
 	GtkTreePath* 	path 	= gtk_tree_path_new();
 
-	gtk_tree_view_get_cursor(GTK_TREE_VIEW(tree_view), &path, NULL);
+	gtk_tree_view_get_cursor(GTK_TREE_VIEW(tree), &path, NULL);
 
 	gtk_tree_path_free(selected_path);
 
@@ -151,7 +151,11 @@ tree_store_add_child(GtkTreeIter* iter, directory* child)
 void 
 read_database(GtkWidget* button, GtkWidget* entry) 
 {
-	bookmark_list* 	bl = NULL;
+	bookmark_list* 	bl 	= NULL;
+	char* 		path_s 	= NULL;
+
+	if(selected_path)
+		path_s = gtk_tree_path_to_string(selected_path);
 
 	gtk_tree_store_clear(bookmarks);
 
@@ -198,15 +202,24 @@ read_database(GtkWidget* button, GtkWidget* entry)
 		bookmark_list_destroy(bl);
 	}
 
-	/* focus n the first tree view item */
-	GtkTreeIter iter;
-	gtk_tree_model_get_iter_first(GTK_TREE_MODEL(model), &iter);
+	/* focus in the first row or previous selected */
+	if(path_s)
+	{
+		selected_path = gtk_tree_path_new_from_string(path_s);
 
-	GtkTreePath* path = gtk_tree_model_get_path(GTK_TREE_MODEL(model)
-		,&iter);
+		if(gtk_tree_path_get_depth(selected_path) > 1)
+			gtk_tree_view_expand_to_path(GTK_TREE_VIEW(treeview), selected_path);
+	}
+	else
+	{
+		GtkTreeIter iter;
+		gtk_tree_model_get_iter_first(GTK_TREE_MODEL(model), &iter);
 
-	gtk_tree_view_set_cursor(GTK_TREE_VIEW(treeview), path, NULL, 0);
-	gtk_tree_path_free(path);
+		selected_path = gtk_tree_model_get_path(GTK_TREE_MODEL(model)
+			,&iter);
+	}
+	
+	gtk_tree_view_set_cursor(GTK_TREE_VIEW(treeview), selected_path, NULL, 0);
 }
 
 bookmark*
@@ -269,19 +282,37 @@ get_data(GtkTreePath* path)
 		return NULL;
 }
 
+void
+row_activated(GtkWidget* tree, GtkTreePath* path, GtkTreeViewColumn* column, gpointer data)
+{
+	bookmark* b = get_data(path);
+
+	if(strlen(bookmark_url(b)) > 1)
+		copy_to_clipboard();
+	else
+	{
+		if(gtk_tree_view_row_expanded(GTK_TREE_VIEW(tree), path))
+			gtk_tree_view_collapse_row(GTK_TREE_VIEW(tree), path);
+		else
+			gtk_tree_view_expand_row(GTK_TREE_VIEW(tree), path, FALSE);
+	}
+
+	bookmark_destroy(b);
+}
+
 GtkWidget*
 tree_view(GtkWidget* search_entry) 
 {
-	GtkCellRenderer* cell_renderer_text;
+	GtkCellRenderer*		 cell_renderer_text;
 
 	/* id/tag */
-	cell_renderer_text = cell_renderer_new(opts->id_fg);
+	cell_renderer_text 		= cell_renderer_new(opts->id_fg);
 
 	/* directory icon */
-	GtkCellRenderer* dir_icon = gtk_cell_renderer_pixbuf_new();;
+	GtkCellRenderer* dir_icon 	= gtk_cell_renderer_pixbuf_new();
 
 	/* dir column */
-	GtkTreeViewColumn* dir_column = gtk_tree_view_column_new();
+	GtkTreeViewColumn* dir_column 	= gtk_tree_view_column_new();
 
 	gtk_tree_view_column_pack_start(GTK_TREE_VIEW_COLUMN(dir_column)
 		,dir_icon, FALSE);
@@ -399,14 +430,20 @@ tree_view(GtkWidget* search_entry)
 	/* lines */
 	gtk_tree_view_set_enable_tree_lines(GTK_TREE_VIEW(tree_view), TRUE);
 
+	/* model */
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(tree_view));
 
 	/* multiple selections */
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(tree_view));
 	gtk_tree_selection_set_mode(GTK_TREE_SELECTION(selection), GTK_SELECTION_MULTIPLE);
 
+	/* cursor changed */
 	g_signal_connect(tree_view, "cursor-changed"
-		,G_CALLBACK(update_selected_row), tree_view);
+		,G_CALLBACK(update_selected_row), NULL);
+
+	/* row activated */
+	g_signal_connect(tree_view, "row-activated"
+		,G_CALLBACK(row_activated), NULL);
 
 	return tree_view;	
 }

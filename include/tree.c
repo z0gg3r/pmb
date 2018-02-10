@@ -425,17 +425,18 @@ dismember(bookmark* b)
 {
 	if(b)
 	{
-		char* 			name	= NULL;
-		char*			tag	= bookmark_tag(b);
-		char* 			path 	= malloc(strlen(tag) * sizeof(char) + 1);
-		directory_name_list* 	l	= directory_name_list_new();
+		char* 			name	 = NULL;
+		char*			tag	 = bookmark_tag(b);
+		char* 			path 	 = malloc(strlen(tag) * sizeof(char) + 1);
+		char*			path_bkp = strdup(path);
+		directory_name_list* 	l	 = directory_name_list_new();
 
 		strcpy(path, tag);
 
 		while((name = strsep(&path, "/")))
 			directory_name_list_add_dir(l, name);
 
-		free(path);
+		free(path_bkp);
 
 		if(l)
 			return l;
@@ -488,7 +489,6 @@ create_directory_tree_from_list(directory_name_list* l, int index)
 			list[0] = head;
 			list[1] = tail;
 
-			//free(ret);
 			directory_name_list_destroy(l);
 			return list;
 		}
@@ -530,7 +530,6 @@ directory_add_children_from_list(directory* d, directory_name_list* l, bookmark*
 			{
 				directory_add_bookmark(list[1], b);
 				directory_add_children(d, list[0]);
-
 				free(list);
 			}
 		}
@@ -679,7 +678,7 @@ create_tree_from_bookmark_list(bookmark_list* bl, char* name)
 		directory* 	d = directory_new(name);
 
 		while((b = bookmark_list_return_next_bookmark(bl)))
-			directory_add_children_from_list(d, (dismember(b)), b);
+			directory_add_children_from_list(d, dismember(b), b);
 
 		return d;
 	}

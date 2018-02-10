@@ -27,9 +27,10 @@ move_directory(char* tag)
 
 	while((b = bookmark_list_return_next_bookmark(bl)))
 	{
-		unsigned int	id	= strtol(bookmark_id(b), NULL, 10);
-		char*		bm_tag	= bookmark_tag(b);
-		char*		res	= NULL;
+		unsigned int	id		= strtol(bookmark_id(b), NULL, 10);
+		char*		bm_tag		= bookmark_tag(b);
+		char*		bm_tag_bkp 	= strdup(bm_tag);
+		char*		res		= NULL;
 
 		strsep(&bm_tag, "//");
 
@@ -49,12 +50,12 @@ move_directory(char* tag)
 				{
 					res = strsep(&bm_tag, "//");
 
-					if(!(strcmp(bm_tag, res)))
+					if(!(strcmp(res, bookmark_id(sb))))
 						break;
 				}
 			}
 
-			char* new_tag = calloc(strlen(tag) + strlen(bm_tag) + 1, sizeof(char));
+			char* new_tag = calloc(1, (strlen(tag) + strlen(bm_tag) + 2) * sizeof(char));
 
 			snprintf(new_tag, strlen(new_tag) - 1, "%s/%s"
 					,tag, bm_tag);
@@ -63,6 +64,7 @@ move_directory(char* tag)
 			free(new_tag);
 		}
 
+		free(bm_tag_bkp);
 		bookmark_destroy(b);
 	}
 	
@@ -346,6 +348,8 @@ edit(GtkWidget* button, gpointer main_window)
 				edit_bookmark_window(b, main_window);
 			else
 				edit_directory_window(b, main_window);
+
+			g_signal_emit_by_name(treeview, "move-cursor", GTK_MOVEMENT_DISPLAY_LINES, -1, NULL);
 		}
 	}
 }

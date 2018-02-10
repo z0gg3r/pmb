@@ -1386,9 +1386,10 @@ read_config(char* filename)
 
 	if(fp)
 	{
-		int 	size 	= 1;
-		char*	option 	= calloc(size, sizeof(char));
-		char** 	ret 	= calloc(7, sizeof(char*));
+		int 	size 	   = 1;
+		char*	option 	   = calloc(size, sizeof(char));
+		char*	option_bkp = strdup(option);
+		char** 	ret 	   = calloc(7, sizeof(char*));
 
 		ret[0] 		= NULL;
 		ret[1] 		= NULL;
@@ -1435,19 +1436,21 @@ read_config(char* filename)
 				}
 
 				new_option:
-				free(option);
-				size 	= 1;
-				option 	= calloc(size, sizeof(char));
+				free(option_bkp);
+				size 		= 1;
+				option 		= calloc(size, sizeof(char));
+				option_bkp 	= strdup(option);
 			}
 			else
 			{
 				option[size - 1] = st;
 				option 		 = realloc(option, ++size * sizeof(char));
 				option[size - 1] = '\0';
+				option_bkp	 = strdup(option);
 			}
 		}
 
-		free(option);
+		free(option_bkp);
 		fclose(fp);
 		return ret;
 	}
