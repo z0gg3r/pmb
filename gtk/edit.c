@@ -141,7 +141,7 @@ edit_bookmark(GtkWidget* button, gpointer** args)
 
 				unsigned int size = (strlen(bookmark_id(b))
 						+ strlen(bookmark_url(b)) 
-						+ strlen("editing id =   , url =  ") + 1)
+						+ strlen("editing id = , url = ") + 3)
 						* sizeof(char);
 
 				message = calloc(1, size);

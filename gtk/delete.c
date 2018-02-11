@@ -11,7 +11,7 @@ delete_bookmark(GtkWidget* button, gpointer** args)
 		
 		if(bl) 
 		{
-			bookmark* b = bookmark_list_return_next(bl);
+			bookmark* b = bookmark_list_return_next_bookmark(bl);
 
 			if(b) 
 			{
