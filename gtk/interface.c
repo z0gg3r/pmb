@@ -9,6 +9,7 @@ GtkWidget* 		treeview 	= NULL;
 GtkWidget*		tool_box	= NULL;
 GtkWidget*		main_box	= NULL;
 GtkWidget*		info_label	= NULL;
+GtkWidget*		spinner		= NULL;
 GtkTreeSelection*	selection	= NULL;
 
 /* selected path in tree view */
@@ -66,8 +67,16 @@ gtk_interface(int argc, char* argv[])
 	GtkWidget* search_box 	= search_box_new(search_entry);
 
 	/* info label */
-	info_label		= gtk_label_new("Ready");
+	info_label		= gtk_label_new(" ");
 	gtk_label_set_xalign(GTK_LABEL(info_label), 1);
+
+	/* spinner */
+	spinner 		= gtk_spinner_new();
+
+	/* info box */
+	GtkWidget* info_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
+	gtk_box_pack_start(GTK_BOX(info_box), info_label, TRUE, TRUE, 1);
+	gtk_container_add(GTK_CONTAINER(info_box), spinner);
 
 	/* add to main */
 	main_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
@@ -75,7 +84,7 @@ gtk_interface(int argc, char* argv[])
 	gtk_container_add(GTK_CONTAINER(main_box), tool_box);
 	gtk_container_add(GTK_CONTAINER(main_box), search_box);
 	gtk_box_pack_start(GTK_BOX(main_box), s_window, TRUE, TRUE, 1);
-	//gtk_container_add(GTK_CONTAINER(main_box), info_label);
+	gtk_container_add(GTK_CONTAINER(main_box), info_box);
 
 	/* add main_box into window */
 	gtk_container_add(GTK_CONTAINER(bookmark_window), main_box);

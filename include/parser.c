@@ -104,7 +104,7 @@ version()
 }
 
 void
-bookmark_print_field(int i, char* r) 
+bookmark_print_field(unsigned int i, char* r) 
 {
 	if(color && isatty(STDOUT_FILENO)) 
 	{
@@ -266,7 +266,7 @@ parse_config_file(char* optarg)
 	{
 		if(res[0])
 		{
-			int r = strtol(res[0], NULL, 10);	
+			unsigned int r = strtol(res[0], NULL, 10);	
 
 			if(r == 0 || r == 1)
 				color = r;
@@ -279,7 +279,7 @@ parse_config_file(char* optarg)
 
 		if(res[1])
 		{
-			int r = strtol(res[1], NULL, 10);	
+			unsigned int r = strtol(res[1], NULL, 10);	
 
 			if(r == 0 || r == 1)
 				verbose = r;

@@ -229,6 +229,7 @@ read_database(GtkWidget* button, GtkWidget* entry)
 	}
 	
 	gtk_tree_view_set_cursor(GTK_TREE_VIEW(treeview), selected_path, NULL, 0);
+	gtk_label_set_text(GTK_LABEL(info_label), "Loaded");
 }
 
 bookmark*

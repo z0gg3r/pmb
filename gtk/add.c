@@ -7,6 +7,7 @@ add_bookmark(GtkWidget* button, gpointer** args)
 	char* url 	= NULL;
 	char* comment 	= "None";
 	char* tag 	= "None";
+	char* tag_t	= NULL;
 
 	if(gtk_entry_get_text_length(GTK_ENTRY(args[0])))
 		name 	= (char*)gtk_entry_get_text(GTK_ENTRY(args[0]));
@@ -17,8 +18,10 @@ add_bookmark(GtkWidget* button, gpointer** args)
 	if(gtk_entry_get_text_length(GTK_ENTRY(args[2])))
 		comment	= (char*)gtk_entry_get_text(GTK_ENTRY(args[2]));
 
-	if(gtk_entry_get_text_length(GTK_ENTRY(args[3])))
-		tag 	= (char*)gtk_entry_get_text(GTK_ENTRY(args[3]));
+	tag_t 		= (char*)gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(args[3]));
+
+	if(strlen(tag_t) > 1)
+		tag = tag_t;
 
 	if(name && url) 
 	{
@@ -39,9 +42,13 @@ add_window(GtkWidget* button, gpointer main_window)
 	GtkWidget** 	e 	= entries(TRUE);
 	bookmark* 	b 	= get_data(NULL);
 
+	/* tag box */
+	GtkWidget* tag_box = tag_box_new();
+
 	if(b) 
 	{
-		gtk_entry_set_text(GTK_ENTRY(e[7]), get_full_path(b));
+		GtkWidget* tag_entry = gtk_bin_get_child(GTK_BIN(tag_box));
+		gtk_entry_set_text(GTK_ENTRY(tag_entry), get_full_path(b));
 		bookmark_destroy(b);
 		b = NULL;
 	}
@@ -50,7 +57,7 @@ add_window(GtkWidget* button, gpointer main_window)
 	add_bookmark_args[0] = e[1];
 	add_bookmark_args[1] = e[3];
 	add_bookmark_args[2] = e[5];
-	add_bookmark_args[3] = e[7];
+	add_bookmark_args[3] = tag_box;
 	add_bookmark_args[4] = window;
 
 	/* button */
@@ -61,11 +68,6 @@ add_window(GtkWidget* button, gpointer main_window)
 	GtkWidget* cancel_button = gtk_button_new_with_mnemonic("_Cancel");
 	g_signal_connect(cancel_button, "clicked", G_CALLBACK(close_window)
 		,window);
-
-	/* tag box */
-	GtkWidget* tag_box = tag_box_new();
-	g_signal_connect(tag_box, "changed", G_CALLBACK(tag_entry_set_text)
-		,e[7]); 
 
 	/* grid */
 	GtkWidget *grid = gtk_grid_new();
@@ -80,13 +82,13 @@ add_window(GtkWidget* button, gpointer main_window)
 	gtk_grid_attach(GTK_GRID(grid), e[4] 		,0,  2, 30, 1);
 	gtk_grid_attach(GTK_GRID(grid), e[5] 		,20, 2, 50, 1);
 	gtk_grid_attach(GTK_GRID(grid), e[6] 		,0,  3, 30, 1);
-	gtk_grid_attach(GTK_GRID(grid), e[7] 		,20, 3, 50, 1);
-	gtk_grid_attach(GTK_GRID(grid), tag_box 	,20, 4, 50, 1);
-	gtk_grid_attach(GTK_GRID(grid), add_button 	,20, 5, 20, 10);
-	gtk_grid_attach(GTK_GRID(grid), cancel_button 	,40, 5, 20, 10);
+	gtk_grid_attach(GTK_GRID(grid), tag_box 	,20, 3, 50, 1);
+	gtk_grid_attach(GTK_GRID(grid), add_button 	,20, 4, 20, 10);
+	gtk_grid_attach(GTK_GRID(grid), cancel_button 	,40, 4, 20, 10);
 
 	g_free(e);
 	gtk_container_add(GTK_CONTAINER(window), grid);
 	gtk_widget_show_all(GTK_WIDGET(window));
+	gtk_spinner_start(GTK_SPINNER(spinner));
 }
 
