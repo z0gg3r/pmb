@@ -103,6 +103,9 @@ key_press(GtkWidget* window, GdkEventKey* e, gpointer** args)
 	else if(!strcmp(key, "e"))
 		edit(NULL, args[3]);
 	
+	else if(!strcmp(key, "n"))
+		rename_directory_wrapper(args[3]);
+
 	else if(!strcmp(key, "o"))
 		options_window(NULL, args[3]);
 }

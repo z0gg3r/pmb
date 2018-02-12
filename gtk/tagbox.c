@@ -29,6 +29,7 @@ GtkWidget*
 tag_box_new()
 {
 	tag_box 			= gtk_combo_box_text_new_with_entry();
+	GtkWidget* 	entry 		= gtk_bin_get_child(GTK_BIN(tag_box));
 	bookmark_list*	bl		= bookmark_db_query(db, 0, NULL);
 	bookmark*	b		= NULL;
 	char*		last_tag	= NULL;
@@ -55,7 +56,6 @@ tag_box_new()
 		bookmark_list_destroy(bl);
 	
 	b = get_data(NULL);
-	GtkWidget* entry = gtk_bin_get_child(GTK_BIN(tag_box));
 	gtk_entry_set_text(GTK_ENTRY(entry), get_full_path(b));
 	bookmark_destroy(b);
 	

@@ -74,12 +74,12 @@ gtk_interface(int argc, char* argv[])
 	spinner 		= gtk_spinner_new();
 
 	/* info box */
-	GtkWidget* info_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
+	GtkWidget* info_box 	= gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
 	gtk_box_pack_start(GTK_BOX(info_box), info_label, TRUE, TRUE, 1);
 	gtk_container_add(GTK_CONTAINER(info_box), spinner);
 
 	/* add to main */
-	main_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
+	main_box 		= gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
 	gtk_container_add(GTK_CONTAINER(main_box), menu_bar);
 	gtk_container_add(GTK_CONTAINER(main_box), tool_box);
 	gtk_container_add(GTK_CONTAINER(main_box), search_box);

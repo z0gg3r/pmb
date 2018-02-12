@@ -9,4 +9,7 @@
 void
 edit(GtkWidget*, gpointer);
 
+void
+rename_directory_wrapper(gpointer);
+
 #endif
