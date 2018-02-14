@@ -1,5 +1,11 @@
 #include "options.h"
 
+GtkWidget* 	id_fg 		= NULL;
+GtkWidget* 	name_fg		= NULL;
+GtkWidget* 	url_fg 		= NULL;
+GtkWidget* 	comment_fg 	= NULL;
+gpmb_options* 	opts 		= NULL;
+
 void 
 read_options() 
 {
@@ -15,15 +21,33 @@ read_options()
 	}
 }
 
-void
-options_window(GtkWidget* button, gpointer main_window) 
+static void
+set_colors(GtkWidget* button)
 {
-	GtkWidget* window = dialogs("Options", main_window);
+	GdkRGBA color;
 
-	/* page 1 */
-	GtkWidget* page_color_l = gtk_label_new("Colors");
-	GtkWidget* page_color_b = gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
+	gtk_color_chooser_get_rgba(GTK_COLOR_CHOOSER(id_fg), &color);
+	opts->id_fg 		= gdk_rgba_to_string(&color);
+	g_object_set(cell_renderer_id, "foreground", opts->id_fg, NULL);
 
+	gtk_color_chooser_get_rgba(GTK_COLOR_CHOOSER(name_fg), &color);
+	opts->name_fg 		= gdk_rgba_to_string(&color);
+	g_object_set(cell_renderer_name, "foreground", opts->name_fg, NULL);
+
+	gtk_color_chooser_get_rgba(GTK_COLOR_CHOOSER(url_fg), &color);
+	opts->url_fg 		= gdk_rgba_to_string(&color);
+	g_object_set(cell_renderer_url, "foreground", opts->url_fg, NULL);
+
+	gtk_color_chooser_get_rgba(GTK_COLOR_CHOOSER(comment_fg), &color);
+	opts->comment_fg 	= gdk_rgba_to_string(&color);
+	g_object_set(cell_renderer_comment, "foreground", opts->comment_fg, NULL);
+
+	read_database(NULL, NULL);
+}
+
+static GtkWidget*
+color_page()
+{
 	GdkRGBA id;
 	GdkRGBA name;
 	GdkRGBA url;
@@ -34,10 +58,14 @@ options_window(GtkWidget* button, gpointer main_window)
 	gdk_rgba_parse(&url, opts->url_fg);
 	gdk_rgba_parse(&comment, opts->comment_fg);
 
-	GtkWidget* id_fg 	= gtk_color_button_new_with_rgba(&id);
-	GtkWidget* name_fg	= gtk_color_button_new_with_rgba(&name);
-	GtkWidget* url_fg 	= gtk_color_button_new_with_rgba(&url);
-	GtkWidget* comment_fg 	= gtk_color_button_new_with_rgba(&comment);
+	id_fg 		= gtk_color_button_new_with_rgba(&id);
+	name_fg		= gtk_color_button_new_with_rgba(&name);
+	url_fg 		= gtk_color_button_new_with_rgba(&url);
+	comment_fg 	= gtk_color_button_new_with_rgba(&comment);
+
+	GtkWidget* apply_button = gtk_button_new_with_mnemonic("_Apply");
+	g_signal_connect(GTK_WIDGET(apply_button), "clicked", G_CALLBACK(set_colors)
+		,NULL);
 
 	GtkWidget* id_label		= gtk_label_new("Dir / Id");
 	GtkWidget* name_label		= gtk_label_new("Name");
@@ -57,18 +85,27 @@ options_window(GtkWidget* button, gpointer main_window)
 	gtk_grid_attach(GTK_GRID(color_grid), url_fg 		,40, 2, 50, 1);
 	gtk_grid_attach(GTK_GRID(color_grid), comment_label 	,0,  3, 30, 1);
 	gtk_grid_attach(GTK_GRID(color_grid), comment_fg 	,40, 3, 50, 1);
+	gtk_grid_attach(GTK_GRID(color_grid), apply_button 	,0,  4, 100, 1);
 
-	//gtk_grid_attach(GTK_GRID(color_grid), edit_button 	,20, 5, 20, 10);
-	//gtk_grid_attach(GTK_GRID(color_grid), cancel_button 	,40, 5, 20, 10);
+	return color_grid;
+}
 
+void
+options_window(GtkWidget* button, gpointer main_window) 
+{
+	GtkWidget* window = dialogs("Options", main_window);
+
+	/* page 1 */
+	GtkWidget* page_color_l 	= gtk_label_new("Colors");
+	GtkWidget* page_color_b 	= gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
+	GtkWidget* color_grid 		= color_page();
 	gtk_container_add(GTK_CONTAINER(page_color_b), color_grid);
 
 	/* page 2 */
-	GtkWidget* page_2_label = gtk_label_new("page 2");
-	GtkWidget* page_2_box 	= gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
+	GtkWidget* page_2_label 	= gtk_label_new("page 2");
+	GtkWidget* page_2_box 		= gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
 
-	GtkWidget* test_2_button = gtk_button_new_with_label("test 2");
-
+	GtkWidget* test_2_button 	= gtk_button_new_with_label("test 2");
 	gtk_container_add(GTK_CONTAINER(page_2_box), test_2_button);
 
 	/* notebook */

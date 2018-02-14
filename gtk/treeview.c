@@ -1,5 +1,18 @@
 #include "treeview.h"
 
+GtkWidget* 		treeview 	= NULL;
+GtkTreeStore* 		bookmarks	= NULL;
+GtkTreeSelection*	selection	= NULL;
+GtkTreeModel* 		model 		= NULL;
+
+/* selected path in tree view */
+GtkTreePath* 		selected_path 	= NULL;
+
+GtkCellRenderer* 	cell_renderer_id;
+GtkCellRenderer* 	cell_renderer_name;
+GtkCellRenderer* 	cell_renderer_url;
+GtkCellRenderer* 	cell_renderer_comment;
+
 void
 copy_to_clipboard()
 {
@@ -312,10 +325,8 @@ row_activated(GtkWidget* tree, GtkTreePath* path, GtkTreeViewColumn* column
 GtkWidget*
 tree_view(GtkWidget* search_entry) 
 {
-	GtkCellRenderer*		 cell_renderer_text;
-
 	/* id/tag */
-	cell_renderer_text 		= cell_renderer_new(opts->id_fg);
+	cell_renderer_id 		= cell_renderer_new(opts->id_fg);
 
 	/* directory icon */
 	GtkCellRenderer* dir_icon 	= gtk_cell_renderer_pixbuf_new();
@@ -327,10 +338,10 @@ tree_view(GtkWidget* search_entry)
 		,dir_icon, FALSE);
 
 	gtk_tree_view_column_pack_start(GTK_TREE_VIEW_COLUMN(dir_column)
-		,cell_renderer_text, FALSE);
+		,cell_renderer_id, FALSE);
 
 	gtk_tree_view_column_add_attribute(GTK_TREE_VIEW_COLUMN(dir_column)
-		,cell_renderer_text, "text", 0);
+		,cell_renderer_id, "text", 0);
 
 	gtk_tree_view_column_add_attribute(GTK_TREE_VIEW_COLUMN(dir_column)
 		,dir_icon, "pixbuf", 5);
@@ -338,39 +349,30 @@ tree_view(GtkWidget* search_entry)
 	g_object_set(G_OBJECT(dir_column), "title", "Tag/Id", NULL);
 
 	/* name column */
-	cell_renderer_text = cell_renderer_new(opts->name_fg);
+	cell_renderer_name = cell_renderer_new(opts->name_fg);
 	GtkTreeViewColumn* name_view_column = 
 		gtk_tree_view_column_new_with_attributes(
 		"Name"
-		,cell_renderer_text
+		,cell_renderer_name
 		,"text", 1
 		,NULL);
 
 	/* url column */
-	cell_renderer_text = cell_renderer_new(opts->url_fg);
+	cell_renderer_url = cell_renderer_new(opts->url_fg);
 	GtkTreeViewColumn* url_view_column = 
 		gtk_tree_view_column_new_with_attributes(
 		"Url"
-		,cell_renderer_text
+		,cell_renderer_url
 		,"text", 2
 		,NULL);
 
 	/* comment column */
-	cell_renderer_text = cell_renderer_new(opts->comment_fg);
+	cell_renderer_comment = cell_renderer_new(opts->comment_fg);
 	GtkTreeViewColumn* comment_view_column = 
 		gtk_tree_view_column_new_with_attributes(
 		"Comment"
-		,cell_renderer_text
+		,cell_renderer_comment
 		,"text", 3
-		,NULL);
-
-	/* tag column */
-	cell_renderer_text = cell_renderer_new(opts->tag_fg);
-	GtkTreeViewColumn* tag_view_column = 
-		gtk_tree_view_column_new_with_attributes(
-		"Tag"
-		,cell_renderer_text
-		,"text", 4
 		,NULL);
 
 	/* set expand */
@@ -382,9 +384,6 @@ tree_view(GtkWidget* search_entry)
 
 	gtk_tree_view_column_set_expand
 		(GTK_TREE_VIEW_COLUMN(comment_view_column), TRUE);
-
-	gtk_tree_view_column_set_expand
-		(GTK_TREE_VIEW_COLUMN(tag_view_column), TRUE);
 
 	/* tree store */
 	bookmarks = gtk_tree_store_new(
@@ -417,11 +416,6 @@ tree_view(GtkWidget* search_entry)
 
 	gtk_tree_view_append_column(GTK_TREE_VIEW(tree_view)
 		,comment_view_column);
-
-	/*
-	gtk_tree_view_append_column(GTK_TREE_VIEW(tree_view)
-		,tag_view_column);
-	*/
 
 	/* search entry */
 	gtk_tree_view_set_search_entry(GTK_TREE_VIEW(tree_view)

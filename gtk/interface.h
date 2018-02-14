@@ -22,14 +22,9 @@
 
 /* globals */
 extern sqlite3* 		db;
-extern GtkTreeModel* 		model;
-extern GtkTreeStore* 		bookmarks;
-extern GtkWidget* 		treeview;
-extern GtkWidget* 		tool_box;
 extern GtkWidget* 		main_box;
 extern GtkWidget* 		info_label;
 extern GtkWidget* 		spinner;
-extern GtkTreeSelection*	selection;
 
 /* -- quit -- */
 void 

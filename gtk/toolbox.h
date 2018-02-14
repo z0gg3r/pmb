@@ -3,6 +3,8 @@
 
 #include "interface.h"
 
+extern GtkWidget* tool_box;
+
 void
 toolbox_hide(GtkWidget*, gpointer);
 

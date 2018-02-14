@@ -1,19 +1,10 @@
 #include "interface.h"
 
 /* globals */
-gpmb_options* 		opts 		= NULL;
 sqlite3* 		db 		= NULL;
-GtkTreeModel* 		model 		= NULL;
-GtkTreeStore* 		bookmarks	= NULL;
-GtkWidget* 		treeview 	= NULL;
-GtkWidget*		tool_box	= NULL;
 GtkWidget*		main_box	= NULL;
 GtkWidget*		info_label	= NULL;
 GtkWidget*		spinner		= NULL;
-GtkTreeSelection*	selection	= NULL;
-
-/* selected path in tree view */
-GtkTreePath* 		selected_path 	= NULL;
 
 void 
 destroy() 

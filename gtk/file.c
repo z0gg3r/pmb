@@ -35,3 +35,4 @@ open_database(gpointer window)
 	
 	gtk_widget_destroy(file_chooser);
 }
+

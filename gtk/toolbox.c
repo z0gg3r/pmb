@@ -1,5 +1,7 @@
 #include "toolbox.h"
 
+GtkWidget* tool_box = NULL;
+
 void
 toolbox_hide(GtkWidget* button, gpointer tb)
 {
