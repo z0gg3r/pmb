@@ -33,7 +33,8 @@ row_expander(GtkTreePath* path, unsigned int recursive)
 	if(gtk_tree_view_row_expanded(GTK_TREE_VIEW(treeview), path))
 		gtk_tree_view_collapse_row(GTK_TREE_VIEW(treeview), path);
 	else
-		gtk_tree_view_expand_row(GTK_TREE_VIEW(treeview), path, recursive);
+		gtk_tree_view_expand_row(GTK_TREE_VIEW(treeview), path
+			,recursive);
 }
 
 static GtkCellRenderer*
@@ -217,7 +218,8 @@ read_database(GtkWidget* button, GtkWidget* entry)
 		selected_path = gtk_tree_path_new_from_string(path_s);
 
 		if(gtk_tree_path_get_depth(selected_path) > 1)
-			gtk_tree_view_expand_to_path(GTK_TREE_VIEW(treeview), selected_path);
+			gtk_tree_view_expand_to_path(GTK_TREE_VIEW(treeview)
+				,selected_path);
 	}
 	else
 	{
@@ -228,8 +230,9 @@ read_database(GtkWidget* button, GtkWidget* entry)
 			,&iter);
 	}
 	
-	gtk_tree_view_set_cursor(GTK_TREE_VIEW(treeview), selected_path, NULL, 0);
-	gtk_label_set_text(GTK_LABEL(info_label), "Loaded");
+	gtk_tree_view_set_cursor(GTK_TREE_VIEW(treeview), selected_path, NULL
+		,0);
+	//gtk_label_set_text(GTK_LABEL(info_label), "Loaded");
 }
 
 bookmark*
@@ -293,7 +296,8 @@ get_data(GtkTreePath* path)
 }
 
 void
-row_activated(GtkWidget* tree, GtkTreePath* path, GtkTreeViewColumn* column, gpointer data)
+row_activated(GtkWidget* tree, GtkTreePath* path, GtkTreeViewColumn* column
+	,gpointer data)
 {
 	bookmark* b = get_data(path);
 
@@ -440,7 +444,8 @@ tree_view(GtkWidget* search_entry)
 
 	/* multiple selections */
 	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(tree_view));
-	gtk_tree_selection_set_mode(GTK_TREE_SELECTION(selection), GTK_SELECTION_MULTIPLE);
+	gtk_tree_selection_set_mode(GTK_TREE_SELECTION(selection)
+		,GTK_SELECTION_MULTIPLE);
 
 	/* cursor changed */
 	g_signal_connect(tree_view, "cursor-changed"

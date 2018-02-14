@@ -20,22 +20,34 @@ key_press(GtkWidget* window, GdkEventKey* e, gpointer** args)
 			,selected_path, NULL, 0);
 
 	else if(!strcmp(key, "j"))
-		g_signal_emit_by_name(args[0], "move-cursor", GTK_MOVEMENT_DISPLAY_LINES, 1, &r);
+		g_signal_emit_by_name(args[0], "move-cursor", GTK_MOVEMENT_DISPLAY_LINES
+			,1, &r);
 
 	else if(!strcmp(key, "k"))
-		g_signal_emit_by_name(args[0], "move-cursor", GTK_MOVEMENT_DISPLAY_LINES, -1, &r);
+		g_signal_emit_by_name(args[0], "move-cursor", GTK_MOVEMENT_DISPLAY_LINES
+			,-1, &r);
 
 	else if(!strcmp(key, "h")) 
-		g_signal_emit_by_name(args[0], "move-cursor", GTK_MOVEMENT_LOGICAL_POSITIONS, -1, &r);
+		g_signal_emit_by_name(args[0], "move-cursor", GTK_MOVEMENT_LOGICAL_POSITIONS
+			,-1, &r);
 
 	else if(!strcmp(key, "l")) 
-		g_signal_emit_by_name(args[0], "move-cursor", GTK_MOVEMENT_LOGICAL_POSITIONS, 1, &r);
+		g_signal_emit_by_name(args[0], "move-cursor", GTK_MOVEMENT_LOGICAL_POSITIONS
+			,1, &r);
 
 	else if(!strcmp(key, "g"))
-		g_signal_emit_by_name(args[0], "move-cursor", GTK_MOVEMENT_BUFFER_ENDS, -1, &r);
+		g_signal_emit_by_name(args[0], "move-cursor", GTK_MOVEMENT_BUFFER_ENDS
+			,-1, &r);
 
 	else if(!strcmp(key, "G"))
-		g_signal_emit_by_name(args[0], "move-cursor", GTK_MOVEMENT_BUFFER_ENDS, 1, &r);
+	{
+		g_signal_emit_by_name(args[0], "move-cursor", GTK_MOVEMENT_BUFFER_ENDS
+			,1, &r);
+
+		gtk_tree_selection_unselect_all(GTK_TREE_SELECTION(selection));
+		gtk_tree_selection_select_path(GTK_TREE_SELECTION(selection)
+			,selected_path);
+	}
 
 	else if(!strcmp(key, "b"))
 		g_signal_emit_by_name(args[0], "move-cursor", GTK_MOVEMENT_PAGES, -1, &r);
@@ -71,9 +83,11 @@ key_press(GtkWidget* window, GdkEventKey* e, gpointer** args)
 	else if(!strcmp(key, "L")) 
 	{
 		if(e->state == 5)
-			gtk_tree_view_expand_row(GTK_TREE_VIEW(args[0]), selected_path, TRUE);
+			gtk_tree_view_expand_row(GTK_TREE_VIEW(args[0]), selected_path
+				,TRUE);
 		else
-			gtk_tree_view_expand_row(GTK_TREE_VIEW(args[0]), selected_path, FALSE);
+			gtk_tree_view_expand_row(GTK_TREE_VIEW(args[0]), selected_path
+				,FALSE);
 	}
 
 	else if(!strcmp(key, "H")) 
@@ -104,9 +118,12 @@ key_press(GtkWidget* window, GdkEventKey* e, gpointer** args)
 		edit(NULL, args[3]);
 	
 	else if(!strcmp(key, "n"))
-		rename_directory_wrapper(args[3]);
+		rename_directory_wrapper(NULL, args[3]);
 
 	else if(!strcmp(key, "o"))
+		open_database(args[3]);
+
+	else if(!strcmp(key, "O"))
 		options_window(NULL, args[3]);
 }
 

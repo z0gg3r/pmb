@@ -30,6 +30,8 @@ menu_bar_new(GtkWidget* main_window)
 
 	GtkWidget* open 	= gtk_menu_item_new_with_mnemonic("_Open");
 	gtk_menu_shell_append(GTK_MENU_SHELL(file_menu), open);
+	g_signal_connect(GTK_WIDGET(open), "activate"
+		,G_CALLBACK(open_database), main_window);
 
 	GtkWidget* exit 	= gtk_menu_item_new_with_mnemonic("E_xit");
 	gtk_menu_shell_append(GTK_MENU_SHELL(file_menu), exit);
@@ -60,6 +62,11 @@ menu_bar_new(GtkWidget* main_window)
 	gtk_menu_shell_append(GTK_MENU_SHELL(edit_menu), edit);
 	g_signal_connect(GTK_WIDGET(edit), "activate"
 		,G_CALLBACK(edit), main_window);
+
+	GtkWidget* rename_t 	= gtk_menu_item_new_with_mnemonic("_Rename");
+	gtk_menu_shell_append(GTK_MENU_SHELL(edit_menu), rename_t);
+	g_signal_connect(GTK_WIDGET(rename_t), "activate"
+		,G_CALLBACK(rename_directory_wrapper), main_window);
 
 	GtkWidget* delete	= gtk_menu_item_new_with_mnemonic("_Delete");
 	gtk_menu_shell_append(GTK_MENU_SHELL(edit_menu), delete);

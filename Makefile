@@ -30,6 +30,7 @@ G_DIALOG=dialog
 G_ADD=add
 G_DELETE=delete
 G_EDIT=edit
+G_FILE=file
 G_OPTIONS=options
 G_SEARCHBOX=searchbox
 G_TAGBOX=tagbox
@@ -85,6 +86,8 @@ define BUILD_GPMB_DEP
 	-o $(BUILD_DIR)/$(G_DELETE).o
 	$(CC) $(CCFLAGS) $(GTKFLAGS) -c $(GPMB_DIR)/$(G_EDIT).c \
 	-o $(BUILD_DIR)/$(G_EDIT).o
+	$(CC) $(CCFLAGS) $(GTKFLAGS) -c $(GPMB_DIR)/$(G_FILE).c \
+	-o $(BUILD_DIR)/$(G_FILE).o
 	$(CC) $(CCFLAGS) $(GTKFLAGS) -c $(GPMB_DIR)/$(G_OPTIONS).c \
 	-o $(BUILD_DIR)/$(G_OPTIONS).o
 	$(CC) $(CCFLAGS) $(GTKFLAGS) -c $(GPMB_DIR)/$(G_SEARCHBOX).c \
@@ -107,6 +110,7 @@ define BUILD_GPMB
 	$(BUILD_DIR)/$(G_ADD).o \
 	$(BUILD_DIR)/$(G_DELETE).o \
 	$(BUILD_DIR)/$(G_EDIT).o \
+	$(BUILD_DIR)/$(G_FILE).o \
 	$(BUILD_DIR)/$(G_OPTIONS).o \
 	$(BUILD_DIR)/$(G_MENUBAR).o \
 	$(BUILD_DIR)/$(G_TOOLBOX).o \
@@ -178,6 +182,11 @@ $(G_EDIT):$(GPMB_DIR)/$(G_EDIT).c
 	-o $(BUILD_DIR)/$(G_EDIT).o
 	$(BUILD_GPMB)
 
+$(G_FILE):$(GPMB_DIR)/$(G_FILE).c
+	$(CC) $(CCFLAGS) $(GTKFLAGS) -c $(GPMB_DIR)/$(G_FILE).c \
+	-o $(BUILD_DIR)/$(G_FILE).o
+	$(BUILD_GPMB)
+
 $(G_DIALOG):$(GPMB_DIR)/$(G_DIALOG).c
 	$(CC) $(CCFLAGS) $(GTKFLAGS) -c $(GPMB_DIR)/$(G_DIALOG).c \
 	-o $(BUILD_DIR)/$(G_DIALOG).o
@@ -206,6 +215,11 @@ $(G_TOOLBOX):$(GPMB_DIR)/$(G_TOOLBOX).c
 $(G_TAGBOX):$(GPMB_DIR)/$(G_TAGBOX).c
 	$(CC) $(CCFLAGS) $(GTKFLAGS) -c $(GPMB_DIR)/$(G_TAGBOX).c \
 	-o $(BUILD_DIR)/$(G_TAGBOX).o
+	$(BUILD_GPMB)
+
+$(G_SEARCHBOX):$(GPMB_DIR)/$(G_SEARCHBOX).c
+	$(CC) $(CCFLAGS) $(GTKFLAGS) -c $(GPMB_DIR)/$(G_SEARCHBOX).c \
+	-o $(BUILD_DIR)/$(G_SEARCHBOX).o
 	$(BUILD_GPMB)
 
 $(G_INTERFACE):$(GPMB_DIR)/$(G_INTERFACE).c

@@ -15,7 +15,8 @@ delete_bookmark(GtkWidget* button, gpointer** args)
 
 			if(b) 
 			{
-				unsigned int id = strtol(bookmark_id(b), NULL, 10);
+				unsigned int id = strtol(bookmark_id(b), NULL
+							,10);
 				bookmark_db_delete(db, id);
 				read_database(NULL, NULL);
 				bookmark_destroy(b);
@@ -29,7 +30,9 @@ delete_bookmark(GtkWidget* button, gpointer** args)
 	g_free(args);
 
 	gboolean r;
-	g_signal_emit_by_name(treeview, "move-cursor", GTK_MOVEMENT_DISPLAY_LINES, -1, &r);
+	g_signal_emit_by_name(treeview, "move-cursor"
+		,GTK_MOVEMENT_DISPLAY_LINES, -1, &r);
+	gtk_label_set_text(GTK_LABEL(info_label), "Delete: Done");
 }
 
 static void
@@ -42,8 +45,11 @@ delete_directory(GtkWidget* button, gpointer window)
 
 	if(gtk_tree_model_get_iter(GTK_TREE_MODEL(model), &iter, selected_path))
 	{
-		if(gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(model), &child, &iter, 0))
+		if(gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(model), &child
+			,&iter, 0))
+		{
 			collect_bookmark(child, bl);
+		}
 	}
 
 	while((b = bookmark_list_return_next_bookmark(bl)))
@@ -57,7 +63,9 @@ delete_directory(GtkWidget* button, gpointer window)
 	close_window(NULL, window);
 
 	gboolean r;
-	g_signal_emit_by_name(treeview, "move-cursor", GTK_MOVEMENT_DISPLAY_LINES, -1, &r);
+	g_signal_emit_by_name(treeview, "move-cursor"
+		,GTK_MOVEMENT_DISPLAY_LINES, -1, &r);
+	gtk_label_set_text(GTK_LABEL(info_label), "Delete Directory: Done");
 }
 
 static void
@@ -74,7 +82,8 @@ delete_multiple(GtkWidget* button, gpointer window)
 			bookmark* b = get_data(rows->data);
 
 			if(strlen(bookmark_url(b)) > 1)
-				bookmark_db_delete(db, (strtol(bookmark_id(b), NULL, 10)));
+				bookmark_db_delete(db, (strtol(bookmark_id(b)
+					,NULL, 10)));
 			else
 			{
 				selected_path = rows->data;	
@@ -93,7 +102,9 @@ delete_multiple(GtkWidget* button, gpointer window)
 	read_database(NULL, NULL);
 	
 	gboolean r;
-	g_signal_emit_by_name(treeview, "move-cursor", GTK_MOVEMENT_DISPLAY_LINES, -1, &r);
+	g_signal_emit_by_name(treeview, "move-cursor"
+		,GTK_MOVEMENT_DISPLAY_LINES, -1, &r);
+	gtk_label_set_text(GTK_LABEL(info_label), "Delete Multiple: Done");
 }
 
 static void
@@ -205,7 +216,8 @@ static void
 delete_multiple_window(GtkWidget* main_window)
 {
 	GtkWidget* window = dialogs("Delete multiple bookmarks", main_window);
-	GtkWidget* advice = gtk_label_new("Delete all selected bookmarks/directories?");
+	GtkWidget* advice = gtk_label_new
+				("Delete all selected bookmarks/directories?");
 
 	/* button */
 	GtkWidget* delete_button = gtk_button_new_with_mnemonic("_Delete");

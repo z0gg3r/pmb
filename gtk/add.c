@@ -18,7 +18,8 @@ add_bookmark(GtkWidget* button, gpointer** args)
 	if(gtk_entry_get_text_length(GTK_ENTRY(args[2])))
 		comment	= (char*)gtk_entry_get_text(GTK_ENTRY(args[2]));
 
-	tag_t 		= (char*)gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(args[3]));
+	tag_t 		= (char*)gtk_combo_box_text_get_active_text
+				(GTK_COMBO_BOX_TEXT(args[3]));
 
 	if(strlen(tag_t) > 1)
 		tag = tag_t;
@@ -32,7 +33,11 @@ add_bookmark(GtkWidget* button, gpointer** args)
 		close_window(NULL, args[4]);
 		g_free(args);
 		read_database(NULL, NULL);
+		gtk_label_set_text(GTK_LABEL(info_label), "Add: Done");
 	}
+	else
+		gtk_label_set_text(GTK_LABEL(info_label)
+			,"Add: Error, Name or Url field empty");
 }
 
 void 

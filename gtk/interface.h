@@ -15,6 +15,7 @@
 #include "add.h"
 #include "delete.h"
 #include "edit.h"
+#include "file.h"
 #include "options.h"
 #include "searchbox.h"
 #include "tagbox.h"
