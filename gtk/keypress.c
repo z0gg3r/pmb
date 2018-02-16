@@ -121,7 +121,7 @@ key_press(GtkWidget* window, GdkEventKey* e, gpointer** args)
 		rename_directory_wrapper(NULL, args[3]);
 
 	else if(!strcmp(key, "o"))
-		open_database(args[3]);
+		open_database(NULL, args[3]);
 
 	else if(!strcmp(key, "O"))
 		options_window(NULL, args[3]);

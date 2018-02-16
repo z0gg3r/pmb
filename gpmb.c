@@ -1,19 +1,20 @@
 #include "gtk/interface.h"
 
+char* database_file = NULL;
+
 int 
 main(int argc, char *argv[]) 
 {
-	const char* 	home = secure_getenv("HOME");	
-	char*		file = calloc((strlen(home) + strlen(DATABASE)
-				 + 2), sizeof(char));
+	const char* 	home 	= secure_getenv("HOME");	
+	database_file 		= calloc(1, (strlen(home) + strlen(DATABASE)
+					 + 2) * sizeof(char));
 
-	if(file) 
+	if(database_file) 
 	{
-		snprintf(file, strlen(file) - 1, "%s/%s", home
+		snprintf(database_file, strlen(database_file) - 1, "%s/%s", home
 			,DATABASE);
 
-		db = bookmark_db_open(file);
-		free(file);
+		db = bookmark_db_open(database_file);
 	}
 	else
 		exit(EXIT_FAILURE);
@@ -22,6 +23,7 @@ main(int argc, char *argv[])
 	short res = gtk_interface(argc, argv);
 
 	free(opts);
+	free(database_file);
 	bookmark_db_close(db);
 	return res;
 }

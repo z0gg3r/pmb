@@ -21,10 +21,11 @@
 #include "tagbox.h"
 
 /* globals */
-extern sqlite3* 		db;
-extern GtkWidget* 		main_box;
-extern GtkWidget* 		info_label;
-extern GtkWidget* 		spinner;
+extern char*		database_file;
+extern sqlite3* 	db;
+extern GtkWidget* 	main_box;
+extern GtkWidget* 	info_label;
+extern GtkWidget* 	spinner;
 
 /* -- quit -- */
 void 

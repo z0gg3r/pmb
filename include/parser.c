@@ -1149,7 +1149,7 @@ html(char* optarg)
 
 		if(bl) 
 		{
-			bookmark_html_tree(bl);
+			bookmark_html_tree(bl, NULL);
 			bookmark_list_destroy(bl);
 		}
 	}

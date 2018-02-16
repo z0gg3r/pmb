@@ -6,6 +6,6 @@
 extern sqlite3* db;
 
 int
-bookmark_html_tree(bookmark_list*);
+bookmark_html_tree(bookmark_list*, FILE*);
 
 #endif

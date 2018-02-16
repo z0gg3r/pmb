@@ -18,12 +18,12 @@ main(int argc, char *argv[])
 	const char* 	home 	= secure_getenv("HOME");	
 
 	/* database file */
-	char* 	file 		= calloc((strlen(home) 
-				+ strlen(DATABASE) + 2), sizeof(char));
+	char* 	file 		= calloc(1, (strlen(home) 
+				+ strlen(DATABASE) + 2) * sizeof(char));
 
 	/* config file */
-	char* 	config_file 	= calloc((strlen(home) 
-				+ strlen(CONFIG_FILE) + 2), sizeof(char));
+	char* 	config_file 	= calloc(1, (strlen(home) 
+				+ strlen(CONFIG_FILE) + 2) * sizeof(char));
 
 	snprintf(config_file, strlen(config_file) - 1, "%s/%s"
 				,home, CONFIG_FILE);

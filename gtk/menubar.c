@@ -33,6 +33,18 @@ menu_bar_new(GtkWidget* main_window)
 	g_signal_connect(GTK_WIDGET(open), "activate"
 		,G_CALLBACK(open_database), main_window);
 
+	/* file menu > export menu */
+	GtkWidget* export_menu 	= gtk_menu_new();
+	GtkWidget* export_top	= gtk_menu_item_new_with_mnemonic("_Export");
+	gtk_menu_shell_append(GTK_MENU_SHELL(file_menu), export_top);
+	gtk_menu_item_set_submenu(GTK_MENU_ITEM(export_top), export_menu);
+
+	GtkWidget* export_html	= gtk_menu_item_new_with_mnemonic("_Html page");
+	gtk_menu_shell_append(GTK_MENU_SHELL(export_menu), export_html);
+
+	g_signal_connect(GTK_WIDGET(export_html), "activate"
+		,G_CALLBACK(export_html_page), main_window);
+
 	GtkWidget* exit 	= gtk_menu_item_new_with_mnemonic("E_xit");
 	gtk_menu_shell_append(GTK_MENU_SHELL(file_menu), exit);
 	g_signal_connect(GTK_WIDGET(exit), "activate"

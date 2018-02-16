@@ -551,6 +551,8 @@ rename_directory_wrapper(GtkWidget* button, gpointer main_window)
 
 	if((strlen(bookmark_url(b)) < 2))
 		rename_directory_window(b, main_window);
+	else
+		edit_bookmark_window(b, main_window);
 }
 
 void

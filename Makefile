@@ -104,6 +104,7 @@ define BUILD_GPMB
 	$(BUILD_DIR)/$(BOOKMARK_LIST).o \
 	$(BUILD_DIR)/$(DATABASE).o \
 	$(BUILD_DIR)/$(TREE).o \
+	$(BUILD_DIR)/$(HTML).o \
 	$(BUILD_DIR)/$(G_TREEVIEW).o \
 	$(BUILD_DIR)/$(G_KEYPRESS).o \
 	$(BUILD_DIR)/$(G_DIALOG).o \

@@ -1,15 +1,15 @@
 #include "html.h"
 
 void
-print_folder_icon(int* canvas)
+print_folder_icon(int* canvas, FILE* fp)
 {
-	printf(
-		"<canvas id='canvas_%d' width='20' height='14'></canvas>\n"
+	char* icon = "<canvas id='canvas_%d' width='20' height='14'></canvas>\n"
 		"<script>\n"
     		"var ctx = document.getElementById(\"canvas_%d\").getContext(\"2d\");\n"
 		"// #layer1\n"
 		"ctx.save();\n"
-		"ctx.transform(1.000000, 0.000000, 0.000000, 1.000000, -33.095309, -103.342050);\n"
+		"ctx.transform(1.000000, 0.000000, 0.000000, 1.000000, -33.095309"
+			", -103.342050);\n"
 		"// #path3684\n"
 		"ctx.beginPath();\n"
 		"ctx.lineJoin = 'miter';\n"
@@ -36,61 +36,103 @@ print_folder_icon(int* canvas)
 		"ctx.fill();\n"
 		"ctx.stroke();\n"
 		"ctx.restore();\n"
-		"</script>\n", *canvas, *canvas);
+		"</script>\n";
+
+	if(fp)
+		fprintf(fp, icon, *canvas, *canvas);
+	else
+		printf(icon, *canvas, *canvas);
 
 	++(*canvas);
 }
 
 int
-html_tree_table_row(directory* d, int depth, int* canvas)
+html_tree_table_row(directory* d, int depth, int* canvas, FILE* fp)
 {
 	if(d)
 	{
-		for(int i = 0; i <= depth; ++i)
-			printf("<ul>\n");
-
-		print_folder_icon(canvas);
-		printf("<span style='color:#056B24;'>%s</span>\n", directory_name(d));
-		bookmark* b = NULL;
-
-		printf("<ul>\n");
-
-		while((b = directory_next_bookmark(d)))
+		bookmark* b 		= NULL;
+		char* open_ul 		= "<ul>\n";
+		char* close_ul 		= "</ul>\n";
+		char* span_dir_name 	= "<span style='color:#056B24;'>%s</span>\n";
+		char* link_open 	= "<li><a href=\'%s\'>%s";
+		char* link_close 	= "</a></li>\n";
+		char* comment		= " - %s";
+ 
+		if(fp)
 		{
-			printf("<li><a href=\'%s\'>%s"
-				,bookmark_url(b), bookmark_name(b));
+			for(int i = 0; i <= depth; ++i)
+				fprintf(fp, open_ul);
 
-			if(strcmp(bookmark_comment(b), "none"))
-				printf(" - %s", bookmark_comment(b));
+			print_folder_icon(canvas, fp);
+			fprintf(fp, span_dir_name, directory_name(d));
+			fprintf(fp, open_ul);
 
-			printf("</a></li>\n");
+			while((b = directory_next_bookmark(d)))
+			{
+				fprintf(fp, link_open
+					,bookmark_url(b), bookmark_name(b));
+
+				if(strcmp(bookmark_comment(b), "none"))
+					fprintf(fp, comment, bookmark_comment(b));
+
+				fprintf(fp, link_close);
+			}
+
+			for(int i = 0; i <= depth + 2; ++i)
+				fprintf(fp, close_ul);
+
+			free(b);
+			return ++depth;
+
 		}
+		else
+		{
+			for(int i = 0; i <= depth; ++i)
+				printf(open_ul);
 
-		for(int i = 0; i <= depth + 2; ++i)
-			printf("</ul>\n");
+			print_folder_icon(canvas, fp);
+			printf(span_dir_name, directory_name(d));
+			printf(open_ul);
 
-		free(b);
-		return ++depth;
+			while((b = directory_next_bookmark(d)))
+			{
+				printf(link_open
+					,bookmark_url(b), bookmark_name(b));
+
+				if(strcmp(bookmark_comment(b), "none"))
+					printf(comment, bookmark_comment(b));
+
+				printf(link_close);
+			}
+
+			for(int i = 0; i <= depth + 2; ++i)
+				printf(close_ul);
+
+			free(b);
+			return ++depth;
+		}
 	}
 
 	return 0;
 }
 
 void
-html_tree_branch(directory* d, int depth, int* canvas)
+html_tree_branch(directory* d, int depth, int* canvas, FILE* fp)
 {
 	if(d)
 	{
 		directory_rewind(d);
 		directory* ret = NULL;
 
-		depth = html_tree_table_row(d, depth, canvas);
+		depth = html_tree_table_row(d, depth, canvas, fp);
 
 		while((ret = directory_next_children(d)))
 		{
 			directory_rewind(ret);
-			html_tree_table_row(ret, depth, canvas);
-			html_tree_branch(directory_next_children(ret), depth + 1, canvas);
+			html_tree_table_row(ret, depth, canvas, fp);
+			html_tree_branch(directory_next_children(ret), depth + 1, canvas
+				,fp);
 		}
 
 		free(ret);
@@ -98,7 +140,7 @@ html_tree_branch(directory* d, int depth, int* canvas)
 }
 
 int
-bookmark_html_tree(bookmark_list* bl) 
+bookmark_html_tree(bookmark_list* bl, FILE* fp) 
 {
 	if(bl) 
 	{
@@ -107,11 +149,9 @@ bookmark_html_tree(bookmark_list* bl)
 		directory* 	child 	= NULL;
 		directory* 	ret 	= NULL;
 		int		canvas	= 0;
-		char 		buf[50]; 
+		char 		buf[64]; 
 
-		directory_rewind(root);
-
-		printf("<!DOCTYPE html>\n"
+		char* page_top = "<!DOCTYPE html>\n"
 			"<html>\n"
 			"<head>\n"
 			"<meta charset=\'UTF-8\'>\n"
@@ -121,29 +161,40 @@ bookmark_html_tree(bookmark_list* bl)
 			"</style>\n"
 			"</head>\n"
 			"<body bgcolor=mintcream>\n"
-			"<h3>Bookmarks:</h3>"
+			"<h3>Bookmarks:</h3>\n"
 			"<div style='border:1px solid green;"
 			"margin-bottom: 10px;"
 			"margin-top: 10px;"
 			"border-radius:3px;"
 			"background-color:lavender;"
-			"padding:4px;'>\n");
+			"padding:4px;'>\n";
+
+		char* page_bottom = "</div>\n<br />\nGenerated in: "
+			"<span style='color:green;'>%s</span>\n"
+			"</body>\n</html>\n";
+
+		directory_rewind(root);
+
+		if(fp)
+			fprintf(fp, page_top);
+		else
+			printf(page_top);
 
 		//html_tree_table_row(root, 0, &canvas);
 
 		while((child = directory_next_children(root)))
 		{
 			directory_rewind(child);
-			html_tree_table_row(child, 0, &canvas);
+			html_tree_table_row(child, 0, &canvas, fp);
 
 			while((ret = directory_next_children(child)))
-				html_tree_branch(ret, 1, &canvas);
+				html_tree_branch(ret, 1, &canvas, fp);
 		}
 
-		printf("</div>\n<br />\nGenerated in: "
-			"<span style='color:green;'>%s</span>\n"
-			"</body>\n</html>\n"
-			,date(buf, 50));
+		if(fp)
+			fprintf(fp, page_bottom ,date(buf, 64));
+		else
+			printf(page_bottom ,date(buf, 64));
 
 		directory_destroy(ret);
 		directory_destroy(child);
