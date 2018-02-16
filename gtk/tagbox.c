@@ -34,31 +34,33 @@ tag_box_new()
 	bookmark*	b		= NULL;
 	char*		last_tag	= NULL;
 
-	while((b = bookmark_list_return_next_bookmark(bl)))
+	if(bl)
 	{
-		char* tag = bookmark_tag(b);
-
-		if((last_tag && strcmp(last_tag, tag)) 
-		|| (!last_tag))
+		while((b = bookmark_list_return_next_bookmark(bl)))
 		{
-			last_tag = bookmark_tag(b);
+			char* tag = bookmark_tag(b);
 
-			gtk_combo_box_text_append
-				(GTK_COMBO_BOX_TEXT(tag_box)
-				,NULL
-				,last_tag);
+			if((last_tag && strcmp(last_tag, tag)) 
+			|| (!last_tag))
+			{
+				last_tag = bookmark_tag(b);
+
+				gtk_combo_box_text_append
+					(GTK_COMBO_BOX_TEXT(tag_box)
+					,NULL
+					,last_tag);
+			}
+
+			bookmark_destroy(b);
 		}
 
+		bookmark_list_destroy(bl);
+	
+		b = get_data(NULL);
+		gtk_entry_set_text(GTK_ENTRY(entry), get_full_path(b));
 		bookmark_destroy(b);
 	}
 
-	if(bl)
-		bookmark_list_destroy(bl);
-	
-	b = get_data(NULL);
-	gtk_entry_set_text(GTK_ENTRY(entry), get_full_path(b));
-	bookmark_destroy(b);
-	
 	return tag_box;
 }
 

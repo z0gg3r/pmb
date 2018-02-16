@@ -530,7 +530,7 @@ bookmark_db_search(sqlite3* db, char* field, char* str)
 				(strlen(sql) 
 				+ strlen(" name LIKE '%%%%'") 
 				+ strlen(str) + 1)
-				, sizeof(char));
+				,sizeof(char));
 
 			if(search_name) 
 			{
@@ -553,7 +553,7 @@ bookmark_db_search(sqlite3* db, char* field, char* str)
 				(strlen(sql) 
 				+ strlen(" url LIKE '%%%%'") 
 				+ strlen(str) + 1)
-				, sizeof(char));
+				,sizeof(char));
 
 			if(search_url) 
 			{
@@ -576,7 +576,7 @@ bookmark_db_search(sqlite3* db, char* field, char* str)
 				(strlen(sql) 
 				+ strlen(" comment LIKE '%%%%'") 
 				+ strlen(str) + 1)
-				, sizeof(char));
+				,sizeof(char));
 
 			if(search_comment) 
 			{
@@ -599,7 +599,7 @@ bookmark_db_search(sqlite3* db, char* field, char* str)
 				(strlen(sql) 
 				+ strlen(" tag LIKE '%%%%'") 
 				+ strlen(str) + 1)
-				, sizeof(char));
+				,sizeof(char));
 
 			if(search_tag) 
 			{
@@ -625,7 +625,7 @@ bookmark_db_search(sqlite3* db, char* field, char* str)
 					"OR comment LIKE '%%%s%%' "
 					"OR tag LIKE '%%%s%%'") 
 				+ strlen(str) * 4 + 1)
-				, sizeof(char));
+				,sizeof(char));
 
 			if(search) 
 			{

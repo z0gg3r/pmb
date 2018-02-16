@@ -48,7 +48,7 @@ add_window(GtkWidget* button, gpointer main_window)
 	bookmark* 	b 	= get_data(NULL);
 
 	/* tag box */
-	GtkWidget* tag_box = tag_box_new();
+	GtkWidget* 	tag_box = tag_box_new();
 
 	if(b) 
 	{

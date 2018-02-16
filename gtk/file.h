@@ -5,6 +5,9 @@
 #include "interface.h"
 
 void
+new_database(GtkWidget*, gpointer);
+
+void
 open_database(GtkWidget*, gpointer);
 
 void
