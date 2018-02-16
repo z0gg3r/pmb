@@ -68,7 +68,7 @@ help()
 		"\t\texample: pmb -s linux\n"
 		"\t\t         pmb -s name=linux\n"
 		"\t\t         pmb -s name=linux,e=another.db\n"
-		"\t\t         pmb -s linux,d\n\n"
+		"\t\t         pmb -s linux,d\n"
 		"\t\t         pmb -s linux,field=url\n\n");
 
 	printf("\t-l | --colors\n"
@@ -388,7 +388,8 @@ add_bookmark(char* optarg)
 
 					break;		
 				default:
-					printf("need at least name and url to create a bookmark.\n");
+					printf("need at least name and url to create"
+						" a bookmark.\n");
 					break;
 			}
 
@@ -549,7 +550,8 @@ edit_bookmark(char* optarg)
 					if(value) 
 						n_value = value;
 					else
-						printf("edit: new-value needs an argument\n");
+						printf("edit: new-value needs an"
+							" argument\n");
 
 					break;
 				default:
@@ -571,7 +573,8 @@ edit_bookmark(char* optarg)
 		if(field && !strncmp(field, "comment", 7) && c_value && n_value) 
 		{
 			if(bookmark_db_edit_bulk(db, 2, c_value, n_value))
-				printf("can't edit bookmarks with comment '%s'\n", c_value);
+				printf("can't edit bookmarks with comment '%s'\n"
+					,c_value);
 		}
 
 		if(field && !strncmp(field, "tag", 3) && c_value && n_value) 
@@ -728,7 +731,8 @@ search(char* optarg)
 					if(value) 
 						bl = bookmark_db_search(db, COMMENT, value);
 					else
-						printf("search: comment needs an argument\n");
+						printf("search: comment needs an"
+							" argument\n");
 
 					break;
 				case tag_option:
@@ -744,7 +748,8 @@ search(char* optarg)
 					if(value) 
 						export = value;
 					else
-						printf("search: export needs an argument\n");
+						printf("search: export needs an"
+							" argument\n");
 
 					break;		
 				case delete_option:
@@ -810,7 +815,8 @@ search(char* optarg)
 					while((b = bookmark_list_return_next_bookmark(bl)))
 					{
 						if(bookmark_db_write(b, e_db))
-							printf("search: failed to export bookmark\n");
+							printf("search: failed to export"
+								" bookmark\n");
 
 						bookmark_destroy(b);
 					}
@@ -939,7 +945,8 @@ print_bookmark(char* optarg)
 				else
 				{
 					if(id)
-						printf("failed to print name of bookmark id=%d\n", id);
+						printf("failed to print name of"
+							" bookmark id=%d\n", id);
 					else
 						printf("failed to print name\n");
 				}
@@ -960,7 +967,8 @@ print_bookmark(char* optarg)
 				else
 				{
 					if(id)
-						printf("failed to print url of bookmark id=%d\n", id);
+						printf("failed to print url of"
+							" bookmark id=%d\n", id);
 					else
 						printf("failed to print url\n");
 				}
@@ -981,7 +989,8 @@ print_bookmark(char* optarg)
 				else
 				{
 					if(id)
-						printf("failed to print comment of bookmark id=%d\n", id);
+						printf("failed to print comment"
+							" of bookmark id=%d\n", id);
 					else
 						printf("failed to print comment\n");
 				}
@@ -1002,7 +1011,8 @@ print_bookmark(char* optarg)
 				else
 				{
 					if(id)
-						printf("failed to print tag of bookmark id=%d\n", id);
+						printf("failed to print tag of"
+							" bookmark id=%d\n", id);
 					else
 						printf("failed to print tag\n");
 				}

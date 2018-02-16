@@ -28,10 +28,15 @@ menu_bar_new(GtkWidget* main_window)
 	GtkWidget* file_top	= gtk_menu_item_new_with_mnemonic("_File");
 	gtk_menu_item_set_submenu(GTK_MENU_ITEM(file_top), file_menu);
 
-	GtkWidget* open 	= gtk_menu_item_new_with_mnemonic("_Open");
+	GtkWidget* open 	= gtk_menu_item_new_with_mnemonic("_Open database");
 	gtk_menu_shell_append(GTK_MENU_SHELL(file_menu), open);
 	g_signal_connect(GTK_WIDGET(open), "activate"
 		,G_CALLBACK(open_database), main_window);
+
+	GtkWidget* import 	= gtk_menu_item_new_with_mnemonic("_Import database");
+	gtk_menu_shell_append(GTK_MENU_SHELL(file_menu), import);
+	g_signal_connect(GTK_WIDGET(import), "activate"
+		,G_CALLBACK(import_database), main_window);
 
 	/* file menu > export menu */
 	GtkWidget* export_menu 	= gtk_menu_new();

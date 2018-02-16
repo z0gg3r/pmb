@@ -77,7 +77,8 @@ bookmark_db_open(char *db_name)
 
 					if(rc) 
 					{
-						printf("error creating table on database\n");
+						printf("error creating table on"
+							" database\n");
 						return NULL;
 					}
 				}
@@ -110,7 +111,8 @@ bookmark_db_write(bookmark* b, sqlite3* db)
 {
 	if(b && db) 
 	{
-		const char* 	sql = "INSERT INTO bookmark (name, url, comment, tag) VALUES(?,?,?,?)";
+		const char* 	sql = "INSERT INTO bookmark (name, url, comment, tag)"
+					" VALUES(?,?,?,?)";
 		sqlite3_stmt* 	res;
 
 		if((sqlite3_prepare_v2(db, sql, -1, &res, 0)) == SQLITE_OK) 
@@ -247,7 +249,8 @@ bookmark_db_delete_tag(sqlite3* db, char* tag, int greedy)
 
 			if(sql) 
 			{
-				snprintf(sql, strlen(sql) - 1, "%s tag LIKE '%%%s%%'", sql_head, tag);
+				snprintf(sql, strlen(sql) - 1, "%s tag LIKE '%%%s%%'"
+							,sql_head, tag);
 				sqlite3_stmt* 	res;
 
 				if((sqlite3_prepare_v2(db, sql, -1, &res, 0)) == SQLITE_OK) 
@@ -403,7 +406,8 @@ search_db(sqlite3* db, char* field, char* str, char* sql)
 					{
 						if(sqlite3_column_text(res, 0)) 
 							bookmark_list_enqueue(bl
-								,(char*)sqlite3_column_text(res, 0)
+								,(char*)sqlite3_column_text
+									(res, 0)
 								,NULL
 								,NULL
 								,NULL
@@ -415,7 +419,8 @@ search_db(sqlite3* db, char* field, char* str, char* sql)
 						if(sqlite3_column_text(res, 1)) 
 							bookmark_list_enqueue(bl
 								,NULL
-								,(char*)sqlite3_column_text(res, 1)
+								,(char*)sqlite3_column_text
+									(res, 1)
 								,NULL
 								,NULL
 								,NULL);
@@ -427,7 +432,8 @@ search_db(sqlite3* db, char* field, char* str, char* sql)
 							bookmark_list_enqueue(bl
 								,NULL
 								,NULL
-								,(char*)sqlite3_column_text(res, 2)
+								,(char*)sqlite3_column_text
+									(res, 2)
 								,NULL
 								,NULL);
 					}
@@ -439,7 +445,8 @@ search_db(sqlite3* db, char* field, char* str, char* sql)
 								,NULL
 								,NULL
 								,NULL
-								,(char*)sqlite3_column_text(res, 3)
+								,(char*)sqlite3_column_text
+									(res, 3)
 								,NULL);
 					}
 
@@ -451,7 +458,8 @@ search_db(sqlite3* db, char* field, char* str, char* sql)
 								,NULL
 								,NULL
 								,NULL
-								,(char*)sqlite3_column_text(res, 4));
+								,(char*)sqlite3_column_text
+									(res, 4));
 					}
 				}
 				else 

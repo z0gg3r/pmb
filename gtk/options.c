@@ -123,7 +123,7 @@ settings_page()
 void
 options_window(GtkWidget* button, gpointer main_window) 
 {
-	GtkWidget* window = dialogs("Options", main_window);
+	GtkWidget* window 		= dialogs("Options", main_window);
 
 	/* settings page */
 	GtkWidget* page_settings_l 	= gtk_label_new("Settings");
@@ -142,7 +142,7 @@ options_window(GtkWidget* button, gpointer main_window)
 	g_signal_connect(GTK_WIDGET(apply_button), "clicked", G_CALLBACK(apply_settings)
 			,NULL);
 
-	GtkWidget* cancel_button	=gtk_button_new_with_mnemonic("_Cancel");
+	GtkWidget* cancel_button	= gtk_button_new_with_mnemonic("_Cancel");
 	g_signal_connect(GTK_WIDGET(cancel_button), "clicked", G_CALLBACK(close_window)
 		,window);
 
