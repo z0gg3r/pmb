@@ -8,12 +8,6 @@ menu_bar_new(GtkWidget* main_window)
 	GtkWidget* file_top	= gtk_menu_item_new_with_mnemonic("_File");
 	gtk_menu_item_set_submenu(GTK_MENU_ITEM(file_top), file_menu);
 
-	/* file menu > new item */
-	GtkWidget* new_db 	= gtk_menu_item_new_with_mnemonic("_New database");
-	gtk_menu_shell_append(GTK_MENU_SHELL(file_menu), new_db);
-	g_signal_connect(GTK_WIDGET(new_db), "activate"
-		,G_CALLBACK(new_database), main_window);
-
 	/* file menu > open item */
 	GtkWidget* open 	= gtk_menu_item_new_with_mnemonic("_Open database");
 	gtk_menu_shell_append(GTK_MENU_SHELL(file_menu), open);
@@ -35,10 +29,8 @@ menu_bar_new(GtkWidget* main_window)
 	/* file menu > import menu > selective import item */
 	GtkWidget* sel_import 	= gtk_menu_item_new_with_mnemonic("_Selective import");
 	gtk_menu_shell_append(GTK_MENU_SHELL(import_menu), sel_import);
-	/*
 	g_signal_connect(GTK_WIDGET(sel_import), "activate"
-		,G_CALLBACK(import_database), main_window);
-	*/
+		,G_CALLBACK(selective_import_window), main_window);
 
 	/* file menu > export menu */
 	GtkWidget* export_menu 	= gtk_menu_new();
@@ -52,6 +44,12 @@ menu_bar_new(GtkWidget* main_window)
 
 	g_signal_connect(GTK_WIDGET(export_html), "activate"
 		,G_CALLBACK(export_html_page), main_window);
+
+	/* file menu > export menu > selective export item */
+	GtkWidget* sel_export 	= gtk_menu_item_new_with_mnemonic("_Selective export");
+	gtk_menu_shell_append(GTK_MENU_SHELL(export_menu), sel_export);
+	g_signal_connect(GTK_WIDGET(sel_export), "activate"
+		,G_CALLBACK(selective_export_window), main_window);
 
 	/* file menu > exit item */
 	GtkWidget* exit 	= gtk_menu_item_new_with_mnemonic("E_xit");

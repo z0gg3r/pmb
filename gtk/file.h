@@ -5,9 +5,6 @@
 #include "interface.h"
 
 void
-new_database(GtkWidget*, gpointer);
-
-void
 open_database(GtkWidget*, gpointer);
 
 void
@@ -15,5 +12,11 @@ import_database(GtkWidget*, gpointer);
 
 void
 export_html_page(GtkWidget*, gpointer);
+
+void
+selective_import_window(GtkWidget*, gpointer);
+
+void
+selective_export_window(GtkWidget*, gpointer);
 
 #endif

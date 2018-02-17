@@ -729,7 +729,8 @@ search(char* optarg)
 				case comment_option:
 				case scomment_option:
 					if(value) 
-						bl = bookmark_db_search(db, COMMENT, value);
+						bl = bookmark_db_search(db, COMMENT
+							,value);
 					else
 						printf("search: comment needs an"
 							" argument\n");
