@@ -74,10 +74,7 @@ color_page()
 	GtkWidget* url_label		= gtk_label_new("Url");
 	GtkWidget* comment_label	= gtk_label_new("Comment");
 
-	GtkWidget* grid = gtk_grid_new();
-	gtk_grid_set_column_spacing(GTK_GRID(grid), 2);
-	gtk_grid_set_row_spacing(GTK_GRID(grid), 2);
-	gtk_grid_set_column_homogeneous(GTK_GRID(grid), 1);
+	GtkWidget* grid = grid_new();
 
 	gtk_grid_attach(GTK_GRID(grid), id_label 	,0,  0, 30, 1);
 	gtk_grid_attach(GTK_GRID(grid), id_fg 		,40, 0, 50, 1);
@@ -108,10 +105,7 @@ settings_page()
 	if(gtk_tree_view_get_enable_tree_lines(GTK_TREE_VIEW(treeview)))
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(tree_lines), TRUE);
 
-	GtkWidget* grid = gtk_grid_new();
-	gtk_grid_set_column_spacing(GTK_GRID(grid), 2);
-	gtk_grid_set_row_spacing(GTK_GRID(grid), 2);
-	gtk_grid_set_column_homogeneous(GTK_GRID(grid), 1);
+	GtkWidget* grid = grid_new();
 
 	gtk_grid_attach(GTK_GRID(grid), database_label 		,0,  0, 30, 1);
 	gtk_grid_attach(GTK_GRID(grid), database_file_entry	,40, 0, 50, 1);
@@ -121,9 +115,9 @@ settings_page()
 }
 
 void
-options_window(GtkWidget* button, gpointer main_window) 
+options_window(GtkWidget* button) 
 {
-	GtkWidget* window 		= dialogs("Options", main_window);
+	GtkWidget* window 		= dialogs("Options", gpmb_window);
 
 	/* settings page */
 	GtkWidget* page_settings_l 	= gtk_label_new("Settings");

@@ -7,9 +7,9 @@
 
 /* -- edit wrapper -- */
 void
-edit(GtkWidget*, gpointer);
+edit(GtkWidget*);
 
 void
-rename_directory_wrapper(GtkWidget*, gpointer);
+rename_directory_wrapper(GtkWidget*);
 
 #endif

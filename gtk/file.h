@@ -5,18 +5,18 @@
 #include "interface.h"
 
 void
-open_database(GtkWidget*, gpointer);
+open_database(GtkWidget*);
 
 void
-import_database(GtkWidget*, gpointer);
+import_database(GtkWidget*);
 
 void
-export_html_page(GtkWidget*, gpointer);
+export_html_page(GtkWidget*);
 
 void
-selective_import_window(GtkWidget*, gpointer);
+selective_import_window(GtkWidget*);
 
 void
-selective_export_window(GtkWidget*, gpointer);
+selective_export_window(GtkWidget*);
 
 #endif

@@ -126,17 +126,6 @@ collect_bookmark(GtkTreeIter iter, bookmark_list* bl)
 	gtk_tree_path_free(path);
 }
 
-void
-tag_entry_set_text(GtkWidget* tag_box, GtkWidget* tag_entry)
-{
-	if(tag_entry && tag_box)
-	{
-		char* tag = gtk_combo_box_text_get_active_text	
-			(GTK_COMBO_BOX_TEXT(tag_box));
-		gtk_entry_set_text(GTK_ENTRY(tag_entry), tag);
-	}
-}
-
 GtkWidget**
 entries(gboolean editable)
 {
@@ -185,6 +174,17 @@ entries(gboolean editable)
 	r[7] = tag_entry;
 
 	return r;
+}
+
+GtkWidget*
+grid_new()
+{
+	GtkWidget* grid = gtk_grid_new();
+	gtk_grid_set_column_spacing(GTK_GRID(grid), 2);
+	gtk_grid_set_row_spacing(GTK_GRID(grid), 2);
+	gtk_grid_set_column_homogeneous(GTK_GRID(grid), 1);
+
+	return grid;
 }
 
 void  

@@ -5,9 +5,6 @@
 
 extern GtkWidget* tool_box;
 
-void
-toolbox_hide(GtkWidget*, gpointer);
-
 GtkWidget*
 tool_box_new(GtkWidget*); 
 

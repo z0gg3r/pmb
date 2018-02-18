@@ -7,6 +7,9 @@
 GtkWidget**
 entries(gboolean);
 
+GtkWidget*
+grid_new();
+
 /* collect bookmarks from selected_path */
 void
 collect_bookmark(GtkTreeIter, bookmark_list*);
@@ -14,10 +17,6 @@ collect_bookmark(GtkTreeIter, bookmark_list*);
 /* -- get full path of selected bookmark/directory -- */
 char*
 get_full_path(bookmark*);
-
-/* used to set text from tag box */
-void
-tag_entry_set_text(GtkWidget*, GtkWidget*);
 
 /* -- cancel -- */
 void 

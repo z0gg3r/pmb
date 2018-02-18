@@ -108,9 +108,9 @@ delete_multiple(GtkWidget* button, gpointer window)
 }
 
 static void
-delete_bookmark_window(bookmark* b, gpointer main_window) 
+delete_bookmark_window(bookmark* b) 
 {
-	GtkWidget* 	window 	= dialogs("Delete bookmark", main_window);
+	GtkWidget* 	window 	= dialogs("Delete bookmark", gpmb_window);
 	GtkWidget** 	e 	= entries(FALSE);
 
 	if(b) 
@@ -145,10 +145,7 @@ delete_bookmark_window(bookmark* b, gpointer main_window)
 		,window);
 
 	/* grid */
-	GtkWidget* grid = gtk_grid_new();
-	gtk_grid_set_column_spacing(GTK_GRID(grid), 2);
-	gtk_grid_set_row_spacing(GTK_GRID(grid), 2);
-	gtk_grid_set_column_homogeneous(GTK_GRID(grid), 1);
+	GtkWidget* grid = grid_new();
 
 	gtk_grid_attach(GTK_GRID(grid), e[0] 		,0,  0, 30, 1);
 	gtk_grid_attach(GTK_GRID(grid), e[1]		,20, 0, 50, 1);
@@ -169,9 +166,9 @@ delete_bookmark_window(bookmark* b, gpointer main_window)
 }
 
 static void
-delete_directory_window(bookmark* b, gpointer main_window)
+delete_directory_window(bookmark* b)
 {
-	GtkWidget* window = dialogs("Delete directory", main_window);
+	GtkWidget* window = dialogs("Delete directory", gpmb_window);
 
 	GtkWidget* name_entry_label = gtk_label_new("Name");
 	gtk_widget_set_halign(GTK_WIDGET(name_entry_label), GTK_ALIGN_START);
@@ -196,10 +193,7 @@ delete_directory_window(bookmark* b, gpointer main_window)
 		,window);
 
 	/* grid */
-	GtkWidget* grid = gtk_grid_new();
-	gtk_grid_set_column_spacing(GTK_GRID(grid), 2);
-	gtk_grid_set_row_spacing(GTK_GRID(grid), 2);
-	gtk_grid_set_column_homogeneous(GTK_GRID(grid), 1);
+	GtkWidget* grid = grid_new();
 
 	gtk_grid_attach(GTK_GRID(grid), name_entry_label 	,0,  0, 30, 1);
 	gtk_grid_attach(GTK_GRID(grid), name_entry 		,20, 0, 50, 1);
@@ -213,9 +207,9 @@ delete_directory_window(bookmark* b, gpointer main_window)
 }
 
 static void
-delete_multiple_window(GtkWidget* main_window)
+delete_multiple_window()
 {
-	GtkWidget* window = dialogs("Delete multiple bookmarks", main_window);
+	GtkWidget* window = dialogs("Delete multiple bookmarks", gpmb_window);
 	GtkWidget* advice = gtk_label_new
 				("Delete all selected bookmarks/directories?");
 
@@ -229,10 +223,7 @@ delete_multiple_window(GtkWidget* main_window)
 		,window);
 
 	/* grid */
-	GtkWidget* grid = gtk_grid_new();
-	gtk_grid_set_column_spacing(GTK_GRID(grid), 2);
-	gtk_grid_set_row_spacing(GTK_GRID(grid), 2);
-	gtk_grid_set_column_homogeneous(GTK_GRID(grid), 1);
+	GtkWidget* grid = grid_new();
 
 	gtk_grid_attach(GTK_GRID(grid), advice 		,0,  0, 30, 1);
 	gtk_grid_attach(GTK_GRID(grid), delete_button 	,0,  1, 20, 10);
@@ -245,12 +236,12 @@ delete_multiple_window(GtkWidget* main_window)
 }
 
 void
-delete(GtkWidget* button, gpointer main_window)
+delete(GtkWidget* button)
 {
 	if(gtk_tree_selection_count_selected_rows
 		(GTK_TREE_SELECTION(selection)) > 1)
 	{
-		delete_multiple_window(main_window);
+		delete_multiple_window();
 	}
 	else
 	{
@@ -259,9 +250,9 @@ delete(GtkWidget* button, gpointer main_window)
 		if(b)
 		{
 			if(strlen(bookmark_url(b)) > 1)
-				delete_bookmark_window(b, main_window);
+				delete_bookmark_window(b);
 			else
-				delete_directory_window(b, main_window);
+				delete_directory_window(b);
 		}
 	}
 }

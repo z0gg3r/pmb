@@ -24,12 +24,18 @@
 extern char*		database_file;
 extern sqlite3* 	db;
 extern GtkWidget* 	main_box;
+extern GtkWidget* 	info_box;
 extern GtkWidget* 	info_label;
 extern GtkWidget* 	spinner;
+extern GtkWidget* 	gpmb_window;
 
 /* -- quit -- */
 void 
 destroy(); 	
+
+/* hide widget */
+void
+widget_hide(GtkWidget*, char*);
 
 /* -- gtk interface -- */
 int 

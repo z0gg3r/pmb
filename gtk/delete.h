@@ -5,6 +5,6 @@
 
 /* -- delete wrapper -- */
 void
-delete(GtkWidget*, gpointer);
+delete(GtkWidget*);
 
 #endif

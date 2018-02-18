@@ -41,9 +41,9 @@ add_bookmark(GtkWidget* button, gpointer** args)
 }
 
 void 
-add_window(GtkWidget* button, gpointer main_window) 
+add_window(GtkWidget* button) 
 {
-	GtkWidget* 	window 	= dialogs("Add bookmark", main_window);
+	GtkWidget* 	window 	= dialogs("Add bookmark", gpmb_window);
 	GtkWidget** 	e 	= entries(TRUE);
 	bookmark* 	b 	= get_data(NULL);
 

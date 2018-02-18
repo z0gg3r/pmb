@@ -2,15 +2,6 @@
 
 GtkWidget* tool_box = NULL;
 
-void
-toolbox_hide(GtkWidget* button, gpointer tb)
-{
-	//gtk_widget_hide(tb);	
-	//gtk_container_remove(GTK_CONTAINER(main_box), tb);
-	//gtk_widget_set_visible(GTK_WIDGET(tb), FALSE);
-	gtk_widget_destroy(tb);
-}
-
 GtkWidget*
 tool_box_new(GtkWidget* main_window) 
 {
@@ -23,7 +14,7 @@ tool_box_new(GtkWidget* main_window)
 	gtk_tool_item_set_tooltip_text(GTK_TOOL_ITEM(add), "add");
 
 	g_signal_connect(add, "clicked", G_CALLBACK(add_window)
-		,main_window);
+		,NULL);
 
 	/* edit */
 	GtkWidget* edit_icon 	= gtk_image_new_from_icon_name
@@ -32,7 +23,7 @@ tool_box_new(GtkWidget* main_window)
 	gtk_tool_item_set_tooltip_text(GTK_TOOL_ITEM(edit_t), "edit/move");
 
 	g_signal_connect(edit_t, "clicked", G_CALLBACK(edit)
-		,main_window);
+		,NULL);
 
 	/* rename */
 	GtkWidget* rename_icon 	= gtk_image_new_from_icon_name
@@ -41,7 +32,7 @@ tool_box_new(GtkWidget* main_window)
 	gtk_tool_item_set_tooltip_text(GTK_TOOL_ITEM(rename_t), "rename directories");
 
 	g_signal_connect(rename_t, "clicked", G_CALLBACK(rename_directory_wrapper)
-		,main_window);
+		,NULL);
 
 	/* delete */
 	GtkWidget* delete_icon	= gtk_image_new_from_icon_name
@@ -50,7 +41,7 @@ tool_box_new(GtkWidget* main_window)
 	gtk_tool_item_set_tooltip_text(GTK_TOOL_ITEM(delete_t), "delete");
 
 	g_signal_connect(delete_t, "clicked", G_CALLBACK(delete)
-		,main_window);
+		,NULL);
 
 	/* options */
 	GtkWidget* options_icon = gtk_image_new_from_icon_name
@@ -60,7 +51,7 @@ tool_box_new(GtkWidget* main_window)
 	gtk_tool_item_set_tooltip_text(GTK_TOOL_ITEM(options), "preferences");
 
 	g_signal_connect(options, "clicked", G_CALLBACK(options_window)
-		,main_window);
+		,NULL);
 
 	/* reload */
 	GtkWidget* reload_icon 	= gtk_image_new_from_icon_name

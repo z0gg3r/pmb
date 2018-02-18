@@ -109,21 +109,21 @@ key_press(GtkWidget* window, GdkEventKey* e, gpointer** args)
 		read_database(NULL, NULL);
 
 	else if(!strcmp(key, "d"))
-		delete(NULL, args[3]);
+		delete(NULL);
 
 	else if(!strcmp(key, "i"))
-		add_window(NULL, args[3]);
+		add_window(NULL);
 
 	else if(!strcmp(key, "e"))
-		edit(NULL, args[3]);
+		edit(NULL);
 	
 	else if(!strcmp(key, "n"))
-		rename_directory_wrapper(NULL, args[3]);
+		rename_directory_wrapper(NULL);
 
 	else if(!strcmp(key, "o"))
 		open_database(NULL, args[3]);
 
 	else if(!strcmp(key, "O"))
-		options_window(NULL, args[3]);
+		options_window(NULL);
 }
 

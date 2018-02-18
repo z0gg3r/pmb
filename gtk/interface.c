@@ -3,13 +3,35 @@
 /* globals */
 sqlite3* 		db 		= NULL;
 GtkWidget*		main_box	= NULL;
+GtkWidget* 		info_box 	= NULL;
 GtkWidget*		info_label	= NULL;
 GtkWidget*		spinner		= NULL;
+GtkWidget* 		gpmb_window 	= NULL;
 
 void 
 destroy() 
 {
 	gtk_main_quit();
+}
+
+void
+widget_hide(GtkWidget* button, char* name)
+{
+	if(!strcmp(name, "info_box"))
+	{
+		if(gtk_widget_get_visible(GTK_WIDGET(info_box)))
+			gtk_widget_hide(GTK_WIDGET(info_box));
+		else
+			gtk_widget_show(GTK_WIDGET(info_box));
+	}
+
+	if(!(strcmp(name, "tool_bar")))
+	{
+		if(gtk_widget_get_visible(GTK_WIDGET(tool_box)))
+			gtk_widget_hide(GTK_WIDGET(tool_box));
+		else
+			gtk_widget_show(GTK_WIDGET(tool_box));
+	}
 }
 
 int 
@@ -18,13 +40,13 @@ gtk_interface(int argc, char* argv[])
 	gtk_init(&argc, &argv);
 
 	/* set up the main window */
-	GtkWidget* bookmark_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	gtk_window_set_title(GTK_WINDOW(bookmark_window), "Bookmarks");
-	gtk_window_set_role(GTK_WINDOW(bookmark_window), "Bookmarks");
-	gtk_window_set_default_size(GTK_WINDOW(bookmark_window)
+	gpmb_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	gtk_window_set_title(GTK_WINDOW(gpmb_window), "Bookmarks");
+	gtk_window_set_role(GTK_WINDOW(gpmb_window), "Bookmarks");
+	gtk_window_set_default_size(GTK_WINDOW(gpmb_window)
 		,800, 600);
 
-	g_signal_connect(bookmark_window, "destroy", G_CALLBACK(destroy)
+	g_signal_connect(gpmb_window, "destroy", G_CALLBACK(destroy)
 		,NULL);
 
 	/* tree view */
@@ -40,7 +62,7 @@ gtk_interface(int argc, char* argv[])
 	key_press_args[0] = treeview;
 	key_press_args[1] = s_window;
 	key_press_args[2] = search_entry;
-	key_press_args[3] = bookmark_window;
+	key_press_args[3] = gpmb_window;
 
 	g_signal_connect(s_window, "key-press-event"
 		,G_CALLBACK(key_press), key_press_args);
@@ -49,10 +71,10 @@ gtk_interface(int argc, char* argv[])
 		,G_CALLBACK(search_entry_key_press), treeview);
 
 	/* menu bar */
-	GtkWidget* menu_bar 	= menu_bar_new(bookmark_window);
+	GtkWidget* menu_bar 	= menu_bar_new(gpmb_window);
 
 	/* tool box */
-	tool_box 		= tool_box_new(bookmark_window);
+	tool_box 		= tool_box_new(gpmb_window);
 
 	/* search box */
 	GtkWidget* search_box 	= search_box_new(search_entry);
@@ -65,7 +87,7 @@ gtk_interface(int argc, char* argv[])
 	spinner 		= gtk_spinner_new();
 
 	/* info box */
-	GtkWidget* info_box 	= gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
+	info_box 		= gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
 	gtk_box_pack_start(GTK_BOX(info_box), info_label, TRUE, TRUE, 1);
 	gtk_container_add(GTK_CONTAINER(info_box), spinner);
 
@@ -78,8 +100,8 @@ gtk_interface(int argc, char* argv[])
 	gtk_container_add(GTK_CONTAINER(main_box), info_box);
 
 	/* add main_box into window */
-	gtk_container_add(GTK_CONTAINER(bookmark_window), main_box);
-	gtk_widget_show_all(bookmark_window);
+	gtk_container_add(GTK_CONTAINER(gpmb_window), main_box);
+	gtk_widget_show_all(gpmb_window);
 
 	/* read database and append to tree */
 	read_database(NULL, NULL);

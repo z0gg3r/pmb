@@ -5,6 +5,6 @@
 
 /* -- the add bookmark window -- */
 void 
-add_window(GtkWidget*, gpointer); 
+add_window(GtkWidget*); 
 
 #endif
