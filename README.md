@@ -5,6 +5,7 @@ Gtk interface, gpmb.
 ![screenshot-gpmb](image/gpmb.png)
 
 Command line, pmb.
+
 ![screenshot-pmb](image/pmb.png)
 
 A bookmark inside pmb will have 5 fields:
