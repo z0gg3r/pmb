@@ -1,7 +1,11 @@
 **pmb** is a bookmark management tool for those who want more power and flexibility
 in bookmark management.
 
-![screenshort](pmb-medium.png)
+Gtk interface, gpmb.
+![screenshot-gpmb](image/gpmb.png)
+
+Command line, pmb.
+![screenshot-pmb](image/pmb.png)
 
 A bookmark inside pmb will have 5 fields:
 
