@@ -6,8 +6,8 @@ SQLITE_FLAGS=-l sqlite3
 
 # directories
 SRC_DIR=$(shell pwd)
-INC_DIR=./include
-GPMB_DIR=./gtk
+INC_DIR=./src
+GPMB_DIR=./src/gtk
 BUILD_DIR=./build
 DEST_DIR=/usr/local/bin
 

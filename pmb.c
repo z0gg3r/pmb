@@ -3,7 +3,7 @@
  * version:	0.1, 17/07/2017        * 
  ***************************************/
 
-#include "include/parser.h"
+#include "src/parser.h"
 
 int 
 main(int argc, char *argv[]) 

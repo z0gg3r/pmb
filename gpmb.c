@@ -1,4 +1,4 @@
-#include "gtk/interface.h"
+#include "src/gtk/interface.h"
 
 char* database_file = NULL;
 
