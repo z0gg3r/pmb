@@ -3,7 +3,7 @@
 
 #define _GNU_SOURCE 	/* getsubopt, secure_getenv */
 #define VERSION 	"0.0.1"
-#define CONFIG_FILE	".pmb.conf"
+#define CONFIG_FILE	"pmb.conf"
 
 #include <getopt.h>
 #include <stdio.h>

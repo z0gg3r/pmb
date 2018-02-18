@@ -29,6 +29,6 @@ void
 search_entry_key_press(GtkWidget* window, GdkEventKey* e, GtkWidget* s_window)
 {
 	if(!strcmp((gdk_keyval_name(e->keyval)), "Escape")) 
-		gtk_widget_grab_focus(GTK_WIDGET(s_window));
+		gtk_widget_grab_focus(GTK_WIDGET(treeview));
 }
 

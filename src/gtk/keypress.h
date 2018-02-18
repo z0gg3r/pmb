@@ -4,7 +4,7 @@
 #include "interface.h"
 
 void
-key_press(GtkWidget*, GdkEventKey*, gpointer**);
+key_press(GtkWidget*, GdkEventKey*);
 
 #endif
 

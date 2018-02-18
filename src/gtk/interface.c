@@ -1,12 +1,14 @@
 #include "interface.h"
 
 /* globals */
-sqlite3* 		db 		= NULL;
-GtkWidget*		main_box	= NULL;
-GtkWidget* 		info_box 	= NULL;
-GtkWidget*		info_label	= NULL;
-GtkWidget*		spinner		= NULL;
-GtkWidget* 		gpmb_window 	= NULL;
+sqlite3* 	db 		= NULL;
+GtkWidget*	main_box	= NULL;
+GtkWidget* 	info_box 	= NULL;
+GtkWidget*	info_label	= NULL;
+GtkWidget* 	search_entry	= NULL;
+GtkWidget*	spinner		= NULL;
+GtkWidget* 	s_window 	= NULL;
+GtkWidget* 	gpmb_window 	= NULL;
 
 void 
 destroy() 
@@ -50,25 +52,18 @@ gtk_interface(int argc, char* argv[])
 		,NULL);
 
 	/* tree view */
-	GtkWidget* search_entry	= gtk_entry_new();
-	treeview 		= tree_view(search_entry);
+	search_entry	= gtk_entry_new();
+	treeview 	= tree_view(search_entry);
 
 	/* scrolled window for bookmark_view */
-	GtkWidget* s_window 	= gtk_scrolled_window_new(NULL, NULL);
+	s_window 		= gtk_scrolled_window_new(NULL, NULL);
 	gtk_container_add(GTK_CONTAINER(s_window), treeview);
 
-	/* key press */
-	GtkWidget** 	key_press_args 	= g_new(GtkWidget*, 4);
-	key_press_args[0] = treeview;
-	key_press_args[1] = s_window;
-	key_press_args[2] = search_entry;
-	key_press_args[3] = gpmb_window;
-
 	g_signal_connect(s_window, "key-press-event"
-		,G_CALLBACK(key_press), key_press_args);
+		,G_CALLBACK(key_press), NULL);
 
 	g_signal_connect(search_entry, "key-release-event"
-		,G_CALLBACK(search_entry_key_press), treeview);
+		,G_CALLBACK(search_entry_key_press), NULL);
 
 	/* menu bar */
 	GtkWidget* menu_bar 	= menu_bar_new(gpmb_window);

@@ -1,8 +1,11 @@
+#define _GNU_SOURCE 	/* secure_getenv */
+
 /***************************************
  * poor man's bookmark, by neoncortex  *
  * version:	0.1, 17/07/2017        * 
  ***************************************/
 
+#include <sys/stat.h>
 #include "src/parser.h"
 
 int 
@@ -15,18 +18,43 @@ main(int argc, char *argv[])
 	comment_color 	= white;
 	tag_color 	= green;
 
-	const char* 	home 	= secure_getenv("HOME");	
+	/* dir path */
+	const char* 	home 		= secure_getenv("HOME");	
+	char*		conf_dir 	= ".config/pmb";
+	char*		path		= calloc(1, 
+						(strlen(home)
+						+ strlen(conf_dir)
+						+ 3) * sizeof(char));
 
-	/* database file */
-	char* 	file 		= calloc(1, (strlen(home) 
-				+ strlen(DATABASE) + 2) * sizeof(char));
+	snprintf(path, strlen(path) - 1, "%s/%s", home, conf_dir);
+
+	struct stat st = {0};
+
+	if(stat(path, &st) == -1)
+		mkdir(path,  0700);
+
+
+	/* database */
+	int		d_size		= (strlen(home)
+						+ (strlen(conf_dir))
+						+ strlen(DATABASE)
+						+ 5) * sizeof(char);
+
+	char*		database_file	= calloc(1, d_size);
+
+	snprintf(database_file, d_size - 1, "%s/%s" 
+		,path, DATABASE);
 
 	/* config file */
-	char* 	config_file 	= calloc(1, (strlen(home) 
-				+ strlen(CONFIG_FILE) + 2) * sizeof(char));
+	int		c_size		= (strlen(home)
+						+ (strlen(conf_dir))
+						+ strlen(CONFIG_FILE)
+						+ 5) * sizeof(char);
 
-	snprintf(config_file, strlen(config_file) - 1, "%s/%s"
-				,home, CONFIG_FILE);
+	char* 	config_file 	= calloc(1, c_size);
+
+	snprintf(config_file, c_size - 1, "%s/%s"
+				,path, CONFIG_FILE);
 
 	parse_config_file(config_file);
 	free(config_file);
@@ -39,13 +67,10 @@ main(int argc, char *argv[])
 
 	if(!db)
 	{
-		if(file) 
+		if(database_file) 
 		{
-			snprintf(file, strlen(file) - 1, "%s/%s"
-				,home, DATABASE);
-
-			db = bookmark_db_open(file);
-			free(file);
+			db = bookmark_db_open(database_file);
+			free(database_file);
 		}
 		else
 			exit(EXIT_FAILURE);

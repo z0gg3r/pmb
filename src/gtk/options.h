@@ -6,6 +6,9 @@
 
 typedef struct gpmb_options 
 {
+	char* database_file;
+	char* tree_lines;
+
 	/* colors */
 	char* id_fg;
 	char* name_fg;
@@ -17,8 +20,8 @@ typedef struct gpmb_options
 extern gpmb_options* 	opts;
 
 /* -- options -- */
-void 
-read_options();
+void
+read_config(); 
 
 /* -- the option window -- */
 void 

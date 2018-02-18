@@ -7,7 +7,7 @@
 #define URL 		"url"
 #define COMMENT 	"comment"
 #define TAG 		"tag"
-#define DATABASE 	".bookmarks.db"
+#define DATABASE 	"bookmarks.db"
 
 #include <stdlib.h>
 

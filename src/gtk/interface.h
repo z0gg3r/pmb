@@ -26,7 +26,9 @@ extern sqlite3* 	db;
 extern GtkWidget* 	main_box;
 extern GtkWidget* 	info_box;
 extern GtkWidget* 	info_label;
+extern GtkWidget* 	search_entry;
 extern GtkWidget* 	spinner;
+extern GtkWidget* 	s_window;
 extern GtkWidget* 	gpmb_window;
 
 /* -- quit -- */

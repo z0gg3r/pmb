@@ -1,7 +1,7 @@
 #include "keypress.h"
 
 void
-key_press(GtkWidget* window, GdkEventKey* e, gpointer** args)
+key_press(GtkWidget* window, GdkEventKey* e)
 {
 	char* 		key = gdk_keyval_name(e->keyval);
 	gboolean 	r;
@@ -16,32 +16,32 @@ key_press(GtkWidget* window, GdkEventKey* e, gpointer** args)
 	||(!strcmp(key, "Page_Down"))
 	||(!strcmp(key, "Home"))
 	||(!strcmp(key, "End")))
-		gtk_tree_view_set_cursor(GTK_TREE_VIEW(args[0])
+		gtk_tree_view_set_cursor(GTK_TREE_VIEW(treeview)
 			,selected_path, NULL, 0);
 
 	else if(!strcmp(key, "j"))
-		g_signal_emit_by_name(args[0], "move-cursor", GTK_MOVEMENT_DISPLAY_LINES
+		g_signal_emit_by_name(treeview, "move-cursor", GTK_MOVEMENT_DISPLAY_LINES
 			,1, &r);
 
 	else if(!strcmp(key, "k"))
-		g_signal_emit_by_name(args[0], "move-cursor", GTK_MOVEMENT_DISPLAY_LINES
+		g_signal_emit_by_name(treeview, "move-cursor", GTK_MOVEMENT_DISPLAY_LINES
 			,-1, &r);
 
 	else if(!strcmp(key, "h")) 
-		g_signal_emit_by_name(args[0], "move-cursor", GTK_MOVEMENT_LOGICAL_POSITIONS
+		g_signal_emit_by_name(treeview, "move-cursor", GTK_MOVEMENT_LOGICAL_POSITIONS
 			,-1, &r);
 
 	else if(!strcmp(key, "l")) 
-		g_signal_emit_by_name(args[0], "move-cursor", GTK_MOVEMENT_LOGICAL_POSITIONS
+		g_signal_emit_by_name(treeview, "move-cursor", GTK_MOVEMENT_LOGICAL_POSITIONS
 			,1, &r);
 
 	else if(!strcmp(key, "g"))
-		g_signal_emit_by_name(args[0], "move-cursor", GTK_MOVEMENT_BUFFER_ENDS
+		g_signal_emit_by_name(treeview, "move-cursor", GTK_MOVEMENT_BUFFER_ENDS
 			,-1, &r);
 
 	else if(!strcmp(key, "G"))
 	{
-		g_signal_emit_by_name(args[0], "move-cursor", GTK_MOVEMENT_BUFFER_ENDS
+		g_signal_emit_by_name(treeview, "move-cursor", GTK_MOVEMENT_BUFFER_ENDS
 			,1, &r);
 
 		gtk_tree_selection_unselect_all(GTK_TREE_SELECTION(selection));
@@ -50,20 +50,20 @@ key_press(GtkWidget* window, GdkEventKey* e, gpointer** args)
 	}
 
 	else if(!strcmp(key, "b"))
-		g_signal_emit_by_name(args[0], "move-cursor", GTK_MOVEMENT_PAGES, -1, &r);
+		g_signal_emit_by_name(treeview, "move-cursor", GTK_MOVEMENT_PAGES, -1, &r);
 
 	else if(!strcmp(key, "f"))
-		g_signal_emit_by_name(args[0], "move-cursor", GTK_MOVEMENT_PAGES, 1, &r);
+		g_signal_emit_by_name(treeview, "move-cursor", GTK_MOVEMENT_PAGES, 1, &r);
 
 	else if(!strcmp(key, "dollar"))
 	{
 		GtkAdjustment* adj	= gtk_scrolled_window_get_hadjustment
-						(GTK_SCROLLED_WINDOW(args[1]));
+						(GTK_SCROLLED_WINDOW(s_window));
 		gdouble upper		= gtk_adjustment_get_upper
 						(GTK_ADJUSTMENT(adj));
 
 		gtk_adjustment_set_value(GTK_ADJUSTMENT(adj), upper);
-		gtk_tree_view_set_cursor(GTK_TREE_VIEW(args[0])
+		gtk_tree_view_set_cursor(GTK_TREE_VIEW(treeview)
 			,selected_path, NULL, 0);	
 	}
 
@@ -71,27 +71,27 @@ key_press(GtkWidget* window, GdkEventKey* e, gpointer** args)
 	||(!strcmp(key, "bar")))
 	{
 		GtkAdjustment* adj	= gtk_scrolled_window_get_hadjustment
-						(GTK_SCROLLED_WINDOW(args[1]));
+						(GTK_SCROLLED_WINDOW(s_window));
 		gdouble lower		= gtk_adjustment_get_lower
 						(GTK_ADJUSTMENT(adj));
 
 		gtk_adjustment_set_value(GTK_ADJUSTMENT(adj), lower);
-		gtk_tree_view_set_cursor(GTK_TREE_VIEW(args[0])
+		gtk_tree_view_set_cursor(GTK_TREE_VIEW(treeview)
 			,selected_path, NULL, 0);
 	}
 
 	else if(!strcmp(key, "L")) 
 	{
 		if(e->state == 5)
-			gtk_tree_view_expand_row(GTK_TREE_VIEW(args[0]), selected_path
+			gtk_tree_view_expand_row(GTK_TREE_VIEW(treeview), selected_path
 				,TRUE);
 		else
-			gtk_tree_view_expand_row(GTK_TREE_VIEW(args[0]), selected_path
+			gtk_tree_view_expand_row(GTK_TREE_VIEW(treeview), selected_path
 				,FALSE);
 	}
 
 	else if(!strcmp(key, "H")) 
-		gtk_tree_view_collapse_row(GTK_TREE_VIEW(args[0]), selected_path);
+		gtk_tree_view_collapse_row(GTK_TREE_VIEW(treeview), selected_path);
 
 	else if(!strcmp(key, "x"))
 		row_expander(selected_path, 0);
@@ -103,7 +103,7 @@ key_press(GtkWidget* window, GdkEventKey* e, gpointer** args)
 		copy_to_clipboard();
 
 	else if(!strcmp(key, "s"))
-		gtk_widget_grab_focus(GTK_WIDGET(args[2]));
+		gtk_widget_grab_focus(GTK_WIDGET(search_entry));
 
 	else if(!strcmp(key, "r"))
 		read_database(NULL, NULL);
