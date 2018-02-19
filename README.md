@@ -25,7 +25,7 @@ bookmarks easily.
 
 **Databases:**
 
-	The default database file are ~/.bookmarks.db. You can point another
+	The default database file are ~/.config/pmb/bookmarks.db. You can point another
 	database with -f option.
 
 	pmb -f ~/xyz.db
@@ -126,7 +126,7 @@ bookmarks easily.
 	
 	pmb -C ~/.my_config_file.conf
 
-	pmb will automatically look for ~/.pmb.conf file.
+	pmb will automatically look for ~/.config/pmb/pmb.conf file.
 	
 	For now we do have those options:
 		color=(0|1)
@@ -162,6 +162,10 @@ And more =D
 
 **TODO:**
 
-	* Gtk interface.
+	* Add favicon support to Gtk intrface.
+
+	* Allow keyboard configuration to Gtk interface.
+
+	* And a lot more ...
 
 I'm writing it in linux and do not know if it will run into other platforms.
