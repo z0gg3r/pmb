@@ -51,14 +51,22 @@ row_expander(GtkTreePath* path, unsigned int recursive)
 }
 
 static GtkCellRenderer*
-cell_renderer_new(char* color) 
+cell_renderer_new(char* color, const char* font) 
 {
-	GdkRGBA	gcolor;
 	GtkCellRenderer* renderer = gtk_cell_renderer_text_new();
-	gdk_rgba_parse(&gcolor, color);
-	g_object_set(G_OBJECT(renderer)
-		,"foreground-rgba", &gcolor
-		,NULL);
+
+	if(color)
+	{
+		GdkRGBA	gcolor;
+		gdk_rgba_parse(&gcolor, color);
+		g_object_set(G_OBJECT(renderer)
+			,"foreground-rgba", &gcolor
+			,NULL);
+	}
+
+	if(font)
+		g_object_set(renderer, "font", font, NULL);
+
 
 	return renderer;
 }
@@ -326,7 +334,7 @@ GtkWidget*
 tree_view(GtkWidget* search_entry) 
 {
 	/* id/tag */
-	cell_renderer_id 		= cell_renderer_new(opts->id_fg);
+	cell_renderer_id 		= cell_renderer_new(opts->id_fg, opts->id_font);
 
 	/* directory icon */
 	GtkCellRenderer* dir_icon 	= gtk_cell_renderer_pixbuf_new();
@@ -349,7 +357,7 @@ tree_view(GtkWidget* search_entry)
 	g_object_set(G_OBJECT(dir_column), "title", "Tag/Id", NULL);
 
 	/* name column */
-	cell_renderer_name = cell_renderer_new(opts->name_fg);
+	cell_renderer_name = cell_renderer_new(opts->name_fg, opts->name_font);
 	GtkTreeViewColumn* name_view_column = 
 		gtk_tree_view_column_new_with_attributes(
 		"Name"
@@ -358,7 +366,7 @@ tree_view(GtkWidget* search_entry)
 		,NULL);
 
 	/* url column */
-	cell_renderer_url = cell_renderer_new(opts->url_fg);
+	cell_renderer_url = cell_renderer_new(opts->url_fg, opts->url_font);
 	GtkTreeViewColumn* url_view_column = 
 		gtk_tree_view_column_new_with_attributes(
 		"Url"
@@ -367,7 +375,7 @@ tree_view(GtkWidget* search_entry)
 		,NULL);
 
 	/* comment column */
-	cell_renderer_comment = cell_renderer_new(opts->comment_fg);
+	cell_renderer_comment = cell_renderer_new(opts->comment_fg, opts->comment_font);
 	GtkTreeViewColumn* comment_view_column = 
 		gtk_tree_view_column_new_with_attributes(
 		"Comment"

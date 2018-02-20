@@ -1,9 +1,17 @@
 #include "options.h"
 
-GtkWidget* 	id_fg 		= NULL;
-GtkWidget* 	name_fg		= NULL;
-GtkWidget* 	url_fg 		= NULL;
-GtkWidget* 	comment_fg 	= NULL;
+char* 		id_fg 		= NULL;
+char* 		name_fg		= NULL;
+char* 		url_fg 		= NULL;
+char* 		comment_fg 	= NULL;
+
+const char*	id_font 	= NULL;
+const char* 	name_font	= NULL;
+const char* 	url_font 	= NULL;
+const char* 	comment_font 	= NULL;
+
+GtkWidget* 	tree_lines	= NULL;
+
 gpmb_options* 	opts 		= NULL;
 char* 		config_file	= NULL;
 
@@ -16,9 +24,9 @@ set_options()
 	char*		config_filename = "gpmb.conf";
 
 	config_file 	= calloc(1, 
-				(strlen(home) * sizeof(char)
-				+ strlen(config_filename) * sizeof(char)
-				+ strlen(conf_dir) * sizeof(char) + 3) * sizeof(char));
+				(strlen(home)
+				+ strlen(config_filename)
+				+ strlen(conf_dir) + 2) * sizeof(char));
 
 	snprintf(config_file, strlen(config_file) - 1, "%s/%s/%s", home
 			,conf_dir, config_filename);
@@ -29,11 +37,15 @@ set_options()
 	{
 		opts->database_file	= database_file;
 		opts->tree_lines	= "true";
-		opts->id_fg 		= "#00ff00";
-		opts->name_fg 		= "#FD4040";
-		opts->url_fg 		= "#4094FD";
-		opts->comment_fg 	= "#ff00ff";
-		opts->tag_fg 		= "#f0a243";
+		opts->id_fg 		= NULL;
+		opts->name_fg 		= NULL;
+		opts->url_fg 		= NULL;
+		opts->comment_fg 	= NULL;
+		opts->tag_fg 		= NULL;
+		opts->id_font		= NULL;
+		opts->name_font		= NULL;
+		opts->url_font		= NULL;
+		opts->comment_font	= NULL;
 	}
 }
 
@@ -44,12 +56,36 @@ write_config()
 
 	if(fp)
 	{
-		fprintf(fp, "database=%s\n", opts->database_file);
-		fprintf(fp, "tree_lines=%s\n", opts->tree_lines);
-		fprintf(fp, "id_fg=%s\n", opts->id_fg);
-		fprintf(fp, "name_fg=%s\n", opts->name_fg);
-		fprintf(fp, "url_fg=%s\n", opts->url_fg);
-		fprintf(fp, "comment_fg=%s\n", opts->comment_fg);
+		if(opts->database_file)
+			fprintf(fp, "database=%s\n", opts->database_file);
+		
+		if(opts->tree_lines)
+			fprintf(fp, "tree_lines=%s\n", opts->tree_lines);
+
+		if(opts->id_fg)
+			fprintf(fp, "id_fg=%s\n", opts->id_fg);
+
+		if(opts->name_fg)
+			fprintf(fp, "name_fg=%s\n", opts->name_fg);
+
+		if(opts->url_fg)
+			fprintf(fp, "url_fg=%s\n", opts->url_fg);
+
+		if(opts->comment_fg)
+			fprintf(fp, "comment_fg=%s\n", opts->comment_fg);
+
+		if(opts->id_font)
+			fprintf(fp, "id_font=%s\n", opts->id_font);
+
+		if(opts->name_font)
+			fprintf(fp, "name_font=%s\n", opts->name_font);
+
+		if(opts->url_font)
+			fprintf(fp, "url_font=%s\n", opts->url_font);
+
+		if(opts->comment_font)
+			fprintf(fp, "comment_font=%s\n", opts->comment_font);
+
 		fclose(fp);
 	}
 }
@@ -100,6 +136,18 @@ read_config()
 				else if(!(strcmp(str, "comment_fg")))
 					opts->comment_fg 	= strsep(&option, "=");
 
+				else if(!(strcmp(str, "id_font")))
+					opts->id_font	 	= strsep(&option, "=");
+
+				else if(!(strcmp(str, "name_font")))
+					opts->name_font	 	= strsep(&option, "=");
+
+				else if(!(strcmp(str, "url_font")))
+					opts->url_font	 	= strsep(&option, "=");
+
+				else if(!(strcmp(str, "comment_font")))
+					opts->comment_font 	= strsep(&option, "=");
+
 				else
 				{
 					printf("unknown option: %s\n", str);
@@ -129,53 +177,188 @@ read_config()
 }
 
 static void
-set_colors()
+apply_settings(GtkWidget* button)
 {
-	GdkRGBA color;
+	if(id_fg)
+		g_object_set(cell_renderer_id, "foreground", opts->id_fg, NULL);
 
-	gtk_color_chooser_get_rgba(GTK_COLOR_CHOOSER(id_fg), &color);
-	opts->id_fg 		= gdk_rgba_to_string(&color);
-	g_object_set(cell_renderer_id, "foreground", opts->id_fg, NULL);
+	if(name_fg)
+		g_object_set(cell_renderer_name, "foreground", opts->name_fg, NULL);
 
-	gtk_color_chooser_get_rgba(GTK_COLOR_CHOOSER(name_fg), &color);
-	opts->name_fg 		= gdk_rgba_to_string(&color);
-	g_object_set(cell_renderer_name, "foreground", opts->name_fg, NULL);
+	if(url_fg)
+		g_object_set(cell_renderer_url, "foreground", opts->url_fg, NULL);
 
-	gtk_color_chooser_get_rgba(GTK_COLOR_CHOOSER(url_fg), &color);
-	opts->url_fg 		= gdk_rgba_to_string(&color);
-	g_object_set(cell_renderer_url, "foreground", opts->url_fg, NULL);
+	if(comment_fg)
+		g_object_set(cell_renderer_comment, "foreground", opts->comment_fg, NULL);
 
-	gtk_color_chooser_get_rgba(GTK_COLOR_CHOOSER(comment_fg), &color);
-	opts->comment_fg 	= gdk_rgba_to_string(&color);
-	g_object_set(cell_renderer_comment, "foreground", opts->comment_fg, NULL);
+	if(id_font)
+		g_object_set(cell_renderer_id, "font", id_font, NULL);
 
+	if(name_font)
+		g_object_set(cell_renderer_name, "font", name_font, NULL);
+
+	if(url_font)
+		g_object_set(cell_renderer_url, "font", url_font, NULL);
+
+	if(comment_font)
+		g_object_set(cell_renderer_comment, "font", comment_font, NULL);
+
+	write_config();
 	read_database(NULL, NULL);
 }
 
 static void
-apply_settings(GtkWidget* button)
+select_font(GtkFontButton* button, gpointer name)
 {
-	set_colors();
-	write_config();
+	if(!(strcmp(name, "id")))
+	{
+		id_font 		= gtk_font_button_get_font_name
+						(GTK_FONT_BUTTON(button));
+		opts->id_font 		= id_font;
+	}
+
+	if(!(strcmp(name, "name")))
+	{
+		name_font 		= gtk_font_button_get_font_name
+						(GTK_FONT_BUTTON(button));
+		opts->name_font 	= name_font;
+
+	}
+
+	if(!(strcmp(name, "url")))
+	{
+		url_font 		= gtk_font_button_get_font_name
+						(GTK_FONT_BUTTON(button));
+		opts->url_font 		= url_font;
+
+	}
+
+	if(!(strcmp(name, "comment")))
+	{
+		comment_font 		= gtk_font_button_get_font_name
+						(GTK_FONT_BUTTON(button));
+		opts->comment_font 	= comment_font;
+
+	}
+}
+
+static void
+select_color(GtkColorButton* button, gpointer name)
+{
+	GdkRGBA color;
+
+	if(!(strcmp(name, "id")))
+	{
+		gtk_color_chooser_get_rgba(GTK_COLOR_CHOOSER(button), &color);
+		id_fg 			= gdk_rgba_to_string(&color);
+		opts->id_fg 		= id_fg;
+	}
+
+	if(!(strcmp(name, "name")))
+	{
+		gtk_color_chooser_get_rgba(GTK_COLOR_CHOOSER(button), &color);
+		name_fg 		= gdk_rgba_to_string(&color);
+		opts->name_fg 		= name_fg;
+	}
+
+	if(!(strcmp(name, "url")))
+	{
+		gtk_color_chooser_get_rgba(GTK_COLOR_CHOOSER(button), &color);
+		url_fg	 		= gdk_rgba_to_string(&color);
+		opts->url_fg 		= url_fg;
+	}
+
+	if(!(strcmp(name, "comment")))
+	{
+		gtk_color_chooser_get_rgba(GTK_COLOR_CHOOSER(button), &color);
+		comment_fg 		= gdk_rgba_to_string(&color);
+		opts->comment_fg 	= comment_fg;
+	}
 }
 
 static GtkWidget*
-color_page()
+appearance_page()
 {
+	/* color buttons */
 	GdkRGBA id;
 	GdkRGBA name;
 	GdkRGBA url;
 	GdkRGBA comment;
 
-	gdk_rgba_parse(&id, opts->id_fg);
-	gdk_rgba_parse(&name, opts->name_fg);
-	gdk_rgba_parse(&url, opts->url_fg);
-	gdk_rgba_parse(&comment, opts->comment_fg);
+	if(opts->id_fg)
+		gdk_rgba_parse(&id, opts->id_fg);
 
-	id_fg 		= gtk_color_button_new_with_rgba(&id);
-	name_fg		= gtk_color_button_new_with_rgba(&name);
-	url_fg 		= gtk_color_button_new_with_rgba(&url);
-	comment_fg 	= gtk_color_button_new_with_rgba(&comment);
+	if(opts->name_fg)
+		gdk_rgba_parse(&name, opts->name_fg);
+
+	if(opts->url_fg)
+		gdk_rgba_parse(&url, opts->url_fg);
+
+	if(opts->comment_fg)
+		gdk_rgba_parse(&comment, opts->comment_fg);
+
+	GtkWidget* id_fg_button 	= gtk_color_button_new_with_rgba(&id);
+	GtkWidget* name_fg_button	= gtk_color_button_new_with_rgba(&name);
+	GtkWidget* url_fg_button 	= gtk_color_button_new_with_rgba(&url);
+	GtkWidget* comment_fg_button 	= gtk_color_button_new_with_rgba(&comment);
+
+	g_signal_connect(GTK_WIDGET(id_fg_button), "color-set", G_CALLBACK(select_color)
+		,"id");
+
+	g_signal_connect(GTK_WIDGET(name_fg_button), "color-set", G_CALLBACK(select_color)
+		,"name");
+
+	g_signal_connect(GTK_WIDGET(url_fg_button), "color-set", G_CALLBACK(select_color)
+		,"url");
+
+	g_signal_connect(GTK_WIDGET(comment_fg_button), "color-set", G_CALLBACK(select_color)
+		,"comment");
+
+	/* font buttons */
+	GtkWidget* id_font_button	= gtk_font_button_new();
+	GtkWidget* name_font_button	= gtk_font_button_new();
+	GtkWidget* url_font_button	= gtk_font_button_new();
+	GtkWidget* comment_font_button	= gtk_font_button_new();
+
+	if(opts->id_font)
+		gtk_font_button_set_font_name(GTK_FONT_BUTTON(id_font_button)
+			,opts->id_font);
+	else
+		gtk_font_button_set_font_name(GTK_FONT_BUTTON(id_font_button)
+			,"none");
+
+	if(opts->name_font)
+		gtk_font_button_set_font_name(GTK_FONT_BUTTON(name_font_button)
+			,opts->name_font);
+	else
+		gtk_font_button_set_font_name(GTK_FONT_BUTTON(name_font_button)
+			,"none");
+
+	if(opts->url_font)
+		gtk_font_button_set_font_name(GTK_FONT_BUTTON(url_font_button)
+			,opts->url_font);
+	else
+		gtk_font_button_set_font_name(GTK_FONT_BUTTON(url_font_button)
+			,"none");
+
+	if(opts->comment_font)
+		gtk_font_button_set_font_name(GTK_FONT_BUTTON(comment_font_button)
+			,opts->comment_font);
+	else
+		gtk_font_button_set_font_name(GTK_FONT_BUTTON(comment_font_button)
+			,"none");
+
+	g_signal_connect(GTK_WIDGET(id_font_button), "font-set", G_CALLBACK(select_font)
+		,"id");
+
+	g_signal_connect(GTK_WIDGET(name_font_button), "font-set", G_CALLBACK(select_font)
+		,"name");
+
+	g_signal_connect(GTK_WIDGET(url_font_button), "font-set", G_CALLBACK(select_font)
+		,"url");
+
+	g_signal_connect(GTK_WIDGET(comment_font_button), "font-set", G_CALLBACK(select_font)
+		,"comment");
 
 	GtkWidget* id_label		= gtk_label_new("Dir / Id");
 	GtkWidget* name_label		= gtk_label_new("Name");
@@ -184,14 +367,18 @@ color_page()
 
 	GtkWidget* grid = grid_new();
 
-	gtk_grid_attach(GTK_GRID(grid), id_label 	,0,  0, 30, 1);
-	gtk_grid_attach(GTK_GRID(grid), id_fg 		,40, 0, 50, 1);
-	gtk_grid_attach(GTK_GRID(grid), name_label 	,0,  1, 30, 1);
-	gtk_grid_attach(GTK_GRID(grid), name_fg 	,40, 1, 50, 1);
-	gtk_grid_attach(GTK_GRID(grid), url_label	,0,  2, 30, 1);
-	gtk_grid_attach(GTK_GRID(grid), url_fg 		,40, 2, 50, 1);
-	gtk_grid_attach(GTK_GRID(grid), comment_label 	,0,  3, 30, 1);
-	gtk_grid_attach(GTK_GRID(grid), comment_fg 	,40, 3, 50, 1);
+	gtk_grid_attach(GTK_GRID(grid), id_label 		,0,  0, 20, 1);
+	gtk_grid_attach(GTK_GRID(grid), id_fg_button 		,20, 0, 10, 1);
+	gtk_grid_attach(GTK_GRID(grid), id_font_button 		,30, 0, 30, 1);
+	gtk_grid_attach(GTK_GRID(grid), name_label 		,0,  1, 20, 1);
+	gtk_grid_attach(GTK_GRID(grid), name_fg_button 		,20, 1, 10, 1);
+	gtk_grid_attach(GTK_GRID(grid), name_font_button 	,30, 1, 30, 1);
+	gtk_grid_attach(GTK_GRID(grid), url_label		,0,  2, 20, 1);
+	gtk_grid_attach(GTK_GRID(grid), url_fg_button		,20, 2, 10, 1);
+	gtk_grid_attach(GTK_GRID(grid), url_font_button 	,30, 2, 30, 1);
+	gtk_grid_attach(GTK_GRID(grid), comment_label 		,0,  3, 20, 1);
+	gtk_grid_attach(GTK_GRID(grid), comment_fg_button 	,20, 3, 10, 1);
+	gtk_grid_attach(GTK_GRID(grid), comment_font_button 	,30, 3, 30, 1);
 
 	return grid;
 }
@@ -208,7 +395,7 @@ settings_page()
 	gtk_entry_set_text(GTK_ENTRY(database_file_entry), opts->database_file);
 
 	/* tree lines */
-	GtkWidget* tree_lines	= gtk_check_button_new_with_label("Tree lines");
+	tree_lines		= gtk_check_button_new_with_label("Tree lines");
 
 	if(gtk_tree_view_get_enable_tree_lines(GTK_TREE_VIEW(treeview)))
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(tree_lines), TRUE);
@@ -233,11 +420,11 @@ options_window(GtkWidget* button)
 	GtkWidget* settings_grid	= settings_page();
 	gtk_container_add(GTK_CONTAINER(page_settings_b), settings_grid);
 
-	/* color page */
-	GtkWidget* page_color_l 	= gtk_label_new("Colors");
-	GtkWidget* page_color_b 	= gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
-	GtkWidget* color_grid 		= color_page();
-	gtk_container_add(GTK_CONTAINER(page_color_b), color_grid);
+	/* appearance page */
+	GtkWidget* page_appearance_l 	= gtk_label_new("Appearance");
+	GtkWidget* page_appearance_b 	= gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
+	GtkWidget* appearance_grid 	= appearance_page();
+	gtk_container_add(GTK_CONTAINER(page_appearance_b), appearance_grid);
 
 	/* buttons */
 	GtkWidget* apply_button 	= gtk_button_new_with_mnemonic("_Apply");
@@ -260,8 +447,8 @@ options_window(GtkWidget* button)
 	GtkWidget* notebook 		= gtk_notebook_new();
 	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), page_settings_b
 				,page_settings_l);
-	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), page_color_b
-				,page_color_l);
+	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), page_appearance_b
+				,page_appearance_l);
 
 	gtk_box_pack_start(GTK_BOX(main_box), notebook, TRUE, TRUE, 1);
 	gtk_box_pack_end(GTK_BOX(main_box), button_box, FALSE, FALSE, 1);

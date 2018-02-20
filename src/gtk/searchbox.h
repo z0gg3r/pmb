@@ -7,6 +7,6 @@ GtkWidget*
 search_box_new(GtkWidget*);
 
 void
-search_entry_key_press(GtkWidget* window, GdkEventKey* e, GtkWidget* s_window);
+search_entry_key_press(GtkWidget* window, GdkEventKey* e);
 
 #endif

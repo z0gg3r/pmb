@@ -178,11 +178,9 @@ rename_directory(GtkWidget* button, gpointer** args)
 								,"//");
 				tag_sep 		= strsep(&b_tag, "//");
 				char* 		tr_bkp 	= strdup(tag_root);
-				unsigned int 	size 	= ((strlen(tr_bkp)
-							* sizeof(char)) 
-							+ ((strlen(nt_sep) + 2)
-							* sizeof(char))) 
-							* sizeof(char);
+				unsigned int 	size 	= (strlen(tr_bkp)
+								+ strlen(nt_sep) + 2)
+								* sizeof(char);
 
 				tag_root		= realloc(tag_root, size); 
 
@@ -192,11 +190,10 @@ rename_directory(GtkWidget* button, gpointer** args)
 
 			if(b_tag)
 			{
-				unsigned int 	size 	= ((strlen(new_tag)
-							* sizeof(char)) 
-							+ (strlen(b_tag)
-							* sizeof(char)) + 2) 
-							* sizeof(char);
+				unsigned int 	size 	= (strlen(new_tag)
+								+ strlen(b_tag) + 2)
+								* sizeof(char);
+
 				char* 		tag 	= calloc(1, size);
 
 				snprintf(tag, size, "%s/%s", new_tag, b_tag);
