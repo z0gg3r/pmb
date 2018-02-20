@@ -35,19 +35,6 @@ G_OPTIONS=options
 G_SEARCHBOX=searchbox
 G_TAGBOX=tagbox
 G_INTERFACE=interface
-#G_DIR_URL=directory_url
-
-#PMB_SOURCE_FILES=$(INC_DIR)/$(BOOKMARK).c $(INC_DIR)/$(PARSER).c \
-#	$(INC_DIR)/$(OPTION).c $(INC_DIR)/$(TREE).c \
-#	$(INC_DIR)/$(HTML).c 
-
-#GPMB_SOURCE_FILES=$(GPMB_DIR)/$(G_DIR_URL).c $(GPMB_DIR)/$(G_TREEVIEW).c \
-#	$(GPMB_DIR)/$(G_KEYPRESS).c $(GPMB_DIR)/$(G_MENUBAR).c \
-#	$(GPMB_DIR)/$(G_TOOLBOX).c $(GPMB_DIR)/$(G_DIALOG).c \
-#	$(GPMB_DIR)/$(G_ADD).c $(GPMB_DIR)/$(G_DELETE).c \
-#	$(GPMB_DIR)/$(G_EDIT).c $(GPMB_DIR)/$(G_OPTIONS).c \
-#	$(GPMB_DIR)/$(G_SEARCHBOX).c $(GPMB_DIR)/$(G_TAGBOX).c \
-#	$(GPMB_DIR)/$(G_INTERFACE).c
 
 # create build directory
 $(shell if [ ! -e "./build" ]; then mkdir build; fi)
@@ -154,14 +141,48 @@ clean:$(PMB)
 	rm $(GPMB)
 	rm -r $(BUILD_DIR)
 
-$(BOOKMARK):$(BOOKMARK).c
-	$(CC) $(CCFLAGS) -c $(INC_DIR)/$(BOOKMARK).c 
-
-$(GPMB):
+$(GPMB):$(GPMB_DIR)/$(G_TREEVIEW).c $(GPMB_DIR)/$(G_KEYPRESS).c \
+$(GPMB_DIR)/$(G_MENUBAR).c $(GPMB_DIR)/$(G_TOOLBOX).c \
+$(GPMB_DIR)/$(G_DIALOG).c $(GPMB_DIR)/$(G_ADD).c \
+$(GPMB_DIR)/$(G_DELETE).c $(GPMB_DIR)/$(G_EDIT).c \
+$(GPMB_DIR)/$(G_FILE).c $(GPMB_DIR)/$(G_OPTIONS).c \
+$(GPMB_DIR)/$(G_SEARCHBOX).c $(GPMB_DIR)/$(G_TAGBOX).c \
+$(GPMB_DIR)/$(G_INTERFACE).c
 	$(BUILD_GPMB)
 
-$(PMB):
+$(PMB):$(INC_DIR)/$(OPTION).c $(INC_DIR)/$(BOOKMARK).c \
+$(INC_DIR)/$(BOOKMARK_LIST).c $(INC_DIR)/$(DATABASE).c \
+$(INC_DIR)/$(PARSER).c $(INC_DIR)/$(OPTION).c \
+$(INC_DIR)/$(TREE).c $(INC_DIR)/$(HTML).c
 	$(BUILD_PMB)
+
+$(BOOKMARK):$(INC_DIR)/$(BOOKMARK).c
+	$(CC) $(CCFLAGS) -c $(INC_DIR)/$(BOOKMARK).c \
+	-o $(BUILD_DIR)/$(BOOKMARK).o
+
+$(BOOKMARK_LIST):$(INC_DIR)/$(BOOKMARK_LIST).c
+	$(CC) $(CCFLAGS) -c $(INC_DIR)/$(BOOKMARK_LIST).c \
+	-o $(BUILD_DIR)/$(BOOKMARK_LIST).o
+
+$(DATABASE):$(INC_DIR)/$(DATABASE).c
+	$(CC) $(CCFLAGS) -c $(INC_DIR)/$(DATABASE).c \
+	-o $(BUILD_DIR)/$(DATABASE).o
+
+$(PARSER):$(INC_DIR)/$(PARSER).c
+	$(CC) $(CCFLAGS) -c $(INC_DIR)/$(PARSER).c \
+	-o $(BUILD_DIR)/$(PARSER).o
+
+$(OPTION):$(INC_DIR)/$(OPTION).c
+	$(CC) $(CCFLAGS) -c $(INC_DIR)/$(OPTION).c \
+	-o $(BUILD_DIR)/$(OPTION).o
+
+$(TREE):$(INC_DIR)/$(TREE).c
+	$(CC) $(CCFLAGS) -c $(INC_DIR)/$(TREE).c \
+	-o $(BUILD_DIR)/$(TREE).o
+
+$(HTML):$(INC_DIR)/$(HTML).c
+	$(CC) $(CCFLAGS) -c $(INC_DIR)/$(HTML).c \
+	-o $(BUILD_DIR)/$(HTML).o
 
 $(G_TREEVIEW):$(GPMB_DIR)/$(G_TREEVIEW).c
 	$(CC) $(CCFLAGS) $(GTKFLAGS) -c $(GPMB_DIR)/$(G_TREEVIEW).c \
@@ -227,15 +248,6 @@ $(G_INTERFACE):$(GPMB_DIR)/$(G_INTERFACE).c
 	$(CC) $(CCFLAGS) $(GTKFLAGS) -c $(GPMB_DIR)/$(G_INTERFACE).c \
 	-o $(BUILD_DIR)/$(G_INTERFACE).o
 	$(BUILD_GPMB)
-
-#$(G_DIR_URL):$(GPMB_DIR)/$(G_DIR_URL).c
-#	$(CC) $(CCFLAGS) $(GTKFLAGS) -c $(GPMB_DIR)/$(G_DIR_URL).c \
-#	-o $(BUILD_DIR)/$(G_DIR_URL).o
-#	$(BUILD_GPMB)
-
-$(TREE):
-	$(CC) $(CCFLAGS) -c $(INC_DIR)/$(TREE).c \
-	-o $(BUILD_DIR)/$(TREE).o
 
 valgrind_gpmb:
 	valgrind --leak-check=full --track-origins=yes --log-file=log.txt -v ./gpmb 
