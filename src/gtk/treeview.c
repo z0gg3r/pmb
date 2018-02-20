@@ -13,6 +13,11 @@ GtkCellRenderer* 	cell_renderer_name;
 GtkCellRenderer* 	cell_renderer_url;
 GtkCellRenderer* 	cell_renderer_comment;
 
+/* icons */
+GtkIconTheme*		theme		= NULL;
+GdkPixbuf*		folder_icon	= NULL;
+GdkPixbuf*		star_icon	= NULL;
+
 void
 copy_to_clipboard()
 {
@@ -87,22 +92,22 @@ update_selected_row(GtkWidget* tree, gpointer data)
 static void
 tree_store_add_child(GtkTreeIter* iter, directory* child)
 {
-	short		icon_size 	= GTK_ICON_SIZE_MENU;
-	GtkIconTheme*	theme		= gtk_icon_theme_get_default();
+	short	icon_size 	= GTK_ICON_SIZE_MENU;
+	theme			= gtk_icon_theme_get_default();
 
-	GdkPixbuf*	folder		= gtk_icon_theme_load_icon(
-						GTK_ICON_THEME(theme)
-						,"folder"
-						,icon_size
-						,0
-						,NULL); 
+	folder_icon		= gtk_icon_theme_load_icon(
+					GTK_ICON_THEME(theme)
+					,"folder"
+					,icon_size
+					,0
+					,NULL); 
 
-	GdkPixbuf*	star		= gtk_icon_theme_load_icon(
-						GTK_ICON_THEME(theme)
-						,"starred"
-						,icon_size
-						,0
-						,NULL); 
+	star_icon		= gtk_icon_theme_load_icon(
+					GTK_ICON_THEME(theme)
+					,"starred"
+					,icon_size
+					,0
+					,NULL); 
 
 	if(!iter && child)
 	{
@@ -115,7 +120,7 @@ tree_store_add_child(GtkTreeIter* iter, directory* child)
 		gtk_tree_store_set(bookmarks, &iter, 0, directory_name(child)
 			,-1);
 
-		gtk_tree_store_set(bookmarks, &iter, 5, folder, -1);
+		gtk_tree_store_set(bookmarks, &iter, 5, folder_icon, -1);
 
 		tree_store_add_child(&iter, child);
 	}
@@ -136,7 +141,7 @@ tree_store_add_child(GtkTreeIter* iter, directory* child)
 			gtk_tree_store_set(bookmarks, &d_iter, 0	
 				,directory_name(d), -1);
 
-			gtk_tree_store_set(bookmarks, &d_iter, 5, folder, -1);
+			gtk_tree_store_set(bookmarks, &d_iter, 5, folder_icon, -1);
 
 			tree_store_add_child(&d_iter, d);
 		}
@@ -163,7 +168,7 @@ tree_store_add_child(GtkTreeIter* iter, directory* child)
 				,bookmark_tag(b), -1);
 
 			gtk_tree_store_set(bookmarks, &b_iter, 5
-				,star, -1);
+				,star_icon, -1);
 
 			//bookmark_destroy(b);
 		}
@@ -175,8 +180,8 @@ tree_store_add_child(GtkTreeIter* iter, directory* child)
 			bookmark_destroy(b);
 	}
 	
-	g_object_unref(G_OBJECT(folder));
-	g_object_unref(G_OBJECT(star));
+	g_object_unref(G_OBJECT(folder_icon));
+	g_object_unref(G_OBJECT(star_icon));
 }
 
 void 
@@ -439,7 +444,8 @@ tree_view(GtkWidget* search_entry)
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(tree_view), TRUE);
 
 	/* lines */
-	gtk_tree_view_set_enable_tree_lines(GTK_TREE_VIEW(tree_view), TRUE);
+	if(!(strcmp(opts->tree_lines, "true")))
+		gtk_tree_view_set_enable_tree_lines(GTK_TREE_VIEW(tree_view), TRUE);
 
 	/* model */
 	model = gtk_tree_view_get_model(GTK_TREE_VIEW(tree_view));
@@ -456,6 +462,10 @@ tree_view(GtkWidget* search_entry)
 	/* row activated */
 	g_signal_connect(tree_view, "row-activated"
 		,G_CALLBACK(row_activated), NULL);
+
+	/* automatic sorting */
+	gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(model), 0
+		,GTK_SORT_ASCENDING);
 
 	return tree_view;	
 }

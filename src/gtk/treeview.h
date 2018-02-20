@@ -12,6 +12,10 @@ extern GtkWidget* 		treeview;
 extern GtkTreeStore* 		bookmarks;
 extern GtkTreeSelection*	selection;
 extern GtkTreeModel* 		model;
+extern GtkIconTheme*		theme;
+extern GdkPixbuf*		folder_icon;
+extern GdkPixbuf*		star_icon;
+
 
 /* selected path in tree view */
 extern GtkTreePath* 		selected_path;

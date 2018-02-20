@@ -1,17 +1,6 @@
 #include "options.h"
 
-char* 		id_fg 		= NULL;
-char* 		name_fg		= NULL;
-char* 		url_fg 		= NULL;
-char* 		comment_fg 	= NULL;
-
-const char*	id_font 	= NULL;
-const char* 	name_font	= NULL;
-const char* 	url_font 	= NULL;
-const char* 	comment_font 	= NULL;
-
 GtkWidget* 	tree_lines	= NULL;
-
 gpmb_options* 	opts 		= NULL;
 char* 		config_file	= NULL;
 
@@ -149,10 +138,7 @@ read_config()
 					opts->comment_font 	= strsep(&option, "=");
 
 				else
-				{
 					printf("unknown option: %s\n", str);
-					//exit(EXIT_FAILURE);
-				}
 
 				new_option:
 				free(option_bkp);
@@ -179,29 +165,34 @@ read_config()
 static void
 apply_settings(GtkWidget* button)
 {
-	if(id_fg)
+	if(opts->id_fg)
 		g_object_set(cell_renderer_id, "foreground", opts->id_fg, NULL);
 
-	if(name_fg)
+	if(opts->name_fg)
 		g_object_set(cell_renderer_name, "foreground", opts->name_fg, NULL);
 
-	if(url_fg)
+	if(opts->url_fg)
 		g_object_set(cell_renderer_url, "foreground", opts->url_fg, NULL);
 
-	if(comment_fg)
+	if(opts->comment_fg)
 		g_object_set(cell_renderer_comment, "foreground", opts->comment_fg, NULL);
 
-	if(id_font)
-		g_object_set(cell_renderer_id, "font", id_font, NULL);
+	if(opts->id_font)
+		g_object_set(cell_renderer_id, "font", opts->id_font, NULL);
 
-	if(name_font)
-		g_object_set(cell_renderer_name, "font", name_font, NULL);
+	if(opts->name_font)
+		g_object_set(cell_renderer_name, "font", opts->name_font, NULL);
 
-	if(url_font)
-		g_object_set(cell_renderer_url, "font", url_font, NULL);
+	if(opts->url_font)
+		g_object_set(cell_renderer_url, "font", opts->url_font, NULL);
 
-	if(comment_font)
-		g_object_set(cell_renderer_comment, "font", comment_font, NULL);
+	if(opts->comment_font)
+		g_object_set(cell_renderer_comment, "font", opts->comment_font, NULL);
+
+	if(!(strcmp(opts->tree_lines, "true")))
+		gtk_tree_view_set_enable_tree_lines(GTK_TREE_VIEW(treeview), TRUE);
+	else
+		gtk_tree_view_set_enable_tree_lines(GTK_TREE_VIEW(treeview), FALSE);
 
 	write_config();
 	read_database(NULL, NULL);
@@ -211,35 +202,20 @@ static void
 select_font(GtkFontButton* button, gpointer name)
 {
 	if(!(strcmp(name, "id")))
-	{
-		id_font 		= gtk_font_button_get_font_name
+		opts->id_font 		= gtk_font_button_get_font_name
 						(GTK_FONT_BUTTON(button));
-		opts->id_font 		= id_font;
-	}
 
 	if(!(strcmp(name, "name")))
-	{
-		name_font 		= gtk_font_button_get_font_name
+		opts->name_font 	= gtk_font_button_get_font_name
 						(GTK_FONT_BUTTON(button));
-		opts->name_font 	= name_font;
-
-	}
 
 	if(!(strcmp(name, "url")))
-	{
-		url_font 		= gtk_font_button_get_font_name
+		opts->url_font 		= gtk_font_button_get_font_name
 						(GTK_FONT_BUTTON(button));
-		opts->url_font 		= url_font;
-
-	}
 
 	if(!(strcmp(name, "comment")))
-	{
-		comment_font 		= gtk_font_button_get_font_name
+		opts->comment_font 	= gtk_font_button_get_font_name
 						(GTK_FONT_BUTTON(button));
-		opts->comment_font 	= comment_font;
-
-	}
 }
 
 static void
@@ -250,30 +226,35 @@ select_color(GtkColorButton* button, gpointer name)
 	if(!(strcmp(name, "id")))
 	{
 		gtk_color_chooser_get_rgba(GTK_COLOR_CHOOSER(button), &color);
-		id_fg 			= gdk_rgba_to_string(&color);
-		opts->id_fg 		= id_fg;
+		opts->id_fg 		= gdk_rgba_to_string(&color);
 	}
 
 	if(!(strcmp(name, "name")))
 	{
 		gtk_color_chooser_get_rgba(GTK_COLOR_CHOOSER(button), &color);
-		name_fg 		= gdk_rgba_to_string(&color);
-		opts->name_fg 		= name_fg;
+		opts->name_fg 		= gdk_rgba_to_string(&color);
 	}
 
 	if(!(strcmp(name, "url")))
 	{
 		gtk_color_chooser_get_rgba(GTK_COLOR_CHOOSER(button), &color);
-		url_fg	 		= gdk_rgba_to_string(&color);
-		opts->url_fg 		= url_fg;
+		opts->url_fg		= gdk_rgba_to_string(&color);
 	}
 
 	if(!(strcmp(name, "comment")))
 	{
 		gtk_color_chooser_get_rgba(GTK_COLOR_CHOOSER(button), &color);
-		comment_fg 		= gdk_rgba_to_string(&color);
-		opts->comment_fg 	= comment_fg;
+		opts->comment_fg 	= gdk_rgba_to_string(&color);
 	}
+}
+
+static void
+tree_lines_set(GtkToggleButton* button)
+{
+	if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button)))
+		opts->tree_lines = "true";
+	else
+		opts->tree_lines = "false";
 }
 
 static GtkWidget*
@@ -396,6 +377,8 @@ settings_page()
 
 	/* tree lines */
 	tree_lines		= gtk_check_button_new_with_label("Tree lines");
+	g_signal_connect(GTK_WIDGET(tree_lines), "toggled", G_CALLBACK(tree_lines_set)
+		,NULL);
 
 	if(gtk_tree_view_get_enable_tree_lines(GTK_TREE_VIEW(treeview)))
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(tree_lines), TRUE);

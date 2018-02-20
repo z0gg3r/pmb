@@ -15,10 +15,14 @@ delete_bookmark(GtkWidget* button, gpointer** args)
 
 			if(b) 
 			{
-				unsigned int id = strtol(bookmark_id(b), NULL
-							,10);
-				bookmark_db_delete(db, id);
-				read_database(NULL, NULL);
+				GtkTreeIter iter;
+				gtk_tree_model_get_iter(GTK_TREE_MODEL(model)
+					,&iter, selected_path);
+
+				gtk_tree_store_remove(GTK_TREE_STORE(bookmarks)
+					,&iter);
+
+				bookmark_db_delete(db, strtol(bookmark_id(b), NULL, 10));
 				bookmark_destroy(b);
 			}
 
@@ -59,7 +63,8 @@ delete_directory(GtkWidget* button, gpointer window)
 	}
 
 	bookmark_list_destroy(bl);
-	read_database(NULL, NULL);
+	gtk_tree_store_remove(GTK_TREE_STORE(bookmarks), &iter);
+
 	close_window(NULL, window);
 
 	gboolean r;

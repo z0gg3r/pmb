@@ -26,13 +26,46 @@ add_bookmark(GtkWidget* button, gpointer** args)
 
 	if(name && url) 
 	{
+		/* write to database */
 		bookmark* b = bookmark_new(name, url, comment, tag);
 		bookmark_db_write(b, db);
 		bookmark_destroy(b);
 
+		/*
+		// get it from database 
+		bookmark_list* bl = bookmark_db_search(db, URL, url);
+		b = bookmark_list_return_next_bookmark(bl);
+
+		// add to treestore 
+		GtkTreeIter iter, p_iter;
+		bookmark* sb = get_data(NULL);
+
+		gtk_tree_model_get_iter(GTK_TREE_MODEL(model)
+			,&p_iter, selected_path);
+
+		if(selected_path && (strlen(bookmark_url(sb))) > 1)
+			gtk_tree_store_insert_after(GTK_TREE_STORE(bookmarks)
+				,&iter, NULL, &p_iter);
+		else
+			gtk_tree_store_insert_after(GTK_TREE_STORE(bookmarks)
+				,&iter, &p_iter, NULL);
+
+		gtk_tree_store_set(GTK_TREE_STORE(bookmarks), &iter
+			,0, bookmark_id(b)
+			,1, bookmark_name(b)
+			,2, bookmark_url(b)
+			,3, bookmark_comment(b)
+			,4, bookmark_tag(b)
+			,5, star_icon
+			, -1);
+	
+		bookmark_list_destroy(bl);
+		bookmark_destroy(sb);
+		bookmark_destroy(b);
+		*/
+		read_database(NULL, NULL);
 		close_window(NULL, args[4]);
 		g_free(args);
-		read_database(NULL, NULL);
 		gtk_label_set_text(GTK_LABEL(info_label), "Add: Done");
 	}
 	else

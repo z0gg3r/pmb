@@ -34,7 +34,7 @@ file_dialog(GtkFileChooserAction action, char* title)
 void
 open_database(GtkWidget* button)
 {
-	gint result = file_dialog(GTK_FILE_CHOOSER_ACTION_OPEN, "Open database");
+	gint result = file_dialog(GTK_FILE_CHOOSER_ACTION_SAVE, "Open database");
 
 	switch(result)
 	{
