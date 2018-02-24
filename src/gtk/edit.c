@@ -364,9 +364,12 @@ edit_download_favicon()
 	bookmark* 	b 		= get_data(NULL);
 	char* 		favicon = download_favicon(bookmark_url(b));
 
-	bookmark_db_edit(db, strtol(bookmark_id(b), NULL, 10), 4, favicon);
-	read_database(NULL, NULL);
-	bookmark_destroy(b);
+	if(favicon)
+	{
+		bookmark_db_edit(db, strtol(bookmark_id(b), NULL, 10), 4, favicon);
+		read_database(NULL, NULL);
+		bookmark_destroy(b);
+	}
 }
 
 static void

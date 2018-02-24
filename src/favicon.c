@@ -54,7 +54,7 @@ download_favicon(char* url)
 	curl_easy_setopt(curl_handle, CURLOPT_FOLLOWLOCATION, 1L);
  	curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, favicon_fetch);
  	curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void*)&favicon);
- 	curl_easy_setopt(curl_handle, CURLOPT_USERAGENT, "libcurl-agent/1.0");
+ 	curl_easy_setopt(curl_handle, CURLOPT_USERAGENT, "pmb/0.1");
 	res 			= curl_easy_perform(curl_handle);
  
 	if(res != CURLE_OK)

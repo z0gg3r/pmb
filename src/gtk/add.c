@@ -34,7 +34,12 @@ add_bookmark(GtkWidget* button, gpointer** args)
 		tag = tag_t;
 
 	if(favicon_button_state)
-		favicon = download_favicon(url);
+	{
+		char* favicon_temp = download_favicon(url);
+
+		if(favicon_temp)
+			favicon = download_favicon(url);
+	}
 	
 	if(name && url) 
 	{

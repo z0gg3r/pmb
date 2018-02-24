@@ -221,10 +221,10 @@ favicon_foreach(GtkTreeModel* m, GtkTreePath* p, GtkTreeIter* i, gpointer data)
 
 	if(strlen(bookmark_url(b)) > 2)
 	{
-		char* icon = download_favicon(bookmark_url(b));
+		char* favicon = download_favicon(bookmark_url(b));
 
-		if(icon)
-			bookmark_db_edit(db, strtol(bookmark_id(b), NULL, 10), 4, icon);
+		if(favicon)
+			bookmark_db_edit(db, strtol(bookmark_id(b), NULL, 10), 4, favicon);
 	}
 
 	bookmark_destroy(b);
