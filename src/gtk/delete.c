@@ -45,7 +45,7 @@ delete_directory(GtkWidget* button, gpointer window)
 	GtkTreeIter 	iter, child;
 
 	bookmark_list* 	bl 	= bookmark_list_new(); 
-	bookmark* 	b 	= NULL;
+	bookmark* 		b 	= NULL;
 
 	if(gtk_tree_model_get_iter(GTK_TREE_MODEL(model), &iter, selected_path))
 	{
@@ -116,7 +116,7 @@ static void
 delete_bookmark_window(bookmark* b) 
 {
 	GtkWidget* 	window 	= dialogs("Delete bookmark", gpmb_window);
-	GtkWidget** 	e 	= entries(FALSE);
+	GtkWidget** e 		= entries(FALSE);
 
 	if(b) 
 	{
@@ -132,6 +132,12 @@ delete_bookmark_window(bookmark* b)
 
 		if(bookmark_tag(b))
 			gtk_entry_set_text(GTK_ENTRY(e[7]), bookmark_tag(b));
+
+		gtk_entry_set_icon_from_icon_name(GTK_ENTRY(e[7])
+			,GTK_ENTRY_ICON_PRIMARY, "folder");
+
+		/* set favicon */
+		set_url_favicon(e[3]);
 
 		bookmark_destroy(b);
 	}
@@ -152,14 +158,14 @@ delete_bookmark_window(bookmark* b)
 	/* grid */
 	GtkWidget* grid = grid_new();
 
-	gtk_grid_attach(GTK_GRID(grid), e[0] 		,0,  0, 30, 1);
-	gtk_grid_attach(GTK_GRID(grid), e[1]		,20, 0, 50, 1);
-	gtk_grid_attach(GTK_GRID(grid), e[2] 		,0,  1, 30, 1);
-	gtk_grid_attach(GTK_GRID(grid), e[3]		,20, 1, 50, 1);
-	gtk_grid_attach(GTK_GRID(grid), e[4] 		,0,  2, 30, 1);
-	gtk_grid_attach(GTK_GRID(grid), e[5]		,20, 2, 50, 1);
-	gtk_grid_attach(GTK_GRID(grid), e[6] 		,0,  3, 30, 1);
-	gtk_grid_attach(GTK_GRID(grid), e[7]		,20, 3, 50, 1);
+	gtk_grid_attach(GTK_GRID(grid), e[0] 			,0,  0, 30, 1);
+	gtk_grid_attach(GTK_GRID(grid), e[1]			,20, 0, 50, 1);
+	gtk_grid_attach(GTK_GRID(grid), e[2] 			,0,  1, 30, 1);
+	gtk_grid_attach(GTK_GRID(grid), e[3]			,20, 1, 50, 1);
+	gtk_grid_attach(GTK_GRID(grid), e[4] 			,0,  2, 30, 1);
+	gtk_grid_attach(GTK_GRID(grid), e[5]			,20, 2, 50, 1);
+	gtk_grid_attach(GTK_GRID(grid), e[6] 			,0,  3, 30, 1);
+	gtk_grid_attach(GTK_GRID(grid), e[7]			,20, 3, 50, 1);
 	gtk_grid_attach(GTK_GRID(grid), delete_button	,20, 4, 20, 10);
 	gtk_grid_attach(GTK_GRID(grid), cancel_button 	,40, 4, 20, 10);
 
@@ -201,7 +207,7 @@ delete_directory_window(bookmark* b)
 	GtkWidget* grid = grid_new();
 
 	gtk_grid_attach(GTK_GRID(grid), name_entry_label 	,0,  0, 30, 1);
-	gtk_grid_attach(GTK_GRID(grid), name_entry 		,20, 0, 50, 1);
+	gtk_grid_attach(GTK_GRID(grid), name_entry 			,20, 0, 50, 1);
 	gtk_grid_attach(GTK_GRID(grid), delete_button 		,20, 1, 20, 10);
 	gtk_grid_attach(GTK_GRID(grid), cancel_button 		,40, 1, 20, 10);
 
@@ -230,7 +236,7 @@ delete_multiple_window()
 	/* grid */
 	GtkWidget* grid = grid_new();
 
-	gtk_grid_attach(GTK_GRID(grid), advice 		,0,  0, 30, 1);
+	gtk_grid_attach(GTK_GRID(grid), advice 			,0,  0, 30, 1);
 	gtk_grid_attach(GTK_GRID(grid), delete_button 	,0,  1, 20, 10);
 	gtk_grid_attach(GTK_GRID(grid), cancel_button 	,20, 1, 20, 10);
 

@@ -20,7 +20,7 @@ bookmark_list_destroy(bookmark_list*);
 	,char* tag */
 int
 bookmark_list_enqueue(bookmark_list* 
-	,char*, char*, char*, char*, char*);
+	,char*, char*, char*, char*, char*, char*);
 
 /* -- add a bookmark to bookmark_list -- */
 int

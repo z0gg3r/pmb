@@ -2,9 +2,9 @@
 
 char* date(char* buffer, int bufsize) 
 {
-	const char* 	format = "%A %d/%m/%Y - %T";
-	time_t 		t = time(NULL);
-	struct tm* 	tmp;
+	const char* 	format 	= "%A %d/%m/%Y - %T";
+	time_t 			t 		= time(NULL);
+	struct tm* 		tmp;
 
 	if(t) 
 	{
@@ -26,9 +26,10 @@ bookmark_db_table_create(sqlite3* db)
 {
 	if(db) 
 	{
-		char* 		err 	= 0;
+		char* 			err 	= 0;
 		const char* 	table 	= "CREATE TABLE bookmark(id INTEGER PRIMARY KEY"
-			", name text, url text, comment text, tag text, unique(url));";
+							",name text, url text, comment text, tag text, favicon text"
+							",unique(url));";
 
 		sqlite3_exec(db, table, 0, 0, &err);
 		
@@ -58,10 +59,10 @@ bookmark_db_open(char *db_name)
 
 		else /* verify if table bookmark exist on db */
 		{
-			int 		step;
+			int 			step;
 			sqlite3_stmt* 	res;
 			const char* 	sql = "SELECT name FROM sqlite_master WHERE"
-				 	" name = 'bookmark' AND type = 'table'";
+				 				" name = 'bookmark' AND type = 'table'";
 
 			int rc = sqlite3_prepare_v2(db, sql, -1, &res, 0);
 			
@@ -82,9 +83,29 @@ bookmark_db_open(char *db_name)
 						return NULL;
 					}
 				}
+				else
+				{
+					/* verify if column favicon exist in bookmark table */
+					sql 	= "SELECT * from bookmark";
+					rc 		= sqlite3_prepare_v2(db, sql, -1, &res, 0);
+					step 	= sqlite3_step(res);
+
+					const char* favicon_column = sqlite3_column_name(res, 5);
+					sqlite3_finalize(res);
+				
+					if(!favicon_column)
+					{
+						sql 	= "ALTER TABLE bookmark ADD COLUMN favicon text";
+						rc 		= sqlite3_prepare_v2(db, sql, -1, &res, 0);
+						step 	= sqlite3_step(res);
+
+					}
+				}
+
 			} 
 			else 
 			{
+
 				sqlite3_finalize(res);
 				return NULL;
 			}
@@ -111,8 +132,8 @@ bookmark_db_write(bookmark* b, sqlite3* db)
 {
 	if(b && db) 
 	{
-		const char* 	sql = "INSERT INTO bookmark (name, url, comment, tag)"
-					" VALUES(?,?,?,?)";
+		const char* 	sql = "INSERT INTO bookmark (name, url, comment, tag, favicon)"
+							" VALUES(?,?,?,?,?)";
 		sqlite3_stmt* 	res;
 
 		if((sqlite3_prepare_v2(db, sql, -1, &res, 0)) == SQLITE_OK) 
@@ -128,6 +149,9 @@ bookmark_db_write(bookmark* b, sqlite3* db)
 
 			if(bookmark_tag(b))
 				sqlite3_bind_text(res, 4, bookmark_tag(b), -1, NULL);
+
+			if(bookmark_favicon(b))
+				sqlite3_bind_text(res, 5, bookmark_favicon(b), -1, NULL);
 
 			sqlite3_step(res);
 		}
@@ -147,13 +171,10 @@ bookmark_db_import(sqlite3* db, sqlite3* i_db)
 
 		if(bl)
 		{
-			char** result = NULL;
+			bookmark* b = NULL;
 
-			while((result = bookmark_list_return_next(bl)))
+			while((b = bookmark_list_return_next_bookmark(bl)))
 			{
-				bookmark* b 	= bookmark_new(result[1], result[2]
-							,result[3], result[4]);
-
 				if(bookmark_db_write(b, db))
 					return 1;
 
@@ -178,8 +199,8 @@ bookmark_db_id(sqlite3* db, int id)
 	&&(id < (INT_MAX - 1))
 	&&(id > (INT_MIN)))
 	{
-		int 		ret = 0; 
-		const char*	sql = "SELECT * FROM bookmark WHERE id = ?";
+		int 			ret 	= 0; 
+		const char*		sql 	= "SELECT * FROM bookmark WHERE id = ?";
 		sqlite3_stmt* 	res;
 
 		if((sqlite3_prepare_v2(db, sql, -1, &res, 0)) == SQLITE_OK) 
@@ -204,7 +225,7 @@ bookmark_db_delete(sqlite3* db, int id)
 	&&(id < (INT_MAX - 1))
 	&&(id > (INT_MIN)))
 	{
-		const char*	sql = "DELETE FROM bookmark WHERE id = ?";
+		const char*		sql 	= "DELETE FROM bookmark WHERE id = ?";
 		sqlite3_stmt*	res;
 
 		if((sqlite3_prepare_v2(db, sql, -1, &res, 0)) == SQLITE_OK) 
@@ -309,11 +330,14 @@ bookmark_db_edit(sqlite3 *db, int id, int field, char *str)
 			case 3:
 				sql = "UPDATE bookmark SET tag = ? WHERE id = ?";
 				break;
+			case 4:
+				sql = "UPDATE bookmark SET favicon = ? WHERE id = ?";
+				break;
 			default:
 				return 1;
 		}
 
-		int 		ret = 0; 
+		int 			ret 	= 0; 
 		sqlite3_stmt*	res;
 
 		if((sqlite3_prepare_v2(db, sql, -1, &res, 0)) == SQLITE_OK) 
@@ -347,8 +371,8 @@ bookmark_db_edit_bulk(sqlite3* db, int field, char* cv, char* nv)
 	&&(field < (INT_MAX - 1))
 	&&(field > (INT_MIN)))
 	{
-		char* 		sql;
-		int 		ret = 0; 
+		char* 			sql;
+		int 			ret 	= 0; 
 		sqlite3_stmt*	res;
 
 		switch(field) 
@@ -391,7 +415,7 @@ search_db(sqlite3* db, char* field, char* str, char* sql)
 	if(sql && db) 
 	{
 		sqlite3_stmt* 	res;
-		bookmark_list* 	bl = bookmark_list_new();
+		bookmark_list* 	bl 		= bookmark_list_new();
 
 		if((sqlite3_prepare_v2(db, sql, -1, &res, 0)) == SQLITE_OK) 
 		{
@@ -411,6 +435,7 @@ search_db(sqlite3* db, char* field, char* str, char* sql)
 								,NULL
 								,NULL
 								,NULL
+								,NULL
 								,NULL);
 					}
 						
@@ -421,6 +446,7 @@ search_db(sqlite3* db, char* field, char* str, char* sql)
 								,NULL
 								,(char*)sqlite3_column_text
 									(res, 1)
+								,NULL
 								,NULL
 								,NULL
 								,NULL);
@@ -435,6 +461,7 @@ search_db(sqlite3* db, char* field, char* str, char* sql)
 								,(char*)sqlite3_column_text
 									(res, 2)
 								,NULL
+								,NULL
 								,NULL);
 					}
 
@@ -447,6 +474,7 @@ search_db(sqlite3* db, char* field, char* str, char* sql)
 								,NULL
 								,(char*)sqlite3_column_text
 									(res, 3)
+								,NULL
 								,NULL);
 					}
 
@@ -459,7 +487,8 @@ search_db(sqlite3* db, char* field, char* str, char* sql)
 								,NULL
 								,NULL
 								,(char*)sqlite3_column_text
-									(res, 4));
+									(res, 4)
+								,NULL);
 					}
 				}
 				else 
@@ -468,7 +497,8 @@ search_db(sqlite3* db, char* field, char* str, char* sql)
 						,(char*)sqlite3_column_text(res, 1)
 						,(char*)sqlite3_column_text(res, 2)
 						,(char*)sqlite3_column_text(res, 3)
-						,(char*)sqlite3_column_text(res, 4));
+						,(char*)sqlite3_column_text(res, 4)
+						,(char*)sqlite3_column_text(res, 5));
 			}
 		} 
 		else 
@@ -491,7 +521,7 @@ bookmark_db_query(sqlite3* db, int id, char* field)
 	if(db) 
 	{
 		bookmark_list* 	bl;
-		char* 		sql = "SELECT * FROM bookmark ORDER BY tag ASC";
+		char* 			sql = "SELECT * FROM bookmark ORDER BY tag ASC";
 
 		if((id) 
 		&&(id < (INT_MAX - 1))
@@ -522,7 +552,7 @@ bookmark_db_search(sqlite3* db, char* field, char* str)
 	if(str && db) 
 	{
 		bookmark_list* 	bl 	= NULL;
-		const char* 	sql 	= "SELECT * FROM bookmark WHERE";
+		const char* 	sql = "SELECT * FROM bookmark WHERE";
 
 		if(field && !strncmp(field, NAME, strlen(NAME))) 
 		{

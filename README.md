@@ -152,19 +152,21 @@ And more =D
 
 	* gtk3
 
+	* curl
+
 **Build dependencies:**
 
 	* libsqlite3-dev
 	
 	* libgtk-3-dev 
+	
+	* libcurl4-openssl
 
 	To build, just clone the repository, cd to it and type make
 
 **TODO:**
 
-	* Add favicon support to Gtk intrface.
-
-	* Allow keyboard configuration to Gtk interface.
+	* Allow keybind customization to Gtk interface.
 
 	* And a lot more ...
 

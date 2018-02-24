@@ -11,6 +11,7 @@ bookmark_list
 	char** 	url;
 	char** 	comment;
 	char** 	tag;
+	char** 	favicon;
 };
 
 bookmark_list*
@@ -21,20 +22,22 @@ bookmark_list_new()
 	if(l) 
 	{
 		l->position 	= 0;
-		l->next 	= 0;
-		l->size 	= 1;
+		l->next 		= 0;
+		l->size 		= 1;
 
-		l->id 		= calloc(l->size, sizeof(char*));
-		l->name 	= calloc(l->size, sizeof(char*));
-		l->url 		= calloc(l->size, sizeof(char*));
-		l->comment 	= calloc(l->size, sizeof(char*));
-		l->tag 		= calloc(l->size, sizeof(char*));
+		l->id 			= calloc(l->size, sizeof(char*));
+		l->name 		= calloc(l->size, sizeof(char*));
+		l->url 			= calloc(l->size, sizeof(char*));
+		l->comment 		= calloc(l->size, sizeof(char*));
+		l->tag 			= calloc(l->size, sizeof(char*));
+		l->favicon 		= calloc(l->size, sizeof(char*));
 		
-		l->id[0] 	= NULL;
-		l->name[0] 	= NULL;
-		l->url[0] 	= NULL;
+		l->id[0] 		= NULL;
+		l->name[0] 		= NULL;
+		l->url[0] 		= NULL;
 		l->comment[0] 	= NULL;
-		l->tag[0] 	= NULL;
+		l->tag[0] 		= NULL;
+		l->favicon[0]	= NULL;
 
 		return l;
 	}
@@ -78,6 +81,12 @@ bookmark_list_destroy(bookmark_list *l)
 				free(l->tag[i]);
 				l->tag[i] = NULL;
 			}
+
+			if(l->favicon[i]) 
+			{
+				free(l->favicon[i]);
+				l->favicon[i] = NULL;
+			}
 		}
 
 		free(l->id);
@@ -96,7 +105,8 @@ bookmark_list_enqueue(
 	,char* name
 	,char* url
 	,char* comment
-	,char* tag) 
+	,char* tag
+	,char* favicon)
 {
 	if(id) 
 	{
@@ -128,16 +138,23 @@ bookmark_list_enqueue(
 		strncpy(l->tag[l->position], tag, strlen(tag));
 	}
 
+	if(favicon) 
+	{
+		l->favicon[l->position] = calloc(strlen(favicon) + 1, sizeof(char));
+		strncpy(l->favicon[l->position], favicon, strlen(favicon));
+	}
+
 	++l->position;
 
 	if(l->position >= l->size - 1) 
 	{
 		++l->size;
-		char** nid 	= realloc(l->id, l->size * sizeof(char*));
+		char** nid 		= realloc(l->id, l->size * sizeof(char*));
 		char** nname 	= realloc(l->name, l->size * sizeof(char*));
 		char** nurl 	= realloc(l->url, l->size * sizeof(char*));
 		char** ncomment = realloc(l->comment, l->size * sizeof(char*));
 		char** ntag 	= realloc(l->tag, l->size * sizeof(char*));
+		char** nfavicon	= realloc(l->favicon, l->size * sizeof(char*));
 
 		if(nid && nname && nurl && ncomment && ntag) 
 		{
@@ -146,12 +163,14 @@ bookmark_list_enqueue(
 			l->url 		= nurl;
 			l->comment 	= ncomment;
 			l->tag 		= ntag;
+			l->favicon 	= nfavicon;
 
-			l->id[l->size - 1] 	= NULL;
+			l->id[l->size - 1] 		= NULL;
 			l->name[l->size - 1] 	= NULL;
 			l->url[l->size - 1] 	= NULL;
 			l->comment[l->size - 1] = NULL;
 			l->tag[l->size - 1] 	= NULL;
+			l->favicon[l->size - 1] = NULL;
 		}
 		else 
 			return 1;
@@ -165,13 +184,14 @@ bookmark_list_enqueue_bookmark(
 	bookmark_list* l
 	,bookmark* b) 
 {
-	char* 	id 	= bookmark_id(b);
+	char* 	id 		= bookmark_id(b);
 	char* 	name	= bookmark_name(b);
 	char* 	url 	= bookmark_url(b);
 	char* 	comment = bookmark_comment(b);
 	char* 	tag 	= bookmark_tag(b);
+	char* 	favicon	= bookmark_favicon(b);
 	int 	res 	= bookmark_list_enqueue(l, id, name, url
-				,comment, tag);
+						,comment, tag, favicon);
 
 	return res;
 }
@@ -213,11 +233,18 @@ bookmark_list_align(bookmark_list* l)
 			l->tag[c - 1] = NULL;
 		}
 
+		if(l->favicon[c - 1]) 
+		{
+			free(l->favicon[c -1]);
+			l->favicon[c - 1] = NULL;
+		}
+
 		l->id[c - 1] 		= l->id[c];
 		l->name[c - 1] 		= l->name[c];
 		l->url[c - 1] 	 	= l->url[c];
 		l->comment[c - 1] 	= l->comment[c];
 		l->tag[c - 1] 		= l->tag[c];
+		l->favicon[c - 1] 	= l->favicon[c];
 		++c;
 	}
 
@@ -230,22 +257,24 @@ bookmark_list_dequeue(bookmark_list* l)
 {
 	if(l->size) 
 	{
-		char** ret = calloc(4, sizeof(char*));
-		ret[0] = l->id[0];
-		ret[1] = l->name[0];
-		ret[2] = l->url[0];
-		ret[3] = l->comment[0];
-		ret[4] = l->tag[0];
+		char** ret 	= calloc(5, sizeof(char*));
+		ret[0] 		= l->id[0];
+		ret[1] 		= l->name[0];
+		ret[2] 		= l->url[0];
+		ret[3] 		= l->comment[0];
+		ret[4] 		= l->tag[0];
+		ret[5] 		= l->favicon[0];
 
 		bookmark_list_align(l);
 
 		if(l->size) 
 		{
-			char **nid 	= realloc(l->id, l->size * sizeof(char*));
+			char **nid 		= realloc(l->id, l->size * sizeof(char*));
 			char **nname 	= realloc(l->name, l->size * sizeof(char*));
 			char **nurl 	= realloc(l->url, l->size * sizeof(char*));
 			char **ncomment = realloc(l->comment, l->size * sizeof(char*));
 			char **ntag 	= realloc(l->tag, l->size * sizeof(char*));
+			char **nfavicon	= realloc(l->tag, l->size * sizeof(char*));
 
 			if(nid && nname && nurl && ncomment && ntag) 
 			{
@@ -254,6 +283,7 @@ bookmark_list_dequeue(bookmark_list* l)
 				l->url 		= nurl;
 				l->comment 	= ncomment;
 				l->tag 		= ntag;
+				l->favicon	= nfavicon;
 			}
 			else 
 				return NULL;
@@ -270,12 +300,13 @@ bookmark_list_return_next(bookmark_list* l)
 {
 	if(l->next < l->size - 1) 
 	{
-		char** ret = calloc(4, sizeof(char*));
+		char** ret = calloc(5, sizeof(char*));
 		ret[0] = l->id[l->next];
 		ret[1] = l->name[l->next];
 		ret[2] = l->url[l->next];
 		ret[3] = l->comment[l->next];
 		ret[4] = l->tag[l->next];
+		ret[5] = l->favicon[l->next];
 
 		l->next++;
 		return ret;
@@ -296,6 +327,7 @@ bookmark_list_return_next_bookmark(bookmark_list* l)
 		bookmark_set_url(b, l->url[l->next]);
 		bookmark_set_comment(b, l->comment[l->next]);
 		bookmark_set_tag(b, l->tag[l->next]);
+		bookmark_set_favicon(b, l->favicon[l->next]);
 
 		l->next++;
 		return b;

@@ -12,19 +12,19 @@ int
 main(int argc, char *argv[]) 
 {
 	/* set default colors */
-	id_color 	= blue;
-	name_color 	= white;
-	url_color 	= cyan;
+	id_color 		= blue;
+	name_color 		= white;
+	url_color 		= cyan;
 	comment_color 	= white;
-	tag_color 	= green;
+	tag_color 		= green;
 
 	/* dir path */
-	const char* 	home 		= secure_getenv("HOME");	
+	const char* 	home 	= secure_getenv("HOME");	
 	char*		conf_dir 	= ".config/pmb";
 	char*		path		= calloc(1, 
-						(strlen(home)
-						+ strlen(conf_dir)
-						+ 3) * sizeof(char));
+								(strlen(home)
+								+ strlen(conf_dir)
+								+ 3) * sizeof(char));
 
 	snprintf(path, strlen(path) - 1, "%s/%s", home, conf_dir);
 
@@ -35,21 +35,21 @@ main(int argc, char *argv[])
 
 
 	/* database */
-	int		d_size		= (strlen(home)
-						+ (strlen(conf_dir))
-						+ strlen(DATABASE)
-						+ 5) * sizeof(char);
+	int		d_size			= (strlen(home)
+								+ (strlen(conf_dir))
+								+ strlen(DATABASE)
+								+ 5) * sizeof(char);
 
-	char*		database_file	= calloc(1, d_size);
+	char*	database_file	= calloc(1, d_size);
 
 	snprintf(database_file, d_size - 1, "%s/%s" 
 		,path, DATABASE);
 
 	/* config file */
-	int		c_size		= (strlen(home)
-						+ (strlen(conf_dir))
-						+ strlen(CONFIG_FILE)
-						+ 5) * sizeof(char);
+	int		c_size			= (strlen(home)
+								+ (strlen(conf_dir))
+								+ strlen(CONFIG_FILE)
+								+ 5) * sizeof(char);
 
 	char* 	config_file 	= calloc(1, c_size);
 
@@ -62,6 +62,7 @@ main(int argc, char *argv[])
 	/* parse options */
 	cl_option_list* option 	= option_list_new();
 	cl_option_list* command = option_list_new();
+
 	parse_options(argc, argv, option, command);
 	exec_option(option);
 

@@ -3,15 +3,15 @@
 struct 
 cl_option
 {
-	int	(*func)(char*); 
+	int		(*func)(char*); 
 	char* 	optarg;
 };
 
 struct 
 cl_option_list 
 {
-	int 		size;
-	int 		position;
+	int 			size;
+	int 			position;
 	cl_option** 	opt;
 };
 
@@ -22,7 +22,7 @@ option_new(int(*func)(char*), char* optarg)
 
 	if(opt)
 	{
-		opt->func	= func;	
+		opt->func		= func;	
 		opt->optarg 	= optarg;
 
 		return opt;
@@ -51,10 +51,10 @@ option_list_new()
 	if(l) 
 	{
 		l->position 	= 0;
-		l->size 	= 1;
+		l->size 		= 1;
 
-		l->opt 		= calloc(l->size, sizeof(cl_option*));
-		l->opt[0] 	= NULL;
+		l->opt 			= calloc(l->size, sizeof(cl_option*));
+		l->opt[0] 		= NULL;
 
 		return l;
 	}
@@ -67,7 +67,6 @@ option_list_add(cl_option_list* l, cl_option* opt)
 {
 	if(l && opt) 
 	{
-		l->opt[l->position] = calloc(1, sizeof(cl_option*));
 		l->opt[l->position] = opt;
 
 		++l->position;
@@ -80,7 +79,7 @@ option_list_add(cl_option_list* l, cl_option* opt)
 			if(!nopt) 
 				return 1;
 			else
-				l->opt[l->size - 1] 	= NULL;
+				l->opt[l->size - 1]	= NULL;
 		}
 	}
 	else
@@ -109,9 +108,6 @@ void
 exec_option(cl_option_list* option)
 {
 	for(int i = 0; i < option->size - 1; ++i)
-	{
-		cl_option* opt = option->opt[i];
-		opt->func(opt->optarg);
-	}
+		option->opt[i]->func(option->opt[i]->optarg);
 }
 

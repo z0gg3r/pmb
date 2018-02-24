@@ -8,36 +8,42 @@ bookmark
 	char* url;
 	char* comment;
 	char* tag;
+	char* favicon;
 };
 
 bookmark* 
-bookmark_new(char* name, char* url, char* comment, char* tag) 
+bookmark_new(char* name, char* url, char* comment, char* tag, char* favicon) 
 {
 	bookmark* b = malloc(sizeof(bookmark));
 	
 	if(b) 
 	{
-		b->id	= NULL;
+		b->id			= NULL;
 
 		if(name)
-			b->name = name;
+			b->name 	= name;
 		else
-			b->name	= NULL;
+			b->name		= NULL;
 
 		if(url)
-			b->url = url;
+			b->url 		= url;
 		else
-			b->url = NULL;
+			b->url 		= NULL;
 
 		if(comment)
-			b->comment = comment;
+			b->comment 	= comment;
 		else
-			b->comment = "none";
+			b->comment 	= "none";
 
 		if(tag)
-			b->tag = tag;
+			b->tag 		= tag;
 		else
-			b->tag = "none";
+			b->tag 		= "none";
+
+		if(favicon)
+			b->favicon 	= favicon;
+		else
+			b->favicon 	= "none";
 
 		return b;
 	} 
@@ -49,10 +55,7 @@ void
 bookmark_destroy(bookmark* b) 
 {
 	if(b) 
-	{
 		free(b);
-		b = NULL;
-	}
 }
 
 char*
@@ -100,21 +103,34 @@ bookmark_tag(bookmark* b)
 		return NULL;
 }
 
+char*
+bookmark_favicon(bookmark* b)
+{
+	if(b && b->favicon)
+		return b->favicon;
+	else
+		return NULL;
+}
+
 int
-bookmark_set(bookmark* b, char* name, char* url, char* comment, char* tag) 
+bookmark_set(bookmark* b, char* name, char* url, char* comment, char* tag, char* favicon) 
 {
 	if(b && name && url) 
 	{
 		if(!comment)
-			comment = "None";
+			comment = "none";
 		
 		if(!tag)
-			tag = "None";
+			tag 	= "none";
 
-		b->name    = name;
-		b->url     = url;
-		b->comment = comment;
-		b->tag     = tag;
+		if(!favicon)
+			favicon = "none";
+
+		b->name    	= name;
+		b->url     	= url;
+		b->comment 	= comment;
+		b->tag     	= tag;
+		b->favicon  = favicon;
 	}
 	else 
 		return 1;
@@ -176,6 +192,18 @@ bookmark_set_tag(bookmark* b, char* tag)
 	if(b && tag)
 	{
 		b->tag = tag;
+		return 0;
+	}
+
+	return 1;
+}
+
+int
+bookmark_set_favicon(bookmark* b, char* favicon)
+{
+	if(b && favicon)
+	{
+		b->favicon = favicon;
 		return 0;
 	}
 

@@ -5,11 +5,11 @@ print_folder_icon(int* canvas, FILE* fp)
 {
 	char* icon = "<canvas id='canvas_%d' width='20' height='14'></canvas>\n"
 		"<script>\n"
-    		"var ctx = document.getElementById(\"canvas_%d\").getContext(\"2d\");\n"
+   		"var ctx = document.getElementById(\"canvas_%d\").getContext(\"2d\");\n"
 		"// #layer1\n"
 		"ctx.save();\n"
 		"ctx.transform(1.000000, 0.000000, 0.000000, 1.000000, -33.095309"
-			", -103.342050);\n"
+		", -103.342050);\n"
 		"// #path3684\n"
 		"ctx.beginPath();\n"
 		"ctx.lineJoin = 'miter';\n"
@@ -54,7 +54,7 @@ html_tree_table_row(directory* d, int depth, int* canvas, FILE* fp)
 		bookmark* b 		= NULL;
 		char* open_ul 		= "<ul>\n";
 		char* close_ul 		= "</ul>\n";
-		char* span_dir_name 	= "<span style='color:#056B24;'>%s</span>\n";
+		char* span_dir_name = "<span style='color:#056B24;'>%s</span>\n";
 		char* link_open 	= "<li><a href=\'%s\'>%s";
 		char* link_close 	= "</a></li>\n";
 		char* comment		= " - %s";
@@ -123,9 +123,9 @@ html_tree_branch(directory* d, int depth, int* canvas, FILE* fp)
 	if(d)
 	{
 		directory_rewind(d);
-		directory* ret = NULL;
 
-		depth = html_tree_table_row(d, depth, canvas, fp);
+		directory* ret 	= NULL;
+		depth 			= html_tree_table_row(d, depth, canvas, fp);
 
 		while((ret = directory_next_children(d)))
 		{
@@ -144,12 +144,12 @@ bookmark_html_tree(bookmark_list* bl, FILE* fp)
 {
 	if(bl) 
 	{
-		bookmark_list* 	bl 	= bookmark_db_query(db, 0, NULL);
-		directory* 	root 	= create_tree_from_bookmark_list(bl, "root");	
-		directory* 	child 	= NULL;
-		directory* 	ret 	= NULL;
-		int		canvas	= 0;
-		char 		buf[64]; 
+		bookmark_list* 	bl 		= bookmark_db_query(db, 0, NULL);
+		directory* 		root 	= create_tree_from_bookmark_list(bl, "root");	
+		directory* 		child 	= NULL;
+		directory* 		ret 	= NULL;
+		int				canvas	= 0;
+		char 			buf[64]; 
 
 		char* page_top = "<!DOCTYPE html>\n"
 			"<html>\n"

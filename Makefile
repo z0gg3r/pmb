@@ -1,7 +1,8 @@
 # gcc
 CC=gcc
-CCFLAGS=-Wall -Wextra -std=c11 -ggdb
+CCFLAGS=-Wall -Wextra -std=c11 -ggdb -lcurl
 GTKFLAGS =$(shell pkg-config --cflags --libs gtk+-3.0)
+GLIBFLAGS =$(shell pkg-config --cflags --libs glib-2.0)
 SQLITE_FLAGS=-l sqlite3
 
 # directories
@@ -20,6 +21,7 @@ BOOKMARK_LIST=bookmark_list
 DATABASE=database
 TREE=tree
 HTML=html
+FAVICON=favicon
 
 GPMB=gpmb
 G_TREEVIEW=treeview
@@ -54,6 +56,8 @@ define BUILD_DEP
 	-o $(BUILD_DIR)/$(TREE).o
 	$(CC) $(CCFLAGS) -c $(INC_DIR)/$(HTML).c \
 	-o $(BUILD_DIR)/$(HTML).o
+	$(CC) $(CCFLAGS) $(GLIBFLAGS) -lcurl -c $(INC_DIR)/$(FAVICON).c \
+	-o $(BUILD_DIR)/$(FAVICON).o
 endef
 
 define BUILD_GPMB_DEP
@@ -86,12 +90,13 @@ define BUILD_GPMB_DEP
 endef
 
 define BUILD_GPMB
-	$(CC) $(CCFLAGS) $(GTKFLAGS) $(SQLITE_FLAGS) \
+	$(CC) $(CCFLAGS) $(GTKFLAGS) $(GLIBFLAGS) $(SQLITE_FLAGS) \
 	$(BUILD_DIR)/$(BOOKMARK).o \
 	$(BUILD_DIR)/$(BOOKMARK_LIST).o \
 	$(BUILD_DIR)/$(DATABASE).o \
 	$(BUILD_DIR)/$(TREE).o \
 	$(BUILD_DIR)/$(HTML).o \
+	$(BUILD_DIR)/$(FAVICON).o \
 	$(BUILD_DIR)/$(G_TREEVIEW).o \
 	$(BUILD_DIR)/$(G_KEYPRESS).o \
 	$(BUILD_DIR)/$(G_DIALOG).o \
@@ -109,7 +114,7 @@ define BUILD_GPMB
 endef
 
 define BUILD_PMB
-	$(CC) $(CCFLAGS) $(SQLITE_FLAGS) \
+	$(CC) $(CCFLAGS) $(GLIBFLAGS) $(SQLITE_FLAGS) \
 	$(BUILD_DIR)/$(BOOKMARK).o \
 	$(BUILD_DIR)/$(BOOKMARK_LIST).o \
 	$(BUILD_DIR)/$(DATABASE).o \
@@ -117,6 +122,7 @@ define BUILD_PMB
 	$(BUILD_DIR)/$(OPTION).o \
 	$(BUILD_DIR)/$(TREE).o \
 	$(BUILD_DIR)/$(HTML).o\
+	$(BUILD_DIR)/$(FAVICON).o\
 	$(PMB).c -o $(PMB)
 endef
 
@@ -141,7 +147,12 @@ clean:$(PMB)
 	rm $(GPMB)
 	rm -r $(BUILD_DIR)
 
-$(GPMB):$(GPMB_DIR)/$(G_TREEVIEW).c $(GPMB_DIR)/$(G_KEYPRESS).c \
+$(GPMB):$(INC_DIR)/$(OPTION).c $(INC_DIR)/$(BOOKMARK).c \
+$(INC_DIR)/$(BOOKMARK_LIST).c $(INC_DIR)/$(DATABASE).c \
+$(INC_DIR)/$(PARSER).c $(INC_DIR)/$(OPTION).c \
+$(INC_DIR)/$(TREE).c $(INC_DIR)/$(HTML).c \
+$(INC_DIR)/$(FAVICON).c \
+$(GPMB_DIR)/$(G_TREEVIEW).c $(GPMB_DIR)/$(G_KEYPRESS).c \
 $(GPMB_DIR)/$(G_MENUBAR).c $(GPMB_DIR)/$(G_TOOLBOX).c \
 $(GPMB_DIR)/$(G_DIALOG).c $(GPMB_DIR)/$(G_ADD).c \
 $(GPMB_DIR)/$(G_DELETE).c $(GPMB_DIR)/$(G_EDIT).c \
@@ -153,6 +164,7 @@ $(GPMB_DIR)/$(G_INTERFACE).c
 $(PMB):$(INC_DIR)/$(OPTION).c $(INC_DIR)/$(BOOKMARK).c \
 $(INC_DIR)/$(BOOKMARK_LIST).c $(INC_DIR)/$(DATABASE).c \
 $(INC_DIR)/$(PARSER).c $(INC_DIR)/$(OPTION).c \
+$(INC_DIR)/$(FAVICON).c \
 $(INC_DIR)/$(TREE).c $(INC_DIR)/$(HTML).c
 	$(BUILD_PMB)
 
@@ -183,6 +195,10 @@ $(TREE):$(INC_DIR)/$(TREE).c
 $(HTML):$(INC_DIR)/$(HTML).c
 	$(CC) $(CCFLAGS) -c $(INC_DIR)/$(HTML).c \
 	-o $(BUILD_DIR)/$(HTML).o
+
+$(FAVICON):$(INC_DIR)/$(FAVICON).c
+	$(CC) $(CCFLAGS) $(GLIBFLAGS) -lcurl -c $(INC_DIR)/$(FAVICON).c \
+	-o $(BUILD_DIR)/$(FAVICON).o
 
 $(G_TREEVIEW):$(GPMB_DIR)/$(G_TREEVIEW).c
 	$(CC) $(CCFLAGS) $(GTKFLAGS) -c $(GPMB_DIR)/$(G_TREEVIEW).c \
@@ -245,7 +261,7 @@ $(G_SEARCHBOX):$(GPMB_DIR)/$(G_SEARCHBOX).c
 	$(BUILD_GPMB)
 
 $(G_INTERFACE):$(GPMB_DIR)/$(G_INTERFACE).c
-	$(CC) $(CCFLAGS) $(GTKFLAGS) -c $(GPMB_DIR)/$(G_INTERFACE).c \
+	$(CC) $(CCFLAGS) $(GTKFLAGS) $(GLIBFLAGS) -c $(GPMB_DIR)/$(G_INTERFACE).c \
 	-o $(BUILD_DIR)/$(G_INTERFACE).o
 	$(BUILD_GPMB)
 

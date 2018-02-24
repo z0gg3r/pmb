@@ -14,6 +14,12 @@ grid_new();
 void
 collect_bookmark(GtkTreeIter, bookmark_list*);
 
+GdkPixbuf*
+favicon_decode(bookmark*);
+
+void
+set_url_favicon(GtkWidget*);
+
 /* -- get full path of selected bookmark/directory -- */
 char*
 get_full_path(bookmark*);

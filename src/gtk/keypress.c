@@ -58,9 +58,9 @@ key_press(GtkWidget* window, GdkEventKey* e)
 	else if(!strcmp(key, "dollar"))
 	{
 		GtkAdjustment* adj	= gtk_scrolled_window_get_hadjustment
-						(GTK_SCROLLED_WINDOW(s_window));
+								(GTK_SCROLLED_WINDOW(s_window));
 		gdouble upper		= gtk_adjustment_get_upper
-						(GTK_ADJUSTMENT(adj));
+								(GTK_ADJUSTMENT(adj));
 
 		gtk_adjustment_set_value(GTK_ADJUSTMENT(adj), upper);
 		gtk_tree_view_set_cursor(GTK_TREE_VIEW(treeview)
@@ -71,9 +71,9 @@ key_press(GtkWidget* window, GdkEventKey* e)
 	||(!strcmp(key, "bar")))
 	{
 		GtkAdjustment* adj	= gtk_scrolled_window_get_hadjustment
-						(GTK_SCROLLED_WINDOW(s_window));
+								(GTK_SCROLLED_WINDOW(s_window));
 		gdouble lower		= gtk_adjustment_get_lower
-						(GTK_ADJUSTMENT(adj));
+								(GTK_ADJUSTMENT(adj));
 
 		gtk_adjustment_set_value(GTK_ADJUSTMENT(adj), lower);
 		gtk_tree_view_set_cursor(GTK_TREE_VIEW(treeview)

@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "../tree.h"
+#include "../favicon.h"
 #include "treeview.h"
 #include "keypress.h"
 #include "menubar.h"

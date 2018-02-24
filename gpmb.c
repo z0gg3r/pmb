@@ -9,12 +9,12 @@ int
 main(int argc, char *argv[]) 
 {
 	/* dir path */
-	const char* 	home 		= secure_getenv("HOME");	
+	const char* 	home 	= secure_getenv("HOME");	
 	char*		conf_dir 	= ".config/pmb";
 	char*		path		= calloc(1, 
-						(strlen(home)
-						+ strlen(conf_dir)
-						+ 3) * sizeof(char));
+								(strlen(home)
+								+ strlen(conf_dir)
+								+ 3) * sizeof(char));
 
 	snprintf(path, strlen(path) - 1, "%s/%s", home, conf_dir);
 
@@ -25,11 +25,11 @@ main(int argc, char *argv[])
 
 	/* database */
 	int		size	= (strlen(home)
-					+ (strlen(conf_dir))
-					+ strlen(DATABASE)
-					+ 5) * sizeof(char);
+						+ (strlen(conf_dir))
+						+ strlen(DATABASE)
+						+ 5) * sizeof(char);
 
-	database_file 		= calloc(1, size);
+	database_file 	= calloc(1, size);
 
 	snprintf(database_file, size, "%s/%s" 
 		,path, DATABASE);

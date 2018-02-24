@@ -5,12 +5,12 @@ GtkWidget* tool_box = NULL;
 GtkWidget*
 tool_box_new(GtkWidget* main_window) 
 {
-	short icon_size 	= GTK_ICON_SIZE_MENU;
+	short 		icon_size 	= GTK_ICON_SIZE_MENU;
 
 	/* add */
-	GtkWidget* add_icon 	= gtk_image_new_from_icon_name
-				("bookmark_add", icon_size);
-	GtkToolItem* add 	= gtk_tool_button_new(add_icon, "Add");
+	GtkWidget* 	add_icon 	= gtk_image_new_from_icon_name
+								("bookmark_add", icon_size);
+	GtkToolItem* add 		= gtk_tool_button_new(add_icon, "Add");
 	gtk_tool_item_set_tooltip_text(GTK_TOOL_ITEM(add), "add");
 
 	g_signal_connect(add, "clicked", G_CALLBACK(add_window)
@@ -18,7 +18,7 @@ tool_box_new(GtkWidget* main_window)
 
 	/* edit */
 	GtkWidget* edit_icon 	= gtk_image_new_from_icon_name
-				("document-page-setup", icon_size);
+								("document-page-setup", icon_size);
 	GtkToolItem* edit_t 	= gtk_tool_button_new(edit_icon, "Edit/Move");
 	gtk_tool_item_set_tooltip_text(GTK_TOOL_ITEM(edit_t), "edit/move");
 
@@ -27,7 +27,7 @@ tool_box_new(GtkWidget* main_window)
 
 	/* rename */
 	GtkWidget* rename_icon 	= gtk_image_new_from_icon_name
-				("folder", icon_size);
+								("folder", icon_size);
 	GtkToolItem* rename_t 	= gtk_tool_button_new(rename_icon, "Rename");
 	gtk_tool_item_set_tooltip_text(GTK_TOOL_ITEM(rename_t), "rename directories");
 
@@ -36,7 +36,7 @@ tool_box_new(GtkWidget* main_window)
 
 	/* delete */
 	GtkWidget* delete_icon	= gtk_image_new_from_icon_name
-				("edit-delete", icon_size);
+								("edit-delete", icon_size);
 	GtkToolItem* delete_t 	= gtk_tool_button_new(delete_icon, "Delete");
 	gtk_tool_item_set_tooltip_text(GTK_TOOL_ITEM(delete_t), "delete");
 
@@ -45,7 +45,7 @@ tool_box_new(GtkWidget* main_window)
 
 	/* options */
 	GtkWidget* options_icon = gtk_image_new_from_icon_name
-				("system-run", icon_size);
+								("system-run", icon_size);
 	GtkToolItem* options 	= gtk_tool_button_new(options_icon
 					,"Preferences");
 	gtk_tool_item_set_tooltip_text(GTK_TOOL_ITEM(options), "preferences");
@@ -55,7 +55,7 @@ tool_box_new(GtkWidget* main_window)
 
 	/* reload */
 	GtkWidget* reload_icon 	= gtk_image_new_from_icon_name
-				("view-refresh", icon_size);
+								("view-refresh", icon_size);
 	GtkToolItem* reload 	= gtk_tool_button_new(reload_icon, "Reload");
 	gtk_tool_item_set_tooltip_text(GTK_TOOL_ITEM(reload)
 		,"reload");
@@ -65,7 +65,7 @@ tool_box_new(GtkWidget* main_window)
 
 	/* copy */
 	GtkWidget* copy_icon 	= gtk_image_new_from_icon_name
-				("gtk-paste", icon_size);
+								("gtk-paste", icon_size);
 	GtkToolItem* copy 	= gtk_tool_button_new(copy_icon, "Copy");
 	gtk_tool_item_set_tooltip_text(GTK_TOOL_ITEM(copy)
 		,"copy to clipboard");

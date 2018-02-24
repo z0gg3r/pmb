@@ -10,11 +10,11 @@ typedef struct gpmb_options
 	char* tree_lines;
 
 	/* colors */
-	char* 		id_fg;
-	char* 		name_fg;
-	char* 		url_fg;
-	char* 		comment_fg;
-	char* 		tag_fg;
+	char* 			id_fg;
+	char* 			name_fg;
+	char* 			url_fg;
+	char* 			comment_fg;
+	char* 			tag_fg;
 	const char* 	id_font;
 	const char* 	name_font;
 	const char* 	url_font;

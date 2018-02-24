@@ -1,12 +1,12 @@
 #include "parser.h"
 
-char* red 	= "\033[31m";
+char* red 		= "\033[31m";
 char* green 	= "\033[32m";
 char* yellow 	= "\033[33m";
-char* blue 	= "\033[34m";
+char* blue 		= "\033[34m";
 char* magenta 	= "\033[35m";
-char* cyan 	= "\033[4;36m";
-char* gray 	= "\033[37m";
+char* cyan 		= "\033[4;36m";
+char* gray 		= "\033[37m";
 char* white 	= "\033[38m";
 char* reset 	= "\033[0m";
 
@@ -16,8 +16,8 @@ char* url_color;
 char* comment_color;
 char* tag_color;
 
-int color 	= 0;
-int verbose	= 0;
+int color 		= 0;
+int verbose		= 0;
 sqlite3* db 	= NULL;
 
 void 
@@ -120,7 +120,7 @@ bookmark_print_field(unsigned int i, char* r)
 void
 bookmark_print(bookmark_list* bl, int field) 
 {
-	bookmark* 	b 	= NULL;
+	bookmark* 		b 	= NULL;
 	unsigned int 	i 	= 0;
 
 	while((b = bookmark_list_return_next_bookmark(bl)))
@@ -291,19 +291,19 @@ parse_config_file(char* optarg)
 		}
 
 		if(res[2])
-			id_color 	= find_color(res[2]);
+			id_color 		= find_color(res[2]);
 
 		if(res[3])
-			name_color 	= find_color(res[3]);
+			name_color 		= find_color(res[3]);
 
 		if(res[4])
-			url_color 	= find_color(res[4]);
+			url_color 		= find_color(res[4]);
 
 		if(res[5])
 			comment_color 	= find_color(res[5]);
 
 		if(res[6])
-			tag_color 	= find_color(res[6]);
+			tag_color 		= find_color(res[6]);
 
 		free(res);
 	}
@@ -318,14 +318,14 @@ add_bookmark(char* optarg)
 {
 	if(db) 
 	{
-		char*	name 	= NULL;
-		char*	url 	= NULL;
-		char*	comment	= NULL;
-		char*	tag	= NULL;
-		char*	value   = NULL;
-		char*	subopts = optarg;
-
-		bookmark* b = NULL;
+		char*		name 	= NULL;
+		char*		url 	= NULL;
+		char*		comment	= NULL;
+		char*		tag		= NULL;
+		char*		favicon	= NULL;
+		char*		value   = NULL;
+		char*		subopts = optarg;
+		bookmark* 	b 		= NULL;
 
 		enum 
 		{ 
@@ -395,7 +395,10 @@ add_bookmark(char* optarg)
 
 		if(name && url) 
 		{
-			b = bookmark_new(name, url, comment, tag);
+			if(!favicon)
+				favicon = "none";
+
+			b = bookmark_new(name, url, comment, tag, favicon);
 
 			if(b) 
 			{
@@ -425,7 +428,7 @@ edit_bookmark(char* optarg)
 {
 	if(db) 
 	{
-		int 	id 	= 0;
+		int 	id 		= 0;
 		char*	name 	= NULL;
 		char*	url 	= NULL;
 		char*	comment	= NULL;
@@ -458,20 +461,20 @@ edit_bookmark(char* optarg)
 
 		char* const sub_options[] = 
 		{
-			[id_option] 		= ID
-			,[sid_option] 		= "i"
-			,[name_option] 		= NAME
-			,[sname_option] 	= "n"
-			,[url_option] 		= URL
-			,[surl_option] 		= "u"
-			,[comment_option] 	= COMMENT
-			,[scomment_option] 	= "c"
-			,[tag_option] 		= TAG
-			,[stag_option] 		= "t"
-			,[field_option] 	= "field"
-			,[sfield_option] 	= "f"
-			,[value_option] 	= "value"
-			,[svalue_option] 	= "v"
+			[id_option] 			= ID
+			,[sid_option] 			= "i"
+			,[name_option] 			= NAME
+			,[sname_option] 		= "n"
+			,[url_option] 			= URL
+			,[surl_option] 			= "u"
+			,[comment_option] 		= COMMENT
+			,[scomment_option] 		= "c"
+			,[tag_option] 			= TAG
+			,[stag_option] 			= "t"
+			,[field_option] 		= "field"
+			,[sfield_option] 		= "f"
+			,[value_option] 		= "value"
+			,[svalue_option] 		= "v"
 			,[new_value_option] 	= "new-value"
 			,[snew_value_option] 	= "w"
 			,NULL
@@ -663,7 +666,7 @@ search(char* optarg)
 {
 	if(db) 
 	{
-		int 	del	= 0;
+		int 	del		= 0;
 		char*	subopts	= optarg;
 		char*	value 	= NULL;
 		char*	export	= NULL;
@@ -859,7 +862,7 @@ print_bookmark(char* optarg)
 {
 	if(db) 
 	{
-		int 	id 	= 0;
+		int 	id 		= 0;
 		char* 	field 	= NULL;
 
 		char* 	subopts = optarg;
@@ -1052,9 +1055,9 @@ delete_bookmark(char* optarg)
 {
 	if(db)
 	{
-		int	id	= 0;
-		int	greedy	= 0;
-		char* 	tag	= NULL;
+		int	id			= 0;
+		int	greedy		= 0;
+		char* 	tag		= NULL;
 
 		char* 	subopts = optarg;
 		char* 	value 	= NULL;
@@ -1280,21 +1283,21 @@ parse_options(int argc, char* argv[], cl_option_list* option
 
 	static struct option long_options[] = 
 	{
-		{"add", 	1, 0, 'a'}
-		,{"color", 	0, 0, 'c'}
-		,{"colors",	1, 0, 'l'}
+		{"add", 		1, 0, 'a'}
+		,{"color", 		0, 0, 'c'}
+		,{"colors",		1, 0, 'l'}
 		,{"config", 	1, 0, 'C'}
 		,{"delete", 	1, 0, 'd'}
-		,{"edit", 	1, 0, 'e'}
+		,{"edit", 		1, 0, 'e'}
 		,{"open-file", 	1, 0, 'f'}
 		,{"import", 	1, 0, 'i'}
-		,{"help", 	0, 0, 'h'}
-		,{"html", 	0, 0, 'H'}
-		,{"print", 	1, 0, 'p'}
+		,{"help", 		0, 0, 'h'}
+		,{"html", 		0, 0, 'H'}
+		,{"print", 		1, 0, 'p'}
 		,{"search", 	1, 0, 's'}
 		,{"verbose", 	0, 0, 'V'}
 		,{"version", 	0, 0, 'V'}
-		,{NULL, 	0, NULL, 0}
+		,{NULL, 		0, NULL, 0}
 	};
 
 	while((c = getopt_long(argc, argv, "a:C:e:d:s:f:i:p:l:chHVv", long_options
@@ -1429,8 +1432,8 @@ read_config(char* filename)
 		char*	option_bkp = strdup(option);
 		char** 	ret 	   = calloc(7, sizeof(char*));
 
-		ret[0] 		= NULL;
-		ret[1] 		= NULL;
+		ret[0] 	= NULL;
+		ret[1] 	= NULL;
 
 		while(!feof(fp))
 		{

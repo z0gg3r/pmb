@@ -1,13 +1,22 @@
 #include "add.h"
 
+int favicon_button_state = FALSE;
+
+static void
+favicon_set()
+{
+	favicon_button_state = TRUE;
+}
+
 static void 
 add_bookmark(GtkWidget* button, gpointer** args) 
 {
-	char* name 	= NULL;
-	char* url 	= NULL;
-	char* comment 	= "None";
-	char* tag 	= "None";
-	char* tag_t	= NULL;
+	char* name 		= NULL;
+	char* url 		= NULL;
+	char* comment 	= "none";
+	char* tag 		= "none";
+	char* tag_t		= NULL;
+	char* favicon	= "none";
 
 	if(gtk_entry_get_text_length(GTK_ENTRY(args[0])))
 		name 	= (char*)gtk_entry_get_text(GTK_ENTRY(args[0]));
@@ -19,15 +28,18 @@ add_bookmark(GtkWidget* button, gpointer** args)
 		comment	= (char*)gtk_entry_get_text(GTK_ENTRY(args[2]));
 
 	tag_t 		= (char*)gtk_combo_box_text_get_active_text
-				(GTK_COMBO_BOX_TEXT(args[3]));
+					(GTK_COMBO_BOX_TEXT(args[3]));
 
 	if(strlen(tag_t) > 1)
 		tag = tag_t;
 
+	if(favicon_button_state)
+		favicon = download_favicon(url);
+	
 	if(name && url) 
 	{
 		/* write to database */
-		bookmark* b = bookmark_new(name, url, comment, tag);
+		bookmark* b = bookmark_new(name, url, comment, tag, favicon);
 		bookmark_db_write(b, db);
 		bookmark_destroy(b);
 
@@ -76,12 +88,12 @@ add_bookmark(GtkWidget* button, gpointer** args)
 void 
 add_window(GtkWidget* button) 
 {
-	GtkWidget* 	window 	= dialogs("Add bookmark", gpmb_window);
-	GtkWidget** 	e 	= entries(TRUE);
-	bookmark* 	b 	= get_data(NULL);
+	GtkWidget* 		window 	= dialogs("Add bookmark", gpmb_window);
+	GtkWidget** 	e 		= entries(TRUE);
+	bookmark* 		b 		= get_data(NULL);
 
 	/* tag box */
-	GtkWidget* 	tag_box = tag_box_new();
+	GtkWidget* 		tag_box = tag_box_new();
 
 	if(b) 
 	{
@@ -107,22 +119,31 @@ add_window(GtkWidget* button)
 	g_signal_connect(cancel_button, "clicked", G_CALLBACK(close_window)
 		,window);
 
+	GtkWidget* favicon_label = gtk_label_new("Favicon");
+	gtk_widget_set_halign(GTK_WIDGET(favicon_label), GTK_ALIGN_START);
+
+	GtkWidget* favicon_button = gtk_check_button_new();
+	g_signal_connect(GTK_WIDGET(favicon_button), "toggled"
+		,G_CALLBACK(favicon_set), NULL);
+
 	/* grid */
 	GtkWidget *grid = gtk_grid_new();
 	gtk_grid_set_column_spacing(GTK_GRID(grid), 2);
 	gtk_grid_set_row_spacing(GTK_GRID(grid), 2);
 	gtk_grid_set_column_homogeneous(GTK_GRID(grid), 1);
 
-	gtk_grid_attach(GTK_GRID(grid), e[0] 		,0,  0, 30, 1);
-	gtk_grid_attach(GTK_GRID(grid), e[1] 		,20, 0, 50, 1);
-	gtk_grid_attach(GTK_GRID(grid), e[2] 		,0,  1, 30, 1);
-	gtk_grid_attach(GTK_GRID(grid), e[3] 		,20, 1, 50, 1);
-	gtk_grid_attach(GTK_GRID(grid), e[4] 		,0,  2, 30, 1);
-	gtk_grid_attach(GTK_GRID(grid), e[5] 		,20, 2, 50, 1);
-	gtk_grid_attach(GTK_GRID(grid), e[6] 		,0,  3, 30, 1);
-	gtk_grid_attach(GTK_GRID(grid), tag_box 	,20, 3, 50, 1);
-	gtk_grid_attach(GTK_GRID(grid), add_button 	,20, 4, 20, 10);
-	gtk_grid_attach(GTK_GRID(grid), cancel_button 	,40, 4, 20, 10);
+	gtk_grid_attach(GTK_GRID(grid), e[0] 			,0,  0, 30, 1);
+	gtk_grid_attach(GTK_GRID(grid), e[1] 			,20, 0, 50, 1);
+	gtk_grid_attach(GTK_GRID(grid), e[2] 			,0,  1, 30, 1);
+	gtk_grid_attach(GTK_GRID(grid), e[3] 			,20, 1, 50, 1);
+	gtk_grid_attach(GTK_GRID(grid), e[4] 			,0,  2, 30, 1);
+	gtk_grid_attach(GTK_GRID(grid), e[5] 			,20, 2, 50, 1);
+	gtk_grid_attach(GTK_GRID(grid), e[6] 			,0,  3, 30, 1);
+	gtk_grid_attach(GTK_GRID(grid), tag_box 		,20, 3, 50, 1);
+	gtk_grid_attach(GTK_GRID(grid), favicon_label 	,0,  4, 30, 1);
+	gtk_grid_attach(GTK_GRID(grid), favicon_button 	,20, 4, 50, 1);
+	gtk_grid_attach(GTK_GRID(grid), add_button 		,20, 5, 20, 10);
+	gtk_grid_attach(GTK_GRID(grid), cancel_button 	,40, 5, 20, 10);
 
 	g_free(e);
 	gtk_container_add(GTK_CONTAINER(window), grid);

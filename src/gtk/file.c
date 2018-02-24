@@ -23,8 +23,8 @@ file_dialog(GtkFileChooserAction action, char* title)
 
 	gint 		result 	= gtk_dialog_run(GTK_DIALOG(file_chooser));
 
-	filename 		= gtk_file_chooser_get_filename
-					(GTK_FILE_CHOOSER(file_chooser));
+	filename 			= gtk_file_chooser_get_filename
+							(GTK_FILE_CHOOSER(file_chooser));
 
 	gtk_widget_destroy(file_chooser);
 	gtk_spinner_stop(GTK_SPINNER(spinner));
@@ -103,7 +103,7 @@ export_html_page(GtkWidget* button)
 		{
 			if(filename)
 			{
-				FILE* 		fp 	= fopen(filename, "w");
+				FILE* 			fp 	= fopen(filename, "w");
 				bookmark_list* 	bl 	= bookmark_db_query(db, 0, NULL);
 
 				bookmark_html_tree(bl, fp);
@@ -150,8 +150,8 @@ selective_copy(GtkWidget* button, char* action)
 {
 	char* filename	= (char*)gtk_entry_get_text(GTK_ENTRY(db_entry));
 	char* pattern 	= (char*)gtk_entry_get_text(GTK_ENTRY(pattern_entry));
-	char* field	= gtk_combo_box_text_get_active_text
-				(GTK_COMBO_BOX_TEXT(field_box));
+	char* field		= gtk_combo_box_text_get_active_text
+						(GTK_COMBO_BOX_TEXT(field_box));
 
 	if(filename)
 	{
@@ -212,7 +212,7 @@ selective_dialog_content(GtkWidget* window, char* action)
 {
 	/* selected database */
 	GtkWidget*	db_entry_label	= gtk_label_new("Database");
-	db_entry			= gtk_entry_new();
+	db_entry					= gtk_entry_new();
 
 	/* select database button */
 	GtkWidget* 	select_button 	= gtk_button_new_with_mnemonic("_Select database");
@@ -221,9 +221,9 @@ selective_dialog_content(GtkWidget* window, char* action)
 
 	/* pattern */
 	GtkWidget*	pattern_label	= gtk_label_new("Pattern | Id");
-	pattern_entry			= gtk_entry_new();
+	pattern_entry				= gtk_entry_new();
 
-	field_box 			= gtk_combo_box_text_new();
+	field_box 					= gtk_combo_box_text_new();
 	gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(field_box), NULL, "any");
 	gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(field_box), NULL, "id");
 	gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(field_box), NULL, "name");
@@ -255,14 +255,14 @@ selective_dialog_content(GtkWidget* window, char* action)
 	GtkWidget* grid = grid_new();
 
 	gtk_grid_attach(GTK_GRID(grid), db_entry_label 	,0,   0, 30, 1);
-	gtk_grid_attach(GTK_GRID(grid), db_entry 	,30,  0, 30, 1);
+	gtk_grid_attach(GTK_GRID(grid), db_entry 		,30,  0, 30, 1);
 	gtk_grid_attach(GTK_GRID(grid), select_button 	,60,  0, 30, 1);
 	gtk_grid_attach(GTK_GRID(grid), pattern_label 	,0,   1, 30, 1);
 	gtk_grid_attach(GTK_GRID(grid), pattern_entry 	,30,  1, 30, 1);
-	gtk_grid_attach(GTK_GRID(grid), field_box 	,60,  1, 30, 1);
+	gtk_grid_attach(GTK_GRID(grid), field_box 		,60,  1, 30, 1);
 
 	/* main box */
-	GtkWidget* 	main_box  	= gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
+	GtkWidget* 	main_box  		= gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
 	gtk_box_pack_start(GTK_BOX(main_box), grid, TRUE, TRUE, 1);
 	gtk_box_pack_end(GTK_BOX(main_box), button_box, FALSE, FALSE, 1);
 	gtk_container_add(GTK_CONTAINER(window), main_box);

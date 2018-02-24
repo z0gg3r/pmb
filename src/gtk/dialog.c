@@ -14,44 +14,43 @@ get_full_path(bookmark* b)
 		{
 			GtkTreePath*	path;
 			unsigned int	size 	= 1;
-			char**		parents = calloc(size, sizeof(char*));
-			char*		dir 	= bookmark_id(b);
+			char**			parents = calloc(size, sizeof(char*));
+			char*			dir 	= bookmark_id(b);
 
 			while(gtk_tree_model_iter_parent(GTK_TREE_MODEL(model)
 				,&parent, &iter))
 			{
-				path 		= gtk_tree_model_get_path
-							(GTK_TREE_MODEL(model)
-							,&parent);
-				bookmark* bp 	= get_data(path);
-				iter 		= parent;
+				path 				= gtk_tree_model_get_path
+										(GTK_TREE_MODEL(model), &parent);
+				bookmark* 	bp 		= get_data(path);
+				iter 				= parent;
 
-				parents[size - 1] = bookmark_id(bp);
-				parents		  = realloc(parents, (size + 1)
-							* sizeof(char*));
+				parents[size - 1] 	= bookmark_id(bp);
+				parents		  		= realloc(parents, (size + 1)
+										* sizeof(char*));
 				++size;
 
 				bookmark_destroy(bp);
 				gtk_tree_path_free(path);
 			}
 
-			char*		complete_path 	= calloc(1, 1 
+			char*			complete_path = calloc(1, 1 
 								* sizeof(char));
-			unsigned int	size_bkp	= size - 1;
+			unsigned int	size_bkp = size - 1;
 
 			while(size_bkp)
 			{
-				char* t_path = calloc(1, (strlen(complete_path) + 3)
+				char* 		t_path = calloc(1, (strlen(complete_path) + 3)
 								* sizeof(char));
-				strcpy(t_path, complete_path);
 
+				strcpy(t_path, complete_path);
 				free(complete_path);
 
-				complete_path = calloc(1, 
-						(strlen(t_path) 
-						+ strlen(parents[size_bkp - 1])
-						+ 3) 
-						* sizeof(char));
+				complete_path 		= calloc(1, 
+										(strlen(t_path) 
+										+ strlen(parents[size_bkp - 1])
+										+ 3) 
+										* sizeof(char));
 
 				if(strlen(t_path) > 1)
 					snprintf(complete_path, (
@@ -75,9 +74,9 @@ get_full_path(bookmark* b)
 			if(strlen(complete_path) > 1)
 				complete_path[strlen(complete_path)] = '/';
 
-			char* full_path = malloc((strlen(complete_path)
-					+ strlen(dir) 
-					+ 2) * sizeof(char));
+			char* full_path 		= malloc((strlen(complete_path)
+										+ strlen(dir) 
+										+ 2) * sizeof(char));
 
 			snprintf(full_path, 
 				(strlen(complete_path) 
@@ -105,7 +104,7 @@ collect_bookmark(GtkTreeIter iter, bookmark_list* bl)
 	do
 	{
 		path 			= gtk_tree_model_get_path(GTK_TREE_MODEL(model)
-						,&iter);
+							,&iter);
 		bookmark* 	b 	= get_data(path);
 
 		if(b)
@@ -122,6 +121,29 @@ collect_bookmark(GtkTreeIter iter, bookmark_list* bl)
 	while(gtk_tree_model_iter_next(GTK_TREE_MODEL(model), &iter));
 
 	gtk_tree_path_free(path);
+}
+
+GdkPixbuf*
+favicon_decode(bookmark* b)
+{
+	if(strcmp(bookmark_favicon(b), "none"))
+	{
+		gsize 			favicon_size 	= strlen(bookmark_favicon(b));
+		guchar* 		favicon 		= g_base64_decode(bookmark_favicon(b)
+											,&favicon_size);
+
+		GInputStream* 	memst 			= g_memory_input_stream_new_from_data
+											(favicon, favicon_size, NULL);
+
+		GdkPixbuf* icon 				= gdk_pixbuf_new_from_stream(memst, NULL, NULL);
+
+		if(icon)
+			return icon;
+		else
+			return NULL;
+	}
+
+	return NULL;
 }
 
 GtkWidget**
@@ -143,12 +165,16 @@ entries(gboolean editable)
 	/* entries */
 	GtkWidget* name_entry = gtk_entry_new();
 	gtk_entry_set_placeholder_text(GTK_ENTRY(name_entry), "name");
+	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(name_entry)
+			,GTK_ENTRY_ICON_PRIMARY, "stock_add-bookmark");
 
 	GtkWidget* url_entry = gtk_entry_new();
 	gtk_entry_set_placeholder_text(GTK_ENTRY(url_entry), "url");
 
 	GtkWidget* comment_entry = gtk_entry_new();
 	gtk_entry_set_placeholder_text(GTK_ENTRY(comment_entry), "comment");
+	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(comment_entry)
+			,GTK_ENTRY_ICON_PRIMARY, "user-available");
 
 	GtkWidget* tag_entry = gtk_entry_new();
 	gtk_entry_set_placeholder_text(GTK_ENTRY(tag_entry), "tag");
@@ -172,6 +198,19 @@ entries(gboolean editable)
 	r[7] = tag_entry;
 
 	return r;
+}
+
+void
+set_url_favicon(GtkWidget* entry)
+{
+	GdkPixbuf* 	icon;
+	GtkTreeIter iter;
+
+	gtk_tree_model_get_iter(GTK_TREE_MODEL(model), &iter, selected_path);
+	gtk_tree_model_get(GTK_TREE_MODEL(model), &iter, 5, &icon, -1);
+
+	gtk_entry_set_icon_from_pixbuf(GTK_ENTRY(entry)
+		,GTK_ENTRY_ICON_PRIMARY , icon);
 }
 
 GtkWidget*

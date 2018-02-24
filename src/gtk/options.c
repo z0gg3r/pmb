@@ -1,21 +1,21 @@
 #include "options.h"
 
-GtkWidget* 	tree_lines	= NULL;
+GtkWidget* 		tree_lines	= NULL;
 gpmb_options* 	opts 		= NULL;
-char* 		config_file	= NULL;
+char* 			config_file	= NULL;
 
 void 
 set_options() 
 {
 
-	const char* 	home 		= secure_getenv("HOME");	
-	char*		conf_dir 	= ".config/pmb";
-	char*		config_filename = "gpmb.conf";
+	const char* 	home 			= secure_getenv("HOME");	
+	char*			conf_dir 		= ".config/pmb";
+	char*			config_filename = "gpmb.conf";
 
 	config_file 	= calloc(1, 
-				(strlen(home)
-				+ strlen(config_filename)
-				+ strlen(conf_dir) + 2) * sizeof(char));
+						(strlen(home)
+						+ strlen(config_filename)
+						+ strlen(conf_dir) + 2) * sizeof(char));
 
 	snprintf(config_file, strlen(config_file) - 1, "%s/%s/%s", home
 			,conf_dir, config_filename);
@@ -278,9 +278,9 @@ appearance_page()
 	if(opts->comment_fg)
 		gdk_rgba_parse(&comment, opts->comment_fg);
 
-	GtkWidget* id_fg_button 	= gtk_color_button_new_with_rgba(&id);
-	GtkWidget* name_fg_button	= gtk_color_button_new_with_rgba(&name);
-	GtkWidget* url_fg_button 	= gtk_color_button_new_with_rgba(&url);
+	GtkWidget* id_fg_button 		= gtk_color_button_new_with_rgba(&id);
+	GtkWidget* name_fg_button		= gtk_color_button_new_with_rgba(&name);
+	GtkWidget* url_fg_button 		= gtk_color_button_new_with_rgba(&url);
 	GtkWidget* comment_fg_button 	= gtk_color_button_new_with_rgba(&comment);
 
 	g_signal_connect(GTK_WIDGET(id_fg_button), "color-set", G_CALLBACK(select_color)
@@ -296,9 +296,9 @@ appearance_page()
 		,"comment");
 
 	/* font buttons */
-	GtkWidget* id_font_button	= gtk_font_button_new();
-	GtkWidget* name_font_button	= gtk_font_button_new();
-	GtkWidget* url_font_button	= gtk_font_button_new();
+	GtkWidget* id_font_button		= gtk_font_button_new();
+	GtkWidget* name_font_button		= gtk_font_button_new();
+	GtkWidget* url_font_button		= gtk_font_button_new();
 	GtkWidget* comment_font_button	= gtk_font_button_new();
 
 	if(opts->id_font)
@@ -341,25 +341,25 @@ appearance_page()
 	g_signal_connect(GTK_WIDGET(comment_font_button), "font-set", G_CALLBACK(select_font)
 		,"comment");
 
-	GtkWidget* id_label		= gtk_label_new("Dir / Id");
+	GtkWidget* id_label			= gtk_label_new("Dir / Id");
 	GtkWidget* name_label		= gtk_label_new("Name");
 	GtkWidget* url_label		= gtk_label_new("Url");
 	GtkWidget* comment_label	= gtk_label_new("Comment");
 
 	GtkWidget* grid = grid_new();
 
-	gtk_grid_attach(GTK_GRID(grid), id_label 		,0,  0, 20, 1);
+	gtk_grid_attach(GTK_GRID(grid), id_label 			,0,  0, 20, 1);
 	gtk_grid_attach(GTK_GRID(grid), id_fg_button 		,20, 0, 10, 1);
 	gtk_grid_attach(GTK_GRID(grid), id_font_button 		,30, 0, 30, 1);
-	gtk_grid_attach(GTK_GRID(grid), name_label 		,0,  1, 20, 1);
+	gtk_grid_attach(GTK_GRID(grid), name_label 			,0,  1, 20, 1);
 	gtk_grid_attach(GTK_GRID(grid), name_fg_button 		,20, 1, 10, 1);
 	gtk_grid_attach(GTK_GRID(grid), name_font_button 	,30, 1, 30, 1);
-	gtk_grid_attach(GTK_GRID(grid), url_label		,0,  2, 20, 1);
+	gtk_grid_attach(GTK_GRID(grid), url_label			,0,  2, 20, 1);
 	gtk_grid_attach(GTK_GRID(grid), url_fg_button		,20, 2, 10, 1);
 	gtk_grid_attach(GTK_GRID(grid), url_font_button 	,30, 2, 30, 1);
 	gtk_grid_attach(GTK_GRID(grid), comment_label 		,0,  3, 20, 1);
 	gtk_grid_attach(GTK_GRID(grid), comment_fg_button 	,20, 3, 10, 1);
-	gtk_grid_attach(GTK_GRID(grid), comment_font_button 	,30, 3, 30, 1);
+	gtk_grid_attach(GTK_GRID(grid), comment_font_button	,30, 3, 30, 1);
 
 	return grid;
 }
@@ -368,7 +368,7 @@ static GtkWidget*
 settings_page()
 {
 	/* database entry */
-	GtkWidget* database_label = gtk_label_new("Database");
+	GtkWidget* database_label 	= gtk_label_new("Database");
 	//gtk_widget_set_halign(GTK_WIDGET(database_label), GTK_ALIGN_START);
 
 	GtkWidget* database_file_entry = gtk_entry_new();
@@ -376,7 +376,7 @@ settings_page()
 	gtk_entry_set_text(GTK_ENTRY(database_file_entry), opts->database_file);
 
 	/* tree lines */
-	tree_lines		= gtk_check_button_new_with_label("Tree lines");
+	tree_lines			= gtk_check_button_new_with_label("Tree lines");
 	g_signal_connect(GTK_WIDGET(tree_lines), "toggled", G_CALLBACK(tree_lines_set)
 		,NULL);
 
@@ -387,7 +387,7 @@ settings_page()
 
 	gtk_grid_attach(GTK_GRID(grid), database_label 		,0,  0, 30, 1);
 	gtk_grid_attach(GTK_GRID(grid), database_file_entry	,40, 0, 50, 1);
-	gtk_grid_attach(GTK_GRID(grid), tree_lines		,0,  1, 50, 1);
+	gtk_grid_attach(GTK_GRID(grid), tree_lines			,0,  1, 50, 1);
 
 	return grid;
 }
@@ -406,7 +406,7 @@ options_window(GtkWidget* button)
 	/* appearance page */
 	GtkWidget* page_appearance_l 	= gtk_label_new("Appearance");
 	GtkWidget* page_appearance_b 	= gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
-	GtkWidget* appearance_grid 	= appearance_page();
+	GtkWidget* appearance_grid 		= appearance_page();
 	gtk_container_add(GTK_CONTAINER(page_appearance_b), appearance_grid);
 
 	/* buttons */

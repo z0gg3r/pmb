@@ -8,13 +8,13 @@ extern GtkCellRenderer* 	cell_renderer_id;
 extern GtkCellRenderer* 	cell_renderer_name;
 extern GtkCellRenderer* 	cell_renderer_url;
 extern GtkCellRenderer* 	cell_renderer_comment;
-extern GtkWidget* 		treeview;
+extern GtkWidget* 			treeview;
 extern GtkTreeStore* 		bookmarks;
 extern GtkTreeSelection*	selection;
 extern GtkTreeModel* 		model;
 extern GtkIconTheme*		theme;
-extern GdkPixbuf*		folder_icon;
-extern GdkPixbuf*		star_icon;
+extern GdkPixbuf*			folder_icon;
+extern GdkPixbuf*			star_icon;
 
 
 /* selected path in tree view */

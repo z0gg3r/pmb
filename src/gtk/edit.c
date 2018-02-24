@@ -5,9 +5,9 @@ move_directory(char* tag)
 {
 	GtkTreeIter 	iter, iter_copy, child, parent;
 
-	bookmark_list* 	bl 	= bookmark_list_new(); 
-	bookmark* 	b 	= NULL;
-	bookmark*	sb	= get_data(NULL);
+	bookmark_list* 	bl 		= bookmark_list_new(); 
+	bookmark* 		b 		= NULL;
+	bookmark*		sb		= get_data(NULL);
 	unsigned int 	parents = 0;
 
 	if(gtk_tree_model_get_iter(GTK_TREE_MODEL(model), &iter, selected_path))
@@ -30,11 +30,10 @@ move_directory(char* tag)
 
 	while((b = bookmark_list_return_next_bookmark(bl)))
 	{
-		unsigned int	id		= strtol(bookmark_id(b), NULL
-							,10);
-		char*		bm_tag		= bookmark_tag(b);
-		char*		bm_tag_bkp 	= strdup(bm_tag);
-		char*		res		= NULL;
+		unsigned int	id			= strtol(bookmark_id(b), NULL, 10);
+		char*			bm_tag		= bookmark_tag(b);
+		char*			bm_tag_bkp 	= strdup(bm_tag);
+		char*			res			= NULL;
 
 		if(parents > 0)
 			strsep(&bm_tag, "//");
@@ -57,8 +56,8 @@ move_directory(char* tag)
 			if(bm_tag)
 			{
 				char* new_tag = calloc(1, (strlen(n_tag) 
-							+strlen(bm_tag) + 2)
-							* sizeof(char));
+					+strlen(bm_tag) + 2)
+					* sizeof(char));
 
 				snprintf(new_tag, strlen(new_tag) - 1, "%s/%s"
 					,n_tag, bm_tag);
@@ -83,7 +82,7 @@ move_directory(char* tag)
 			}
 
 			char* new_tag = calloc(1, (strlen(tag) + strlen(bm_tag)
-							+ 2) * sizeof(char));
+				+ 2) * sizeof(char));
 
 			snprintf(new_tag, strlen(new_tag) - 1, "%s/%s"
 					,tag, bm_tag);
@@ -104,14 +103,14 @@ move_directory(char* tag)
 static void
 rename_directory(GtkWidget* button, gpointer** args)
 {
-	bookmark* 	b 		= get_data(NULL);
-	bookmark*	bt		= NULL;
-	char* 		path 		= get_full_path(b);
-	bookmark_list*	bl 		= bookmark_db_search(db, TAG, path);
-	char* 		input_tag 	= (char*)gtk_entry_get_text(GTK_ENTRY(args[0]));
-	char*		full_tag 	= get_full_path(b);
-	char*		root_tag	= NULL;
-	char*		new_tag		= NULL;
+	bookmark* 		b 			= get_data(NULL);
+	bookmark*		bt			= NULL;
+	char* 			path 		= get_full_path(b);
+	bookmark_list*	bl 			= bookmark_db_search(db, TAG, path);
+	char* 			input_tag 	= (char*)gtk_entry_get_text(GTK_ENTRY(args[0]));
+	char*			full_tag 	= get_full_path(b);
+	char*			root_tag	= NULL;
+	char*			new_tag		= NULL;
 
 	/* assembly the tag */
 	while(full_tag && strcmp(full_tag, bookmark_id(b)))
@@ -120,20 +119,21 @@ rename_directory(GtkWidget* button, gpointer** args)
 		
 		if(root_tag)
 		{
-			char* 		r_tag_bkp 	= strdup(root_tag);
+			char* 			r_tag_bkp 	= strdup(root_tag);
 			unsigned int 	size 		= (strlen(r_tag_bkp) 
-								+ strlen(full_tag_sep) + 2)
-								* sizeof(char);
+											+ strlen(full_tag_sep) + 2)
+											* sizeof(char);
 
-			root_tag 		= realloc(root_tag, size);
+			root_tag 					= realloc(root_tag, size);
 
 			snprintf(root_tag, size, "%s/%s", r_tag_bkp, full_tag_sep);
 			free(r_tag_bkp);
 		}
 		else
 		{
-			root_tag 		= calloc(1, strlen(full_tag_sep) + 1
-							* sizeof(char));
+			root_tag 					= calloc(1, strlen(full_tag_sep) + 1
+											* sizeof(char));
+
 			strcpy(root_tag, full_tag_sep);
 		}
 	}
@@ -141,9 +141,10 @@ rename_directory(GtkWidget* button, gpointer** args)
 	if(root_tag)
 	{
 		unsigned int 	new_tag_size 	= (strlen(root_tag) 
-							+ strlen(input_tag) + 2)
-							* sizeof(char);
-		new_tag 			= calloc(1, new_tag_size);
+											+ strlen(input_tag) + 2)
+											* sizeof(char);
+
+		new_tag 						= calloc(1, new_tag_size);
 
 		snprintf(new_tag, new_tag_size, "%s/%s", root_tag, input_tag);
 		free(root_tag);
@@ -168,21 +169,21 @@ rename_directory(GtkWidget* button, gpointer** args)
 			if(nt_sep)
 			{
 				tag_root = realloc(tag_root, (strlen(nt_sep)
-						+ 1) * sizeof(char));
+					+ 1) * sizeof(char));
+
 				strcpy(tag_root, nt_sep);
 			}
 
 			while(b_tag && new_tag_bkp && !(strcmp(nt_sep, tag_sep)))
 			{
-				nt_sep 			= strsep(&new_tag_bkp
-								,"//");
-				tag_sep 		= strsep(&b_tag, "//");
+				nt_sep 				= strsep(&new_tag_bkp, "//");
+				tag_sep 			= strsep(&b_tag, "//");
 				char* 		tr_bkp 	= strdup(tag_root);
-				unsigned int 	size 	= (strlen(tr_bkp)
-								+ strlen(nt_sep) + 2)
-								* sizeof(char);
+				unsigned int size 	= (strlen(tr_bkp)
+										+ strlen(nt_sep) + 2)
+										* sizeof(char);
 
-				tag_root		= realloc(tag_root, size); 
+				tag_root			= realloc(tag_root, size); 
 
 				snprintf(tag_root, size - 1, tr_bkp, nt_sep);
 				free(tr_bkp);
@@ -191,10 +192,10 @@ rename_directory(GtkWidget* button, gpointer** args)
 			if(b_tag)
 			{
 				unsigned int 	size 	= (strlen(new_tag)
-								+ strlen(b_tag) + 2)
-								* sizeof(char);
+											+ strlen(b_tag) + 2)
+											* sizeof(char);
 
-				char* 		tag 	= calloc(1, size);
+				char* 			tag 	= calloc(1, size);
 
 				snprintf(tag, size, "%s/%s", new_tag, b_tag);
 
@@ -231,20 +232,20 @@ rename_directory(GtkWidget* button, gpointer** args)
 static void
 edit_bookmark(GtkWidget* button, gpointer** args) 
 {
-	char* name 	= (char*)gtk_entry_get_text(GTK_ENTRY(args[0]));
-	char* url 	= (char*)gtk_entry_get_text(GTK_ENTRY(args[1]));
+	char* name 		= (char*)gtk_entry_get_text(GTK_ENTRY(args[0]));
+	char* url 		= (char*)gtk_entry_get_text(GTK_ENTRY(args[1]));
 	char* comment 	= (char*)gtk_entry_get_text(GTK_ENTRY(args[2]));
-	char* tag 	= (char*)gtk_combo_box_text_get_active_text
-				(GTK_COMBO_BOX_TEXT(args[3]));
+	char* tag 		= (char*)gtk_combo_box_text_get_active_text
+							(GTK_COMBO_BOX_TEXT(args[3]));
 	char* message	= NULL;
 
 	if(url) 
 	{
-		bookmark_list* bl = bookmark_db_search(db, URL, url);
+		bookmark_list* 	bl	= bookmark_db_search(db, URL, url);
 		
 		if(bl) 
 		{
-			bookmark* b = bookmark_list_return_next_bookmark(bl);
+			bookmark* 	b	= bookmark_list_return_next_bookmark(bl);
 
 			if(b) 
 			{
@@ -264,10 +265,10 @@ edit_bookmark(GtkWidget* button, gpointer** args)
 					bookmark_db_edit(db, id, 3, tag);
 
 				unsigned int size = (strlen(bookmark_id(b))
-						+ strlen(bookmark_url(b)) 
-						+ strlen("edit: id = , url = ")
-						+ 3)
-						* sizeof(char);
+										+ strlen(bookmark_url(b)) 
+										+ strlen("edit: id = , url = ")
+										+ 3)
+										* sizeof(char);
 
 				message = calloc(1, size);
 
@@ -309,11 +310,10 @@ move_directory_wrapper(GtkWidget* button, gpointer** args)
 static void
 move_multiple(GtkWidget* button, gpointer** args)
 {
-	char* 	tag	= (char*)gtk_combo_box_text_get_active_text
-				(GTK_COMBO_BOX_TEXT(args[0]));
+	char* 	tag		= (char*)gtk_combo_box_text_get_active_text
+						(GTK_COMBO_BOX_TEXT(args[0]));
 	GList* 	rows 	= gtk_tree_selection_get_selected_rows
-				(GTK_TREE_SELECTION(selection)
-				,&model);
+						(GTK_TREE_SELECTION(selection), &model);
 
 	do
 	{
@@ -352,7 +352,7 @@ static void
 edit_bookmark_window(bookmark* b) 
 {
 	GtkWidget* 	window 	= dialogs("Edit bookmark", gpmb_window);
-	GtkWidget** 	e 	= entries(TRUE);
+	GtkWidget** e 		= entries(TRUE);
 	GtkWidget* 	tag_box = tag_box_new();
 
 	if(b) 
@@ -364,11 +364,17 @@ edit_bookmark_window(bookmark* b)
 			gtk_entry_set_text(GTK_ENTRY(e[3]), bookmark_url(b));
 
 		if(bookmark_comment(b))
-			gtk_entry_set_text(GTK_ENTRY(e[5])
-				,bookmark_comment(b));
+			gtk_entry_set_text(GTK_ENTRY(e[5]), bookmark_comment(b));
 
+		/* tag */
 		GtkWidget* tag_entry = gtk_bin_get_child(GTK_BIN(tag_box));
 		gtk_entry_set_text(GTK_ENTRY(tag_entry), get_full_path(b));
+		gtk_entry_set_icon_from_icon_name(GTK_ENTRY(tag_entry)
+			,GTK_ENTRY_ICON_PRIMARY, "folder");
+
+		/* set favicon */
+		set_url_favicon(e[3]);
+
 		bookmark_destroy(b);
 	}
 
@@ -391,14 +397,14 @@ edit_bookmark_window(bookmark* b)
 	/* grid */
 	GtkWidget* grid = grid_new();
 
-	gtk_grid_attach(GTK_GRID(grid), e[0] 		,0,  0, 30, 1);
-	gtk_grid_attach(GTK_GRID(grid), e[1] 		,20, 0, 50, 1);
-	gtk_grid_attach(GTK_GRID(grid), e[2] 		,0,  1, 30, 1);
-	gtk_grid_attach(GTK_GRID(grid), e[3] 		,20, 1, 50, 1);
-	gtk_grid_attach(GTK_GRID(grid), e[4] 		,0,  2, 30, 1);
-	gtk_grid_attach(GTK_GRID(grid), e[5] 		,20, 2, 50, 1);
-	gtk_grid_attach(GTK_GRID(grid), e[6] 		,0,  3, 30, 1);
-	gtk_grid_attach(GTK_GRID(grid), tag_box 	,20, 3, 50, 1);
+	gtk_grid_attach(GTK_GRID(grid), e[0] 			,0,  0, 30, 1);
+	gtk_grid_attach(GTK_GRID(grid), e[1] 			,20, 0, 50, 1);
+	gtk_grid_attach(GTK_GRID(grid), e[2] 			,0,  1, 30, 1);
+	gtk_grid_attach(GTK_GRID(grid), e[3] 			,20, 1, 50, 1);
+	gtk_grid_attach(GTK_GRID(grid), e[4] 			,0,  2, 30, 1);
+	gtk_grid_attach(GTK_GRID(grid), e[5] 			,20, 2, 50, 1);
+	gtk_grid_attach(GTK_GRID(grid), e[6] 			,0,  3, 30, 1);
+	gtk_grid_attach(GTK_GRID(grid), tag_box 		,20, 3, 50, 1);
 	gtk_grid_attach(GTK_GRID(grid), edit_button 	,20, 5, 20, 10);
 	gtk_grid_attach(GTK_GRID(grid), cancel_button 	,40, 5, 20, 10);
 
@@ -425,15 +431,15 @@ move_directory_window(bookmark* b)
 	}
 
 	GtkWidget** move_directory_args = g_new(GtkWidget*, 2);
-	move_directory_args[0] = tag_box;
-	move_directory_args[1] = window;
+	move_directory_args[0] 		= tag_box;
+	move_directory_args[1] 		= window;
 
 	/* button */
-	GtkWidget* edit_button = gtk_button_new_with_mnemonic("_Move");
+	GtkWidget* edit_button 		= gtk_button_new_with_mnemonic("_Move");
 	g_signal_connect(edit_button, "clicked", G_CALLBACK(move_directory_wrapper)
 		,move_directory_args);
 
-	GtkWidget* cancel_button = gtk_button_new_with_mnemonic("_Cancel");
+	GtkWidget* cancel_button 	= gtk_button_new_with_mnemonic("_Cancel");
 	g_signal_connect(cancel_button, "clicked", G_CALLBACK(close_window)
 		,window);
 
@@ -441,7 +447,7 @@ move_directory_window(bookmark* b)
 	GtkWidget* grid = grid_new();
 
 	gtk_grid_attach(GTK_GRID(grid), name_entry_label 	,0,  0, 30, 1);
-	gtk_grid_attach(GTK_GRID(grid), tag_box 		,20, 0, 50, 1);
+	gtk_grid_attach(GTK_GRID(grid), tag_box 			,20, 0, 50, 1);
 	gtk_grid_attach(GTK_GRID(grid), edit_button 		,20, 1, 20, 10);
 	gtk_grid_attach(GTK_GRID(grid), cancel_button 		,40, 1, 20, 10);
 
@@ -453,22 +459,22 @@ move_directory_window(bookmark* b)
 static void
 move_multiple_window()
 {
-	GtkWidget* window 	= dialogs("Move multiple", gpmb_window);
-	GtkWidget* tag_box 	= tag_box_new();
+	GtkWidget* window 			= dialogs("Move multiple", gpmb_window);
+	GtkWidget* tag_box 			= tag_box_new();
 
 	GtkWidget* name_entry_label = gtk_label_new("Move to");
 	gtk_widget_set_halign(GTK_WIDGET(name_entry_label), GTK_ALIGN_START);
 
 	GtkWidget** move_multiple_args = g_new(GtkWidget*, 2);
-	move_multiple_args[0] = tag_box;
-	move_multiple_args[1] = window;
+	move_multiple_args[0] 		= tag_box;
+	move_multiple_args[1] 		= window;
 
 	/* button */
-	GtkWidget* edit_button = gtk_button_new_with_mnemonic("_Edit");
+	GtkWidget* edit_button 		= gtk_button_new_with_mnemonic("_Edit");
 	g_signal_connect(edit_button, "clicked", G_CALLBACK(move_multiple)
 		,move_multiple_args);
 
-	GtkWidget* cancel_button = gtk_button_new_with_mnemonic("_Cancel");
+	GtkWidget* cancel_button 	= gtk_button_new_with_mnemonic("_Cancel");
 	g_signal_connect(cancel_button, "clicked", G_CALLBACK(close_window)
 		,window);
 
@@ -476,7 +482,7 @@ move_multiple_window()
 	GtkWidget* grid = grid_new();
 
 	gtk_grid_attach(GTK_GRID(grid), name_entry_label 	,0,  0, 30, 1);
-	gtk_grid_attach(GTK_GRID(grid), tag_box 		,20, 0, 50, 1);
+	gtk_grid_attach(GTK_GRID(grid), tag_box 			,20, 0, 50, 1);
 	gtk_grid_attach(GTK_GRID(grid), edit_button 		,20, 1, 20, 10);
 	gtk_grid_attach(GTK_GRID(grid), cancel_button 		,40, 1, 20, 10);
 
@@ -488,10 +494,10 @@ move_multiple_window()
 static void
 rename_directory_window(bookmark* b)
 {
-	GtkWidget* window 	= dialogs("Rename directory", gpmb_window);
+	GtkWidget* 	window 	= dialogs("Rename directory", gpmb_window);
 
 	/* name entry */
-	GtkWidget* name_entry_label = gtk_label_new("New name");
+	GtkWidget* 	name_entry_label = gtk_label_new("New name");
 	gtk_widget_set_halign(GTK_WIDGET(name_entry_label), GTK_ALIGN_START);
 
 	GtkWidget* name_entry = gtk_entry_new();
@@ -520,7 +526,7 @@ rename_directory_window(bookmark* b)
 	GtkWidget* grid = grid_new();
 
 	gtk_grid_attach(GTK_GRID(grid), name_entry_label 	,0,  0, 30, 1);
-	gtk_grid_attach(GTK_GRID(grid), name_entry 		,20, 0, 50, 1);
+	gtk_grid_attach(GTK_GRID(grid), name_entry 			,20, 0, 50, 1);
 	gtk_grid_attach(GTK_GRID(grid), edit_button 		,20, 1, 20, 10);
 	gtk_grid_attach(GTK_GRID(grid), cancel_button 		,40, 1, 20, 10);
 

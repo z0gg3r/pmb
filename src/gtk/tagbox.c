@@ -5,7 +5,7 @@ GtkWidget* tag_box = NULL;
 static int
 compare_tags(GtkTreeModel* m, GtkTreePath* path, GtkTreeIter* iter, void* data)
 {
-	bookmark* 	b 		= get_data(NULL);
+	bookmark* 	b 			= get_data(NULL);
 	char*		b_tag		= bookmark_tag(b);
 	char* 		t_path		= NULL;
 	char*		full_path	= get_full_path(b);
@@ -28,11 +28,11 @@ compare_tags(GtkTreeModel* m, GtkTreePath* path, GtkTreeIter* iter, void* data)
 GtkWidget*
 tag_box_new()
 {
-	tag_box 			= gtk_combo_box_text_new_with_entry();
-	GtkWidget* 	entry 		= gtk_bin_get_child(GTK_BIN(tag_box));
-	bookmark_list*	bl		= bookmark_db_query(db, 0, NULL);
-	bookmark*	b		= NULL;
-	char*		last_tag	= NULL;
+	tag_box 					= gtk_combo_box_text_new_with_entry();
+	GtkWidget* 		entry 		= gtk_bin_get_child(GTK_BIN(tag_box));
+	bookmark_list*	bl			= bookmark_db_query(db, 0, NULL);
+	bookmark*		b			= NULL;
+	char*			last_tag	= NULL;
 
 	if(bl)
 	{

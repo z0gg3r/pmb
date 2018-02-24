@@ -41,6 +41,10 @@ bookmark_comment(bookmark*);
 char*
 bookmark_tag(bookmark*);
 
+/* -- return bookmark favicon -- */
+char*
+bookmark_favicon(bookmark*);
+
 int
 bookmark_set_id(bookmark*, char*);
 
@@ -56,8 +60,11 @@ bookmark_set_comment(bookmark*, char*);
 int
 bookmark_set_tag(bookmark*, char*);
 
-/* bookmark *b, char *name, char *url, char *comment, char *tag */
+int
+bookmark_set_favicon(bookmark*, char*);
+
+/* bookmark *b, char *name, char *url, char *comment, char *tag, char* favicon */
 int 
-bookmark_set(bookmark*, char*, char*, char*, char*);
+bookmark_set(bookmark*, char*, char*, char*, char*, char*);
 
 #endif
