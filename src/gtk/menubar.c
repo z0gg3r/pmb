@@ -98,6 +98,12 @@ menu_bar_new(GtkWidget* main_window)
 	g_signal_connect(GTK_WIDGET(delete), "activate"
 		,G_CALLBACK(delete), NULL);
 
+	/* edit menu > get favicons item */
+	GtkWidget* favicons		= gtk_menu_item_new_with_mnemonic("Get _Favicons");
+	gtk_menu_shell_append(GTK_MENU_SHELL(edit_menu), favicons);
+	g_signal_connect(GTK_WIDGET(favicons), "activate"
+		,G_CALLBACK(get_all_favicons), NULL);
+
 	/* edit menu > preferences item */
 	GtkWidget* preferences	= gtk_menu_item_new_with_mnemonic
 		("_Preferences");

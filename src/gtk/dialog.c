@@ -123,29 +123,6 @@ collect_bookmark(GtkTreeIter iter, bookmark_list* bl)
 	gtk_tree_path_free(path);
 }
 
-GdkPixbuf*
-favicon_decode(bookmark* b)
-{
-	if(strcmp(bookmark_favicon(b), "none"))
-	{
-		gsize 			favicon_size 	= strlen(bookmark_favicon(b));
-		guchar* 		favicon 		= g_base64_decode(bookmark_favicon(b)
-											,&favicon_size);
-
-		GInputStream* 	memst 			= g_memory_input_stream_new_from_data
-											(favicon, favicon_size, NULL);
-
-		GdkPixbuf* icon 				= gdk_pixbuf_new_from_stream(memst, NULL, NULL);
-
-		if(icon)
-			return icon;
-		else
-			return NULL;
-	}
-
-	return NULL;
-}
-
 GtkWidget**
 entries(gboolean editable)
 {
@@ -200,6 +177,29 @@ entries(gboolean editable)
 	return r;
 }
 
+GdkPixbuf*
+favicon_decode(bookmark* b)
+{
+	if(strcmp(bookmark_favicon(b), "none"))
+	{
+		gsize 			favicon_size 	= strlen(bookmark_favicon(b));
+		guchar* 		favicon 		= g_base64_decode(bookmark_favicon(b)
+											,&favicon_size);
+
+		GInputStream* 	memst 			= g_memory_input_stream_new_from_data
+											(favicon, favicon_size, NULL);
+
+		GdkPixbuf* icon 				= gdk_pixbuf_new_from_stream(memst, NULL, NULL);
+
+		if(icon)
+			return icon;
+		else
+			return NULL;
+	}
+
+	return NULL;
+}
+
 void
 set_url_favicon(GtkWidget* entry)
 {
@@ -211,6 +211,31 @@ set_url_favicon(GtkWidget* entry)
 
 	gtk_entry_set_icon_from_pixbuf(GTK_ENTRY(entry)
 		,GTK_ENTRY_ICON_PRIMARY , icon);
+}
+
+/* get all favicons */
+static gboolean
+favicon_foreach(GtkTreeModel* m, GtkTreePath* p, GtkTreeIter* i, gpointer data)
+{
+	bookmark* b = get_data(p);
+
+	if(strlen(bookmark_url(b)) > 2)
+	{
+		char* icon = download_favicon(bookmark_url(b));
+
+		if(icon)
+			bookmark_db_edit(db, strtol(bookmark_id(b), NULL, 10), 4, icon);
+	}
+
+	bookmark_destroy(b);
+
+	return FALSE;
+}
+
+void
+get_all_favicons(GtkWidget* button)
+{
+	gtk_tree_model_foreach(GTK_TREE_MODEL(model), favicon_foreach, NULL);
 }
 
 GtkWidget*

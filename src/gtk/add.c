@@ -93,12 +93,19 @@ add_window(GtkWidget* button)
 	bookmark* 		b 		= get_data(NULL);
 
 	/* tag box */
-	GtkWidget* 		tag_box = tag_box_new();
+	GtkWidget* 		tag_box 	= tag_box_new();
+	GtkWidget* 		tag_entry 	= gtk_bin_get_child(GTK_BIN(tag_box));
+
+	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(tag_entry)
+		,GTK_ENTRY_ICON_PRIMARY, "folder");
+
+	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(e[3])
+		,GTK_ENTRY_ICON_PRIMARY, "non-starred");
 
 	if(b) 
 	{
-		GtkWidget* tag_entry = gtk_bin_get_child(GTK_BIN(tag_box));
 		gtk_entry_set_text(GTK_ENTRY(tag_entry), get_full_path(b));
+
 		bookmark_destroy(b);
 		b = NULL;
 	}
@@ -119,10 +126,10 @@ add_window(GtkWidget* button)
 	g_signal_connect(cancel_button, "clicked", G_CALLBACK(close_window)
 		,window);
 
-	GtkWidget* favicon_label = gtk_label_new("Favicon");
+	GtkWidget* favicon_label = gtk_label_new("Download");
 	gtk_widget_set_halign(GTK_WIDGET(favicon_label), GTK_ALIGN_START);
 
-	GtkWidget* favicon_button = gtk_check_button_new();
+	GtkWidget* favicon_button = gtk_check_button_new_with_label("Favicon");
 	g_signal_connect(GTK_WIDGET(favicon_button), "toggled"
 		,G_CALLBACK(favicon_set), NULL);
 

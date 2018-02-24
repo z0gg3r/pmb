@@ -349,6 +349,27 @@ move_multiple(GtkWidget* button, gpointer** args)
 }
 
 static void
+edit_delete_favicon()
+{
+	bookmark* b = get_data(NULL);
+
+	bookmark_db_edit(db, strtol(bookmark_id(b), NULL, 10), 4, "none");
+	read_database(NULL, NULL);
+	bookmark_destroy(b);
+}
+
+static void
+edit_download_favicon()
+{
+	bookmark* 	b 		= get_data(NULL);
+	char* 		favicon = download_favicon(bookmark_url(b));
+
+	bookmark_db_edit(db, strtol(bookmark_id(b), NULL, 10), 4, favicon);
+	read_database(NULL, NULL);
+	bookmark_destroy(b);
+}
+
+static void
 edit_bookmark_window(bookmark* b) 
 {
 	GtkWidget* 	window 	= dialogs("Edit bookmark", gpmb_window);
@@ -394,6 +415,18 @@ edit_bookmark_window(bookmark* b)
 	g_signal_connect(cancel_button, "clicked", G_CALLBACK(close_window)
 		,window);
 
+	/* favicon buttons */
+	GtkWidget* clean_label = gtk_label_new("Favicon");
+	gtk_widget_set_halign(GTK_WIDGET(clean_label), GTK_ALIGN_START);
+
+	GtkWidget* clean_button = gtk_button_new_with_mnemonic("C_lean");
+	g_signal_connect(GTK_WIDGET(clean_button), "clicked",
+		G_CALLBACK(edit_delete_favicon), NULL);
+
+	GtkWidget* download_button = gtk_button_new_with_mnemonic("Do_wnload");
+	g_signal_connect(GTK_WIDGET(download_button), "clicked",
+		G_CALLBACK(edit_download_favicon), NULL);
+
 	/* grid */
 	GtkWidget* grid = grid_new();
 
@@ -405,6 +438,9 @@ edit_bookmark_window(bookmark* b)
 	gtk_grid_attach(GTK_GRID(grid), e[5] 			,20, 2, 50, 1);
 	gtk_grid_attach(GTK_GRID(grid), e[6] 			,0,  3, 30, 1);
 	gtk_grid_attach(GTK_GRID(grid), tag_box 		,20, 3, 50, 1);
+	gtk_grid_attach(GTK_GRID(grid), clean_label 	,0,  4, 30, 1);
+	gtk_grid_attach(GTK_GRID(grid), download_button	,20, 4, 25, 1);
+	gtk_grid_attach(GTK_GRID(grid), clean_button 	,45, 4, 25, 1);
 	gtk_grid_attach(GTK_GRID(grid), edit_button 	,20, 5, 20, 10);
 	gtk_grid_attach(GTK_GRID(grid), cancel_button 	,40, 5, 20, 10);
 
