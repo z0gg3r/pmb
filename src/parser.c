@@ -327,6 +327,9 @@ add_bookmark(char* optarg)
 		char*		subopts = optarg;
 		bookmark* 	b 		= NULL;
 
+		/* download favicon? */
+		int			ficon	= 0;
+
 		enum 
 		{ 
 			name_option
@@ -337,6 +340,7 @@ add_bookmark(char* optarg)
 			,scomment_option
 			,tag_option
 			,stag_option
+			,favicon_option
 		};
 
 		char* const sub_options[] = 
@@ -349,6 +353,7 @@ add_bookmark(char* optarg)
 			,[scomment_option] 	= "c"
 			,[tag_option] 		= TAG
 			,[stag_option] 		= "t"
+			,[favicon_option] 	= "favicon"
 			,NULL
 		};
 
@@ -387,6 +392,9 @@ add_bookmark(char* optarg)
 						printf("add: tag needs an argument\n");
 
 					break;		
+				case favicon_option:
+					ficon = 1;
+					break;
 				default:
 					printf("need at least name and url to create"
 						" a bookmark.\n");
@@ -395,7 +403,14 @@ add_bookmark(char* optarg)
 
 		if(name && url) 
 		{
-			if(!favicon)
+			if(ficon)
+			{
+				char* favicon_temp = favicon_download(url);
+
+				if(favicon_temp)
+					favicon = favicon_temp;
+			}
+			else
 				favicon = "none";
 
 			b = bookmark_new(name, url, comment, tag, favicon);

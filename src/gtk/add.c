@@ -3,9 +3,12 @@
 int favicon_button_state = FALSE;
 
 static void
-favicon_set()
+favicon_set(GtkWidget* button)
 {
-	favicon_button_state = TRUE;
+	if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button)))
+		favicon_button_state = FALSE;
+	else
+		favicon_button_state = TRUE;
 }
 
 static void 
@@ -38,7 +41,7 @@ add_bookmark(GtkWidget* button, gpointer** args)
 		char* favicon_temp = download_favicon(url);
 
 		if(favicon_temp)
-			favicon = download_favicon(url);
+			favicon = favicon_temp;
 	}
 	
 	if(name && url) 

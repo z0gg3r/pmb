@@ -1,24 +1,21 @@
 **pmb** is a bookmark management tool for those who want more power and flexibility
 in bookmark management.
 
-Gtk interface, gpmb.
-![screenshot-gpmb](image/gpmb.png)
+![screenshot-gpmb](image/screenshot.png)
 
-Command line, pmb.
+A bookmark inside pmb will have 6 fields:
 
-![screenshot-pmb](image/pmb.png)
-
-A bookmark inside pmb will have 5 fields:
-
-	id		<- unique identifier
+	id			<- unique identifier
 
 	name		<- name of the website
 
-	url		<- url of the website
+	url			<- url of the website
 
 	comment		<- a comment about it [optional]
 
-	tag		<- a tag [optional]
+	tag			<- a tag [optional]
+
+	favicon		<- a tag [optional]
 
 Tags are used to group bookmarks together, then you can operate on groups of
 bookmarks easily.

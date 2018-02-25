@@ -14,25 +14,26 @@
 #include "option.h"
 #include "tree.h"
 #include "html.h"
+#include "favicon.h"
 
-extern char* red;
-extern char* green;
-extern char* yellow;
-extern char* blue;
-extern char* magenta;
-extern char* cyan;
-extern char* gray;
-extern char* white;
-extern char* reset;
+extern char* 	red;
+extern char* 	green;
+extern char* 	yellow;
+extern char* 	blue;
+extern char* 	magenta;
+extern char* 	cyan;
+extern char* 	gray;
+extern char* 	white;
+extern char* 	reset;
 
-extern char* id_color;
-extern char* name_color;
-extern char* url_color;
-extern char* comment_color;
-extern char* tag_color;
+extern char* 	id_color;
+extern char* 	name_color;
+extern char* 	url_color;
+extern char* 	comment_color;
+extern char* 	tag_color;
 
-extern int 	color;
-extern int 	verbose;
+extern int 		color;
+extern int 		verbose;
 extern sqlite3* db;
 
 /* read config file */
