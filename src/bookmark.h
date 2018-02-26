@@ -2,12 +2,12 @@
 #define BOOKMARK_H
 #define _GNU_SOURCE
 
-#define ID 		"id"
-#define NAME 		"name"
-#define URL 		"url"
-#define COMMENT 	"comment"
-#define TAG 		"tag"
-#define DATABASE 	"bookmarks.db"
+#define ID "id"
+#define NAME "name"
+#define URL "url"
+#define COMMENT "comment"
+#define TAG "tag"
+#define DATABASE "bookmarks.db"
 
 #include <stdlib.h>
 

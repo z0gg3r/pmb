@@ -1,6 +1,6 @@
 #ifndef DATABASE_H
 #define DATABASE_H
-#define _GNU_SOURCE 	/* asprintf, secure_getenv */
+#define _GNU_SOURCE /* asprintf, secure_getenv */
 
 #include <limits.h>
 #include <stdio.h>
@@ -34,7 +34,7 @@ bookmark_db_delete(sqlite3*, int);
 
 /* -- delete all bookmarks tagged with char* tag */
 /* -- if greedy = 1, it will delete any tag containing 
-	the words in tag */
+   the words in tag */
 /* sqlite3* database, char* tag, int greedy */
 int
 bookmark_db_delete_tag(sqlite3*, char*, int);
@@ -44,7 +44,7 @@ int
 bookmark_db_edit(sqlite3*, int, int, char*);
 
 /* sqlite3* database, int database field/column, char* current value
- 	,char* new value */
+   ,char* new value */
 int 
 bookmark_db_edit_bulk(sqlite3*, int, char*, char*);
 

@@ -17,10 +17,10 @@ bookmark_list_destroy(bookmark_list*);
 
 /* -- add a bookmark to bookmark_list -- */
 /* bookmark_list* l, char* id, char* name, char* url, char* comment
-	,char* tag */
+   ,char* tag */
 int
 bookmark_list_enqueue(bookmark_list* 
-	,char*, char*, char*, char*, char*, char*);
+		      ,char*, char*, char*, char*, char*, char*);
 
 /* -- add a bookmark to bookmark_list -- */
 int

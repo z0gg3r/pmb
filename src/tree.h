@@ -99,7 +99,8 @@ directory_contain_bookmark(directory*, int);
 directory**
 create_directory_tree_from_list(directory_name_list*, int);
 
-/* -- add childrens to directory from directory_name_list and add bookmark to last child -- */
+/* -- add childrens to directory from directory_name_list and add bookmark 
+   to last child -- */
 /* directory* d, directory_name_list* l, bookmark* b */
 void
 directory_add_children_from_list(directory*, directory_name_list*, bookmark*);
@@ -114,7 +115,8 @@ directory_delete_path(directory*, directory_name_list*);
 
 /* -- edit leaf based on directory_name_list path -- */
 void
-directory_edit_last_children_name_from_list(directory*, directory_name_list*, char*);
+directory_edit_last_children_name_from_list(directory*, directory_name_list*
+					    ,char*);
 
 /* -- rename directory who have current_name to new_name -- */
 /* directory *d, char* current_name, char* new_name, directory_name_list* l */
@@ -169,7 +171,8 @@ directory_name_list_return_last(directory_name_list*);
 void
 directory_name_list_rewind(directory_name_list*);
 
-/* -- cut the bookmark* b->tag string and return it in directory_name_list* -- */
+/* -- cut the bookmark* b->tag string and return it in 
+   directory_name_list* -- */
 directory_name_list*
 dismember(bookmark*);
 
@@ -178,4 +181,3 @@ char*
 directory_name_list_pop(directory_name_list*);
 
 #endif
-

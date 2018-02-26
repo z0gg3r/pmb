@@ -1,14 +1,14 @@
 #ifndef PARSER_H
 #define PARSER_H
 
-#define _GNU_SOURCE 	/* getsubopt, secure_getenv */
-#define VERSION 	"0.0.1"
-#define CONFIG_FILE	"pmb.conf"
+#define _GNU_SOURCE /* getsubopt, secure_getenv */
+#define VERSION "0.0.1"
+#define CONFIG_FILE "pmb.conf"
 
 #include <getopt.h>
 #include <stdio.h>
 #include <string.h>
-#include <unistd.h> 	/* isatty */
+#include <unistd.h> /* isatty */
 #include <limits.h>
 #include <stdlib.h>
 #include "option.h"
@@ -16,24 +16,24 @@
 #include "html.h"
 #include "favicon.h"
 
-extern char* 	red;
-extern char* 	green;
-extern char* 	yellow;
-extern char* 	blue;
-extern char* 	magenta;
-extern char* 	cyan;
-extern char* 	gray;
-extern char* 	white;
-extern char* 	reset;
+extern char* red;
+extern char* green;
+extern char* yellow;
+extern char* blue;
+extern char* magenta;
+extern char* cyan;
+extern char* gray;
+extern char* white;
+extern char* reset;
 
-extern char* 	id_color;
-extern char* 	name_color;
-extern char* 	url_color;
-extern char* 	comment_color;
-extern char* 	tag_color;
+extern char* id_color;
+extern char* name_color;
+extern char* url_color;
+extern char* comment_color;
+extern char* tag_color;
 
-extern int 		color;
-extern int 		verbose;
+extern int color;
+extern int verbose;
 extern sqlite3* db;
 
 /* read config file */
@@ -43,7 +43,7 @@ read_config(char*);
 /* int argc, char* argv[], cl_option_list*, cl_option_list* */
 void
 parse_options(int, char*[], cl_option_list*
-	,cl_option_list*);
+	      ,cl_option_list*);
 
 /* -- add a new bookmark */
 int
@@ -102,4 +102,3 @@ void
 version();
 
 #endif
-

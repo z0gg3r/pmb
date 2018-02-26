@@ -48,7 +48,7 @@ define BUILD_DEP
 	-o $(BUILD_DIR)/$(BOOKMARK_LIST).o
 	$(CC) $(CCFLAGS) -c $(INC_DIR)/$(DATABASE).c \
 	-o $(BUILD_DIR)/$(DATABASE).o
-	$(CC) $(CCFLAGS) -c $(INC_DIR)/$(PARSER).c \
+	$(CC) $(CCFLAGS) $(GLIBFLAGS) -c $(INC_DIR)/$(PARSER).c \
 	-o $(BUILD_DIR)/$(PARSER).o
 	$(CC) $(CCFLAGS) -c $(INC_DIR)/$(OPTION).c \
 	-o $(BUILD_DIR)/$(OPTION).o
