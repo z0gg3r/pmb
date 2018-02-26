@@ -27,7 +27,7 @@ add_bookmark(GtkWidget* button, gpointer** args)
   if(strlen(tag_t) > 1)
     tag = tag_t;
 
-  if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTTON(favicon_button)));
+  if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(favicon_button)))
     {
       char* favicon_temp = download_favicon(url);
 
