@@ -1,15 +1,6 @@
 #include "add.h"
 
-int favicon_button_state = FALSE;
-
-static void
-favicon_set(GtkWidget* button)
-{
-  if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button)))
-    favicon_button_state = FALSE;
-  else
-    favicon_button_state = TRUE;
-}
+GtkWidget* favicon_button;
 
 static void 
 add_bookmark(GtkWidget* button, gpointer** args) 
@@ -36,14 +27,14 @@ add_bookmark(GtkWidget* button, gpointer** args)
   if(strlen(tag_t) > 1)
     tag = tag_t;
 
-  if(favicon_button_state)
+  if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTTON(favicon_button)));
     {
       char* favicon_temp = download_favicon(url);
 
       if(favicon_temp)
 	favicon = favicon_temp;
     }
-	
+
   if(name && url) 
     {
       /* write to database */
@@ -137,9 +128,7 @@ add_window(GtkWidget* button)
   GtkWidget* favicon_label = gtk_label_new("Download");
   gtk_widget_set_halign(GTK_WIDGET(favicon_label), GTK_ALIGN_START);
 
-  GtkWidget* favicon_button = gtk_check_button_new_with_label("Favicon");
-  g_signal_connect
-    (GTK_WIDGET(favicon_button), "toggled", G_CALLBACK(favicon_set), NULL);
+  favicon_button = gtk_check_button_new_with_label("Favicon");
 
   if(!strcmp(opts->download_favicon, "true"))
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(favicon_button), TRUE);

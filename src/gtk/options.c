@@ -368,7 +368,6 @@ appearance_page()
   GtkWidget* comment_label= gtk_label_new("Comment");
 
   GtkWidget* grid = grid_new();
-
   gtk_grid_attach(GTK_GRID(grid), id_label, 0,  0, 20, 1);
   gtk_grid_attach(GTK_GRID(grid), id_fg_button, 20, 0, 10, 1);
   gtk_grid_attach(GTK_GRID(grid), id_font_button, 30, 0, 30, 1);
@@ -416,7 +415,6 @@ settings_page()
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(favicon_button), TRUE);
   
   GtkWidget* grid = grid_new();
-
   gtk_grid_attach(GTK_GRID(grid), database_label, 0,  0, 30, 1);
   gtk_grid_attach(GTK_GRID(grid), database_file_entry, 40, 0, 50, 1);
   gtk_grid_attach(GTK_GRID(grid), tree_lines_button, 0,  1, 25, 1);
