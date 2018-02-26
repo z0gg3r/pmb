@@ -62,15 +62,13 @@ cell_renderer_new(char* color, const char* font)
 
   if(color)
     {
-      GdkRGBA	gcolor;
+      GdkRGBA gcolor;
       gdk_rgba_parse(&gcolor, color);
-      g_object_set
-	(G_OBJECT(renderer), "foreground-rgba", &gcolor, NULL);
+      g_object_set(G_OBJECT(renderer), "foreground-rgba", &gcolor, NULL);
     }
 
   if(font)
     g_object_set(renderer, "font", font, NULL);
-
 
   return renderer;
 }

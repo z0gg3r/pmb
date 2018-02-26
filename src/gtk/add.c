@@ -141,6 +141,9 @@ add_window(GtkWidget* button)
   g_signal_connect
     (GTK_WIDGET(favicon_button), "toggled", G_CALLBACK(favicon_set), NULL);
 
+  if(!strcmp(opts->download_favicon, "true"))
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(favicon_button), TRUE);
+  
   /* grid */
   GtkWidget *grid = gtk_grid_new();
   gtk_grid_set_column_spacing(GTK_GRID(grid), 2);

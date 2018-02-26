@@ -8,7 +8,8 @@ typedef struct gpmb_options
 {
   char* database_file;
   char* tree_lines;
-
+  char* download_favicon;
+  
   /* colors */
   char* id_fg;
   char* name_fg;

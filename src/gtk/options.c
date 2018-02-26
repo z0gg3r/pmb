@@ -1,13 +1,11 @@
 #include "options.h"
 
-GtkWidget* tree_lines = NULL;
 gpmb_options* opts = NULL;
 char* config_file = NULL;
 
 void 
 set_options() 
 {
-
   const char* home = secure_getenv("HOME");	
   char*	conf_dir = ".config/pmb";
   char*	config_filename = "gpmb.conf";
@@ -25,6 +23,7 @@ set_options()
     {
       opts->database_file = database_file;
       opts->tree_lines = "true";
+      opts->download_favicon = "false";
       opts->id_fg = NULL;
       opts->name_fg = NULL;
       opts->url_fg = NULL;
@@ -50,6 +49,9 @@ write_config()
       if(opts->tree_lines)
 	fprintf(fp, "tree_lines=%s\n", opts->tree_lines);
 
+      if(opts->download_favicon)
+	fprintf(fp, "download_favicon=%s\n", opts->download_favicon);
+	    
       if(opts->id_fg)
 	fprintf(fp, "id_fg=%s\n", opts->id_fg);
 
@@ -111,6 +113,9 @@ read_config()
 
 	      else if(!(strcmp(str, "tree_lines")))
 		opts->tree_lines = strsep(&option, "=");
+	      
+	      else if(!(strcmp(str, "download_favicon")))
+		opts->download_favicon = strsep(&option, "=");	      
 
 	      else if(!(strcmp(str, "id_fg")))
 		opts->id_fg = strsep(&option, "=");
@@ -256,6 +261,15 @@ tree_lines_set(GtkToggleButton* button)
     opts->tree_lines = "false";
 }
 
+static void
+favicons_set(GtkToggleButton* button)
+{
+  if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button)))
+    opts->download_favicon = "true";
+  else
+    opts->download_favicon = "false";
+}
+
 static GtkWidget*
 appearance_page()
 {
@@ -384,19 +398,30 @@ settings_page()
   gtk_entry_set_text(GTK_ENTRY(database_file_entry), opts->database_file);
 
   /* tree lines */
-  tree_lines = gtk_check_button_new_with_label("Tree lines");
+  GtkWidget* tree_lines_button = gtk_check_button_new_with_label
+    ("Show tree lines");
   g_signal_connect
-    (GTK_WIDGET(tree_lines), "toggled", G_CALLBACK(tree_lines_set), NULL);
+    (GTK_WIDGET(tree_lines_button), "toggled", G_CALLBACK(tree_lines_set), NULL);
 
   if(gtk_tree_view_get_enable_tree_lines(GTK_TREE_VIEW(treeview)))
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(tree_lines), TRUE);
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(tree_lines_button), TRUE);
 
+  /* favicons */
+  GtkWidget* favicon_button = gtk_check_button_new_with_label
+    ("Download favicon");
+  g_signal_connect
+    (GTK_WIDGET(favicon_button), "toggled", G_CALLBACK(favicons_set), NULL);
+
+  if(!strcmp(opts->download_favicon, "true"))
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(favicon_button), TRUE);
+  
   GtkWidget* grid = grid_new();
 
   gtk_grid_attach(GTK_GRID(grid), database_label, 0,  0, 30, 1);
   gtk_grid_attach(GTK_GRID(grid), database_file_entry, 40, 0, 50, 1);
-  gtk_grid_attach(GTK_GRID(grid), tree_lines, 0,  1, 50, 1);
-
+  gtk_grid_attach(GTK_GRID(grid), tree_lines_button, 0,  1, 25, 1);
+  gtk_grid_attach(GTK_GRID(grid), favicon_button, 25,  1, 25, 1);
+  
   return grid;
 }
 
