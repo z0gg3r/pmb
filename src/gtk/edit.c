@@ -14,6 +14,7 @@ move_directory(char* tag)
     {
       iter_copy = iter;
 
+      /* count number of parents */
       while(gtk_tree_model_iter_parent
 	    (GTK_TREE_MODEL(model), &parent, &iter_copy))
 	{
@@ -21,6 +22,7 @@ move_directory(char* tag)
 	  iter_copy = parent;
 	}
 
+      /* collect children, if any */
       if(gtk_tree_model_iter_nth_child
 	 (GTK_TREE_MODEL(model), &child, &iter, 0))
 	{
@@ -28,6 +30,7 @@ move_directory(char* tag)
 	}
     }
 
+  /* start moving */
   while((b = bookmark_list_return_next_bookmark(bl)))
     {
       unsigned int id = strtol(bookmark_id(b), NULL, 10);
