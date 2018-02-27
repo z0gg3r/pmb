@@ -44,37 +44,59 @@ write_config()
   if(fp)
     {
       if(opts->database_file)
-	fprintf(fp, "database=%s\n", opts->database_file);
+	{
+	  fprintf(fp, "database=%s\n", opts->database_file);
+	}
 		
       if(opts->tree_lines)
-	fprintf(fp, "tree_lines=%s\n", opts->tree_lines);
+	{
+	  fprintf(fp, "tree_lines=%s\n", opts->tree_lines);
+	}
 
       if(opts->download_favicon)
-	fprintf(fp, "download_favicon=%s\n", opts->download_favicon);
+	{
+	  fprintf(fp, "download_favicon=%s\n", opts->download_favicon);
+	}
 	    
       if(opts->id_fg)
-	fprintf(fp, "id_fg=%s\n", opts->id_fg);
+	{
+	  fprintf(fp, "id_fg=%s\n", opts->id_fg);
+	}
 
       if(opts->name_fg)
-	fprintf(fp, "name_fg=%s\n", opts->name_fg);
+	{
+	  fprintf(fp, "name_fg=%s\n", opts->name_fg);
+	}
 
       if(opts->url_fg)
-	fprintf(fp, "url_fg=%s\n", opts->url_fg);
+	{
+	  fprintf(fp, "url_fg=%s\n", opts->url_fg);
+	}
 
       if(opts->comment_fg)
-	fprintf(fp, "comment_fg=%s\n", opts->comment_fg);
+	{
+	  fprintf(fp, "comment_fg=%s\n", opts->comment_fg);
+	}
 
       if(opts->id_font)
-	fprintf(fp, "id_font=%s\n", opts->id_font);
+	{
+	  fprintf(fp, "id_font=%s\n", opts->id_font);
+	}
 
       if(opts->name_font)
-	fprintf(fp, "name_font=%s\n", opts->name_font);
+	{
+	  fprintf(fp, "name_font=%s\n", opts->name_font);
+	}
 
       if(opts->url_font)
-	fprintf(fp, "url_font=%s\n", opts->url_font);
+	{
+	  fprintf(fp, "url_font=%s\n", opts->url_font);
+	}
 
       if(opts->comment_font)
-	fprintf(fp, "comment_font=%s\n", opts->comment_font);
+	{
+	  fprintf(fp, "comment_font=%s\n", opts->comment_font);
+	}
 
       fclose(fp);
     }
@@ -104,45 +126,71 @@ read_config()
 		 ||(option[0] == ' ')
 		 ||(option[0] == '\t')
 		 ||(option[0] == '#')) /* comment */
-		goto new_option;
+		{
+		  goto new_option;
+		}
 
 	      char* str = strsep(&option, "=");
 
 	      if(!(strcmp(str, "database")))
-		opts->database_file = strsep(&option, "=");
+		{
+		  opts->database_file = strsep(&option, "=");
+		}
 
 	      else if(!(strcmp(str, "tree_lines")))
-		opts->tree_lines = strsep(&option, "=");
+		{
+		  opts->tree_lines = strsep(&option, "=");
+		}
 	      
 	      else if(!(strcmp(str, "download_favicon")))
-		opts->download_favicon = strsep(&option, "=");	      
+		{
+		  opts->download_favicon = strsep(&option, "=");
+		}
 
 	      else if(!(strcmp(str, "id_fg")))
-		opts->id_fg = strsep(&option, "=");
+		{
+		  opts->id_fg = strsep(&option, "=");
+		}
 
 	      else if(!(strcmp(str, "name_fg")))
-		opts->name_fg = strsep(&option, "=");
+		{
+		  opts->name_fg = strsep(&option, "=");
+		}
 
 	      else if(!(strcmp(str, "url_fg")))
-		opts->url_fg = strsep(&option, "=");
+		{
+		  opts->url_fg = strsep(&option, "=");
+		}
 
 	      else if(!(strcmp(str, "comment_fg")))
-		opts->comment_fg = strsep(&option, "=");
+		{
+		  opts->comment_fg = strsep(&option, "=");
+		}
 
 	      else if(!(strcmp(str, "id_font")))
-		opts->id_font = strsep(&option, "=");
+		{
+		  opts->id_font = strsep(&option, "=");
+		}
 
 	      else if(!(strcmp(str, "name_font")))
-		opts->name_font	= strsep(&option, "=");
+		{
+		  opts->name_font = strsep(&option, "=");
+		}
 
 	      else if(!(strcmp(str, "url_font")))
-		opts->url_font = strsep(&option, "=");
+		{
+		  opts->url_font = strsep(&option, "=");
+		}
 
 	      else if(!(strcmp(str, "comment_font")))
-		opts->comment_font = strsep(&option, "=");
+		{
+		  opts->comment_font = strsep(&option, "=");
+		}
 
 	      else
-		printf("unknown option: %s\n", str);
+		{
+		  printf("unknown option: %s\n", str);
+		}
 
 	    new_option:
 	      free(option_bkp);
@@ -163,40 +211,63 @@ read_config()
       fclose(fp);
     }
   else
-    write_config();
+    {
+      write_config();
+    }
 }
 
 static void
 apply_settings(GtkWidget* button)
 {
   if(opts->id_fg)
-    g_object_set(cell_renderer_id, "foreground", opts->id_fg, NULL);
+    {
+      g_object_set(g_cell_renderer_id, "foreground", opts->id_fg, NULL);
+    }
 
   if(opts->name_fg)
-    g_object_set(cell_renderer_name, "foreground", opts->name_fg, NULL);
+    {
+      g_object_set(g_cell_renderer_name, "foreground", opts->name_fg, NULL);
+    }
 
   if(opts->url_fg)
-    g_object_set(cell_renderer_url, "foreground", opts->url_fg, NULL);
+    {
+      g_object_set(g_cell_renderer_url, "foreground", opts->url_fg, NULL);
+    }
 
   if(opts->comment_fg)
-    g_object_set(cell_renderer_comment, "foreground", opts->comment_fg, NULL);
+    {
+      g_object_set(g_cell_renderer_comment, "foreground", opts->comment_fg
+		   ,NULL);
+    }
 
   if(opts->id_font)
-    g_object_set(cell_renderer_id, "font", opts->id_font, NULL);
+    {
+      g_object_set(g_cell_renderer_id, "font", opts->id_font, NULL);
+    }
 
   if(opts->name_font)
-    g_object_set(cell_renderer_name, "font", opts->name_font, NULL);
+    {
+      g_object_set(g_cell_renderer_name, "font", opts->name_font, NULL);
+    }
 
   if(opts->url_font)
-    g_object_set(cell_renderer_url, "font", opts->url_font, NULL);
+    {
+      g_object_set(g_cell_renderer_url, "font", opts->url_font, NULL);
+    }
 
   if(opts->comment_font)
-    g_object_set(cell_renderer_comment, "font", opts->comment_font, NULL);
+    {
+      g_object_set(g_cell_renderer_comment, "font", opts->comment_font, NULL);
+    }
 
   if(!(strcmp(opts->tree_lines, "true")))
-    gtk_tree_view_set_enable_tree_lines(GTK_TREE_VIEW(treeview), TRUE);
+    {
+      gtk_tree_view_set_enable_tree_lines(GTK_TREE_VIEW(g_treeview), TRUE);
+    }
   else
-    gtk_tree_view_set_enable_tree_lines(GTK_TREE_VIEW(treeview), FALSE);
+    {
+      gtk_tree_view_set_enable_tree_lines(GTK_TREE_VIEW(g_treeview), FALSE);
+    }
 
   write_config();
   read_database(NULL, NULL);
@@ -206,20 +277,28 @@ static void
 select_font(GtkFontButton* button, gpointer name)
 {
   if(!(strcmp(name, "id")))
-    opts->id_font = gtk_font_button_get_font_name
-      (GTK_FONT_BUTTON(button));
+    {
+      opts->id_font = gtk_font_button_get_font_name
+	(GTK_FONT_BUTTON(button));
+    }
 
   if(!(strcmp(name, "name")))
-    opts->name_font = gtk_font_button_get_font_name
-      (GTK_FONT_BUTTON(button));
+    {
+      opts->name_font = gtk_font_button_get_font_name
+	(GTK_FONT_BUTTON(button));
+    }
 
   if(!(strcmp(name, "url")))
-    opts->url_font = gtk_font_button_get_font_name
-      (GTK_FONT_BUTTON(button));
+    {
+      opts->url_font = gtk_font_button_get_font_name
+	(GTK_FONT_BUTTON(button));
+    }
 
   if(!(strcmp(name, "comment")))
-    opts->comment_font = gtk_font_button_get_font_name
-      (GTK_FONT_BUTTON(button));
+    {
+      opts->comment_font = gtk_font_button_get_font_name
+	(GTK_FONT_BUTTON(button));
+    }
 }
 
 static void
@@ -256,18 +335,26 @@ static void
 tree_lines_set(GtkToggleButton* button)
 {
   if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button)))
-    opts->tree_lines = "true";
+    {
+      opts->tree_lines = "true";
+    }
   else
-    opts->tree_lines = "false";
+    {
+      opts->tree_lines = "false";
+    }
 }
 
 static void
 favicons_set(GtkToggleButton* button)
 {
   if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button)))
-    opts->download_favicon = "true";
+    {
+      opts->download_favicon = "true";
+    }
   else
-    opts->download_favicon = "false";
+    {
+      opts->download_favicon = "false";
+    }
 }
 
 static GtkWidget*
@@ -280,16 +367,24 @@ appearance_page()
   GdkRGBA comment;
 
   if(opts->id_fg)
-    gdk_rgba_parse(&id, opts->id_fg);
+    {
+      gdk_rgba_parse(&id, opts->id_fg);
+    }
 
   if(opts->name_fg)
-    gdk_rgba_parse(&name, opts->name_fg);
+    {
+      gdk_rgba_parse(&name, opts->name_fg);
+    }
 
   if(opts->url_fg)
-    gdk_rgba_parse(&url, opts->url_fg);
+    {
+      gdk_rgba_parse(&url, opts->url_fg);
+    }
 
   if(opts->comment_fg)
-    gdk_rgba_parse(&comment, opts->comment_fg);
+    {
+      gdk_rgba_parse(&comment, opts->comment_fg);
+    }
 
   GtkWidget* id_fg_button = gtk_color_button_new_with_rgba(&id);
   GtkWidget* name_fg_button = gtk_color_button_new_with_rgba(&name);
@@ -319,32 +414,48 @@ appearance_page()
   GtkWidget* comment_font_button = gtk_font_button_new();
 
   if(opts->id_font)
-    gtk_font_button_set_font_name(GTK_FONT_BUTTON(id_font_button)
-				  ,opts->id_font);
+    {
+      gtk_font_button_set_font_name(GTK_FONT_BUTTON(id_font_button)
+				    ,opts->id_font);
+    }
   else
-    gtk_font_button_set_font_name(GTK_FONT_BUTTON(id_font_button)
-				  ,"none");
+    {
+      gtk_font_button_set_font_name(GTK_FONT_BUTTON(id_font_button)
+				    ,"none");
+    }
 
   if(opts->name_font)
-    gtk_font_button_set_font_name(GTK_FONT_BUTTON(name_font_button)
-				  ,opts->name_font);
+    {
+      gtk_font_button_set_font_name(GTK_FONT_BUTTON(name_font_button)
+				    ,opts->name_font);
+    }
   else
-    gtk_font_button_set_font_name(GTK_FONT_BUTTON(name_font_button)
-				  ,"none");
+    {
+      gtk_font_button_set_font_name(GTK_FONT_BUTTON(name_font_button)
+				    ,"none");
+    }
 
   if(opts->url_font)
-    gtk_font_button_set_font_name(GTK_FONT_BUTTON(url_font_button)
-				  ,opts->url_font);
+    {
+      gtk_font_button_set_font_name(GTK_FONT_BUTTON(url_font_button)
+				    ,opts->url_font);
+    }
   else
-    gtk_font_button_set_font_name(GTK_FONT_BUTTON(url_font_button)
-				  ,"none");
+    {
+      gtk_font_button_set_font_name(GTK_FONT_BUTTON(url_font_button)
+				    ,"none");
+    }
 
   if(opts->comment_font)
-    gtk_font_button_set_font_name(GTK_FONT_BUTTON(comment_font_button)
-				  ,opts->comment_font);
+    {
+      gtk_font_button_set_font_name(GTK_FONT_BUTTON(comment_font_button)
+				    ,opts->comment_font);
+    }
   else
-    gtk_font_button_set_font_name(GTK_FONT_BUTTON(comment_font_button)
-				  ,"none");
+    {
+      gtk_font_button_set_font_name(GTK_FONT_BUTTON(comment_font_button)
+				    ,"none");
+    }
 
   g_signal_connect
     (GTK_WIDGET(id_font_button), "font-set", G_CALLBACK(select_font)
@@ -402,8 +513,11 @@ settings_page()
   g_signal_connect
     (GTK_WIDGET(tree_lines_button), "toggled", G_CALLBACK(tree_lines_set), NULL);
 
-  if(gtk_tree_view_get_enable_tree_lines(GTK_TREE_VIEW(treeview)))
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(tree_lines_button), TRUE);
+  if(gtk_tree_view_get_enable_tree_lines(GTK_TREE_VIEW(g_treeview)))
+    {
+      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(tree_lines_button)
+				   ,TRUE);
+    }
 
   /* favicons */
   GtkWidget* favicon_button = gtk_check_button_new_with_label
@@ -412,7 +526,9 @@ settings_page()
     (GTK_WIDGET(favicon_button), "toggled", G_CALLBACK(favicons_set), NULL);
 
   if(!strcmp(opts->download_favicon, "true"))
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(favicon_button), TRUE);
+    {
+      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(favicon_button), TRUE);
+    }
   
   GtkWidget* grid = grid_new();
   gtk_grid_attach(GTK_GRID(grid), database_label, 0,  0, 30, 1);

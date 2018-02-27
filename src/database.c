@@ -39,8 +39,10 @@ bookmark_db_table_create(sqlite3* db)
 	  return 1;
 	}
     } 
-  else 
-    return 1;
+  else
+    {
+      return 1;
+    }
 
   return 0;
 }
@@ -54,8 +56,10 @@ bookmark_db_open(char *db_name)
     {
       const int r = sqlite3_open(db_name, &db);
 
-      if(r) 
-	return NULL;
+      if(r)
+	{
+	  return NULL;
+	}
 
       else /* verify if table bookmark exist on db */
 	{
@@ -104,14 +108,15 @@ bookmark_db_open(char *db_name)
 	    } 
 	  else 
 	    {
-
 	      sqlite3_finalize(res);
 	      return NULL;
 	    }
 	}
     } 
-  else 
-    return NULL;
+  else
+    {
+      return NULL;
+    }
 	
   return db;
 }
@@ -133,24 +138,35 @@ bookmark_db_write(bookmark* b, sqlite3* db)
     {
       const char* sql = "INSERT INTO bookmark (name, url, comment, tag, favicon)"
 	" VALUES(?,?,?,?,?)";
+
       sqlite3_stmt* res;
 
       if((sqlite3_prepare_v2(db, sql, -1, &res, 0)) == SQLITE_OK) 
 	{
 	  if(bookmark_name(b))
-	    sqlite3_bind_text(res, 1, bookmark_name(b), -1, NULL);
+	    {
+	      sqlite3_bind_text(res, 1, bookmark_name(b), -1, NULL);
+	    }
 
 	  if(bookmark_url(b))
-	    sqlite3_bind_text(res, 2, bookmark_url(b), -1, NULL);
+	    {
+	      sqlite3_bind_text(res, 2, bookmark_url(b), -1, NULL);
+	    }
 
 	  if(bookmark_comment(b))
-	    sqlite3_bind_text(res, 3, bookmark_comment(b), -1, NULL);
+	    {
+	      sqlite3_bind_text(res, 3, bookmark_comment(b), -1, NULL);
+	    }
 
 	  if(bookmark_tag(b))
-	    sqlite3_bind_text(res, 4, bookmark_tag(b), -1, NULL);
+	    {
+	      sqlite3_bind_text(res, 4, bookmark_tag(b), -1, NULL);
+	    }
 
 	  if(bookmark_favicon(b))
-	    sqlite3_bind_text(res, 5, bookmark_favicon(b), -1, NULL);
+	    {
+	      sqlite3_bind_text(res, 5, bookmark_favicon(b), -1, NULL);
+	    }
 
 	  sqlite3_step(res);
 	}
@@ -175,7 +191,9 @@ bookmark_db_import(sqlite3* db, sqlite3* i_db)
 	  while((b = bookmark_list_return_next_bookmark(bl)))
 	    {
 	      if(bookmark_db_write(b, db))
-		return 1;
+		{
+		  return 1;
+		}
 
 	      bookmark_destroy(b);
 	    }
@@ -183,10 +201,14 @@ bookmark_db_import(sqlite3* db, sqlite3* i_db)
 	  bookmark_list_destroy(bl);
 	}
       else
-	return 1;
+	{
+	  return 1;
+	}
     }
   else
-    return 1;
+    {
+      return 1;
+    }
 
   return 0;
 }
@@ -206,8 +228,10 @@ bookmark_db_id(sqlite3* db, int id)
 	{
 	  sqlite3_bind_int(res, 1, id);
 
-	  if((sqlite3_step(res)) == SQLITE_ROW) 
-	    ret = sqlite3_column_int(res, 0);
+	  if((sqlite3_step(res)) == SQLITE_ROW)
+	    {
+	      ret = sqlite3_column_int(res, 0);
+	    }
 	}
 
       sqlite3_finalize(res);
@@ -240,8 +264,10 @@ bookmark_db_delete(sqlite3* db, int id)
 	      return 1;
 	    }
 	} 
-      else 
-	return 1;
+      else
+	{
+	  return 1;
+	}
 
       sqlite3_finalize(res);
       return 0;
@@ -272,10 +298,14 @@ bookmark_db_delete_tag(sqlite3* db, char* tag, int greedy)
 		       ,sql_head, tag);
 	      sqlite3_stmt* res;
 
-	      if((sqlite3_prepare_v2(db, sql, -1, &res, 0)) == SQLITE_OK) 
-		sqlite3_step(res);
-	      else 
-		return 1;
+	      if((sqlite3_prepare_v2(db, sql, -1, &res, 0)) == SQLITE_OK)
+		{
+		  sqlite3_step(res);
+		}
+	      else
+		{
+		  return 1;
+		}
 
 	      free(sql);
 	      sqlite3_finalize(res);
@@ -291,8 +321,10 @@ bookmark_db_delete_tag(sqlite3* db, char* tag, int greedy)
 	      sqlite3_bind_text(res, 1, tag, -1, NULL);
 	      sqlite3_step(res);
 	    } 
-	  else 
-	    return 1;
+	  else
+	    {
+	      return 1;
+	    }
 
 	  sqlite3_finalize(res);
 	}
@@ -352,8 +384,10 @@ bookmark_db_edit(sqlite3 *db, int id, int field, char *str)
 	      ret = 1;
 	    }
 	}	
-      else 
-	ret = 1;
+      else
+	{
+	  ret = 1;
+	}
 
       sqlite3_finalize(res);
       return ret;
@@ -397,8 +431,10 @@ bookmark_db_edit_bulk(sqlite3* db, int field, char* cv, char* nv)
 	  sqlite3_bind_text(res, 2, cv, -1, NULL);
 	  sqlite3_step(res);
 	}	
-      else 
-	ret = 1;
+      else
+	{
+	  ret = 1;
+	}
 
       sqlite3_finalize(res);
       return ret;
@@ -417,8 +453,10 @@ search_db(sqlite3* db, char* field, char* str, char* sql)
 
       if((sqlite3_prepare_v2(db, sql, -1, &res, 0)) == SQLITE_OK) 
 	{
-	  if(str) 
-	    sqlite3_bind_text(res, 1, str, -1, NULL);
+	  if(str)
+	    {
+	      sqlite3_bind_text(res, 1, str, -1, NULL);
+	    }
 
 	  while((sqlite3_step(res)) == SQLITE_ROW) 
 	    {
@@ -426,88 +464,112 @@ search_db(sqlite3* db, char* field, char* str, char* sql)
 		{
 		  if(!strncmp(field, ID, strlen(ID))) 
 		    {
-		      if(sqlite3_column_text(res, 0)) 
-			bookmark_list_enqueue(bl
-					      ,(char*)sqlite3_column_text
-					      (res, 0)
-					      ,NULL
-					      ,NULL
-					      ,NULL
-					      ,NULL
-					      ,NULL);
+		      if(sqlite3_column_text(res, 0))
+			{
+			  bookmark_list_enqueue
+			    (bl
+			     ,(char*)sqlite3_column_text
+			     (res, 0)
+			     ,NULL
+			     ,NULL
+			     ,NULL
+			     ,NULL
+			     ,NULL);
+			}
 		    }
 						
 		  if(!strncmp(field, NAME, strlen(NAME))) 
 		    {
-		      if(sqlite3_column_text(res, 1)) 
-			bookmark_list_enqueue(bl
-					      ,NULL
-					      ,(char*)sqlite3_column_text
-					      (res, 1)
-					      ,NULL
-					      ,NULL
-					      ,NULL
-					      ,NULL);
+		      if(sqlite3_column_text(res, 1))
+			{
+			  bookmark_list_enqueue
+			    (bl
+			     ,NULL
+			     ,(char*)sqlite3_column_text
+			     (res, 1)
+			     ,NULL
+			     ,NULL
+			     ,NULL
+			     ,NULL);
+			}
 		    }
 
 		  if(!strncmp(field, URL, strlen(URL))) 
 		    {
 		      if(sqlite3_column_text(res, 2))
-			bookmark_list_enqueue(bl
-					      ,NULL
-					      ,NULL
-					      ,(char*)sqlite3_column_text
-					      (res, 2)
-					      ,NULL
-					      ,NULL
-					      ,NULL);
+			{
+			  bookmark_list_enqueue
+			    (bl
+			     ,NULL
+			     ,NULL
+			     ,(char*)sqlite3_column_text
+			     (res, 2)
+			     ,NULL
+			     ,NULL
+			     ,NULL);
+			}
 		    }
 
 		  if(!strncmp(field, COMMENT, strlen(COMMENT))) 
 		    {
 		      if(sqlite3_column_text(res, 3))
-			bookmark_list_enqueue(bl
-					      ,NULL
-					      ,NULL
-					      ,NULL
-					      ,(char*)sqlite3_column_text
-					      (res, 3)
-					      ,NULL
-					      ,NULL);
+			{
+			  bookmark_list_enqueue
+			    (bl
+			     ,NULL
+			     ,NULL
+			     ,NULL
+			     ,(char*)sqlite3_column_text
+			     (res, 3)
+			     ,NULL
+			     ,NULL);
+			}
 		    }
 
 		  if(!strncmp(field, TAG, strlen(TAG))) 
 		    {
-		      if(sqlite3_column_text(res, 4)) 
-			bookmark_list_enqueue(bl
-					      ,NULL
-					      ,NULL
-					      ,NULL
-					      ,NULL
-					      ,(char*)sqlite3_column_text
-					      (res, 4)
-					      ,NULL);
+		      if(sqlite3_column_text(res, 4))
+			{
+			  bookmark_list_enqueue
+			    (bl
+			     ,NULL
+			     ,NULL
+			     ,NULL
+			     ,NULL
+			     ,(char*)sqlite3_column_text
+			     (res, 4)
+			     ,NULL);
+			}
 		    }
 		}
-	      else 
-		bookmark_list_enqueue(bl
-				      ,(char*)sqlite3_column_text(res, 0)
-				      ,(char*)sqlite3_column_text(res, 1)
-				      ,(char*)sqlite3_column_text(res, 2)
-				      ,(char*)sqlite3_column_text(res, 3)
-				      ,(char*)sqlite3_column_text(res, 4)
-				      ,(char*)sqlite3_column_text(res, 5));
+	      else
+		{
+		  bookmark_list_enqueue
+		    (bl
+		     ,(char*)sqlite3_column_text(res, 0)
+		     ,(char*)sqlite3_column_text(res, 1)
+		     ,(char*)sqlite3_column_text(res, 2)
+		     ,(char*)sqlite3_column_text(res, 3)
+		     ,(char*)sqlite3_column_text(res, 4)
+		     ,(char*)sqlite3_column_text(res, 5));
+		}
 	    }
 	} 
-      else 
-	return NULL;
+      else
+	{
+	  return NULL;
+	}
 
       sqlite3_finalize(res);
 
       if(bookmark_list_get_position(bl))
-	return bl;
+	{
+	  return bl;
+	}
       else
-	return NULL;
+	{
+	  return NULL;
+	}
     }
 
   return NULL;
@@ -533,10 +595,14 @@ bookmark_db_query(sqlite3* db, int id, char* field)
 	  free(s_id);
 	} 
       else
-	bl = search_db(db, field, NULL, sql);
+	{
+	  bl = search_db(db, field, NULL, sql);
+	}
 		
       if(bl)
-	return bl;
+	{
+	  return bl;
+	}
 
       return NULL;
     }
@@ -672,7 +738,8 @@ bookmark_db_search(sqlite3* db, char* field, char* str)
 
       return bl;
     } 
-  else 
-    return NULL;
+  else
+    {
+      return NULL;
+    }
 }
-

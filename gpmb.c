@@ -18,8 +18,10 @@ main(int argc, char *argv[])
   struct stat st = {0};
 
   if(stat(path, &st) == -1)
-    mkdir(path,  0700);
-
+    {
+      mkdir(path,  0700);
+    }
+  
   /* database */
   int size = (strlen(home) + (strlen(conf_dir)) + strlen(DATABASE)
 	      + 5) * sizeof(char);
@@ -33,16 +35,18 @@ main(int argc, char *argv[])
     {
       read_config();
       free(path);
-      db = bookmark_db_open(opts->database_file);
+      g_db = bookmark_db_open(opts->database_file);
     }
   else
-    exit(EXIT_FAILURE);
-
+    {
+      exit(EXIT_FAILURE);
+    }
+  
   short res = gtk_interface(argc, argv);
 
   free(opts);
   free(database_file);
-  bookmark_db_close(db);
+  bookmark_db_close(g_db);
   return res;
 }
 

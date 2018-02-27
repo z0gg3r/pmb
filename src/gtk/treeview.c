@@ -1,17 +1,17 @@
 #include "treeview.h"
 
-GtkWidget* treeview = NULL;
-GtkTreeStore* bookmarks	= NULL;
-GtkTreeSelection* selection = NULL;
-GtkTreeModel* model = NULL;
+GtkWidget* g_treeview = NULL;
+GtkTreeStore* g_bookmarks = NULL;
+GtkTreeSelection* g_selection = NULL;
+GtkTreeModel* g_model = NULL;
 
 /* selected path in tree view */
-GtkTreePath* selected_path = NULL;
+GtkTreePath* g_selected_path = NULL;
 
-GtkCellRenderer* cell_renderer_id;
-GtkCellRenderer* cell_renderer_name;
-GtkCellRenderer* cell_renderer_url;
-GtkCellRenderer* cell_renderer_comment;
+GtkCellRenderer* g_cell_renderer_id;
+GtkCellRenderer* g_cell_renderer_name;
+GtkCellRenderer* g_cell_renderer_url;
+GtkCellRenderer* g_cell_renderer_comment;
 
 /* icons */
 GtkIconTheme* theme = NULL;
@@ -48,11 +48,15 @@ copy_to_clipboard()
 void
 row_expander(GtkTreePath* path, unsigned int recursive)
 {
-  if(gtk_tree_view_row_expanded(GTK_TREE_VIEW(treeview), path))
-    gtk_tree_view_collapse_row(GTK_TREE_VIEW(treeview), path);
+  if(gtk_tree_view_row_expanded(GTK_TREE_VIEW(g_treeview), path))
+    {
+      gtk_tree_view_collapse_row(GTK_TREE_VIEW(g_treeview), path);
+    }
   else
-    gtk_tree_view_expand_row(GTK_TREE_VIEW(treeview), path
-			     ,recursive);
+    {
+      gtk_tree_view_expand_row
+	(GTK_TREE_VIEW(g_treeview), path, recursive);
+    }
 }
 
 static GtkCellRenderer*
@@ -68,7 +72,9 @@ cell_renderer_new(char* color, const char* font)
     }
 
   if(font)
-    g_object_set(renderer, "font", font, NULL);
+    {
+      g_object_set(renderer, "font", font, NULL);
+    }
 
   return renderer;
 }
@@ -80,9 +86,9 @@ update_selected_row(GtkWidget* tree, gpointer data)
   GtkTreePath* path = gtk_tree_path_new();
 
   gtk_tree_view_get_cursor(GTK_TREE_VIEW(tree), &path, NULL);
-  gtk_tree_path_free(selected_path);
+  gtk_tree_path_free(g_selected_path);
 
-  selected_path	= path;
+  g_selected_path	= path;
 }
 
 static void
@@ -99,9 +105,9 @@ tree_store_add_child(GtkTreeIter* iter, directory* child)
       GtkTreeIter iter;
       directory_rewind(child);
 
-      gtk_tree_store_append(bookmarks, &iter, NULL);
-      gtk_tree_store_set(bookmarks, &iter, 0, directory_name(child), -1);
-      gtk_tree_store_set(bookmarks, &iter, 5, folder_icon, -1);
+      gtk_tree_store_append(g_bookmarks, &iter, NULL);
+      gtk_tree_store_set(g_bookmarks, &iter, 0, directory_name(child), -1);
+      gtk_tree_store_set(g_bookmarks, &iter, 5, folder_icon, -1);
       tree_store_add_child(&iter, child);
     }
 
@@ -115,42 +121,48 @@ tree_store_add_child(GtkTreeIter* iter, directory* child)
 	  GtkTreeIter d_iter;
 	  directory_rewind(d);
 
-	  gtk_tree_store_append(bookmarks, &d_iter, iter);
-	  gtk_tree_store_set(bookmarks, &d_iter, 0, directory_name(d), -1);
-	  gtk_tree_store_set(bookmarks, &d_iter, 5, folder_icon, -1);
+	  gtk_tree_store_append(g_bookmarks, &d_iter, iter);
+	  gtk_tree_store_set(g_bookmarks, &d_iter, 0, directory_name(d), -1);
+	  gtk_tree_store_set(g_bookmarks, &d_iter, 5, folder_icon, -1);
 	  tree_store_add_child(&d_iter, d);
 	}
 
       while((b = directory_next_bookmark(child)))
 	{
 	  GtkTreeIter b_iter;
-	  gtk_tree_store_append(bookmarks, &b_iter, iter);
+	  gtk_tree_store_append(g_bookmarks, &b_iter, iter);
 
 	  if(!strcmp(bookmark_favicon(b), "none"))
 	    {
 	      star_icon	= gtk_icon_theme_load_icon
 		(GTK_ICON_THEME(theme), "starred", icon_size, 0, NULL);
 
-	      gtk_tree_store_set(bookmarks, &b_iter, 5, star_icon, -1);
+	      gtk_tree_store_set(g_bookmarks, &b_iter, 5, star_icon, -1);
 	      g_object_unref(G_OBJECT(star_icon));
 	    }
 	  else
-	    gtk_tree_store_set(bookmarks, &b_iter, 5
-			       ,favicon_decode(b), -1);
+	    {
+	      gtk_tree_store_set
+		(g_bookmarks, &b_iter, 5, favicon_decode(b), -1);
+	    }
 
-	  gtk_tree_store_set(bookmarks, &b_iter, 0, bookmark_id(b), -1);
-	  gtk_tree_store_set(bookmarks, &b_iter, 1, bookmark_name(b), -1);
-	  gtk_tree_store_set(bookmarks, &b_iter, 2, bookmark_url(b), -1);
-	  gtk_tree_store_set(bookmarks, &b_iter, 3, bookmark_comment(b), -1);
-	  gtk_tree_store_set(bookmarks, &b_iter, 4, bookmark_tag(b), -1);
+	  gtk_tree_store_set(g_bookmarks, &b_iter, 0, bookmark_id(b), -1);
+	  gtk_tree_store_set(g_bookmarks, &b_iter, 1, bookmark_name(b), -1);
+	  gtk_tree_store_set(g_bookmarks, &b_iter, 2, bookmark_url(b), -1);
+	  gtk_tree_store_set(g_bookmarks, &b_iter, 3, bookmark_comment(b), -1);
+	  gtk_tree_store_set(g_bookmarks, &b_iter, 4, bookmark_tag(b), -1);
 	  //bookmark_destroy(b);
 	}
 
       if(d)
-	directory_destroy(d);
+	{
+	  directory_destroy(d);
+	}
 
       if(b)
-	bookmark_destroy(b);
+	{
+	  bookmark_destroy(b);
+	}
     }
 	
   g_object_unref(G_OBJECT(folder_icon));
@@ -162,10 +174,12 @@ read_database(GtkWidget* button, GtkWidget* entry)
   bookmark_list* bl = NULL;
   char* path_s = NULL;
 
-  if(selected_path)
-    path_s = gtk_tree_path_to_string(selected_path);
+  if(g_selected_path)
+    {
+      path_s = gtk_tree_path_to_string(g_selected_path);
+    }
 
-  gtk_tree_store_clear(bookmarks);
+  gtk_tree_store_clear(g_bookmarks);
 
   if(entry) 
     {
@@ -174,17 +188,23 @@ read_database(GtkWidget* button, GtkWidget* entry)
 	  char* tag = (char*)gtk_entry_get_text(GTK_ENTRY(entry));
 
 	  if(strlen(tag) > 1)
-	    bl = bookmark_db_search(db, NULL ,tag);
+	    {
+	      bl = bookmark_db_search(g_db, NULL ,tag);
+	    }
 	  else
-	    goto get_all;
+	    {
+	      goto get_all;
+	    }
 	}
       else
-	goto get_all;
+	{
+	  goto get_all;
+	}
     }
   else 
     {
     get_all:
-      bl = bookmark_db_query(db, 0, NULL);
+      bl = bookmark_db_query(g_db, 0, NULL);
     }
 
   if(bl) 
@@ -197,10 +217,14 @@ read_database(GtkWidget* button, GtkWidget* entry)
 	  directory_rewind(root);
 
 	  while((child = directory_next_children(root)))
-	    tree_store_add_child(NULL, child);
+	    {
+	      tree_store_add_child(NULL, child);
+	    }
 
 	  if(child)
-	    directory_destroy(child);
+	    {
+	      directory_destroy(child);
+	    }
 
 	  directory_destroy(root);
 	}
@@ -211,21 +235,25 @@ read_database(GtkWidget* button, GtkWidget* entry)
   /* focus in the first row or previous selected before reload */
   if(path_s)
     {
-      selected_path = gtk_tree_path_new_from_string(path_s);
+      g_selected_path = gtk_tree_path_new_from_string(path_s);
 
-      if(gtk_tree_path_get_depth(selected_path) > 1)
-	gtk_tree_view_expand_to_path(GTK_TREE_VIEW(treeview), selected_path);
+      if(gtk_tree_path_get_depth(g_selected_path) > 1)
+	{
+	  gtk_tree_view_expand_to_path
+	    (GTK_TREE_VIEW(g_treeview), g_selected_path);
+	}
     }
   else
     {
       GtkTreeIter iter;
-      gtk_tree_model_get_iter_first(GTK_TREE_MODEL(model), &iter);
+      gtk_tree_model_get_iter_first(GTK_TREE_MODEL(g_model), &iter);
 
-      selected_path = gtk_tree_model_get_path(GTK_TREE_MODEL(model), &iter);
+      g_selected_path = gtk_tree_model_get_path
+	(GTK_TREE_MODEL(g_model), &iter);
     }
 	
   gtk_tree_view_set_cursor
-    (GTK_TREE_VIEW(treeview), selected_path, NULL, 0);
+    (GTK_TREE_VIEW(g_treeview), g_selected_path, NULL, 0);
   //gtk_label_set_text(GTK_LABEL(info_label), "Loaded");
 }
 
@@ -233,12 +261,14 @@ bookmark*
 get_data(GtkTreePath* path) 
 {
   if(!path)
-    path = selected_path;
+    {
+      path = g_selected_path;
+    }
 
   if(path) 
     {
       GtkTreeIter iter;
-      gtk_tree_model_get_iter(GTK_TREE_MODEL(model), &iter, path);
+      gtk_tree_model_get_iter(GTK_TREE_MODEL(g_model), &iter, path);
 
       bookmark* b = bookmark_new();
 
@@ -247,7 +277,7 @@ get_data(GtkTreePath* path)
 	  char* temp[4];
 	  GdkPixbuf* icon; 
 
-	  gtk_tree_model_get(GTK_TREE_MODEL(model), &iter
+	  gtk_tree_model_get(GTK_TREE_MODEL(g_model), &iter
 			     ,0, &temp[0]
 			     ,1, &temp[1]
 			     ,2, &temp[2]
@@ -256,37 +286,61 @@ get_data(GtkTreePath* path)
 			     ,-1);
 
 	  if(temp[0])
-	    bookmark_set_id(b, temp[0]);
+	    {
+	      bookmark_set_id(b, temp[0]);
+	    }
 	  else
-	    bookmark_set_id(b, "");
+	    {
+	      bookmark_set_id(b, "");
+	    }
 
 	  if(temp[1])
-	    bookmark_set_name(b, temp[1]);
+	    {
+	      bookmark_set_name(b, temp[1]);
+	    }
 	  else
-	    bookmark_set_name(b, "");
+	    {
+	      bookmark_set_name(b, "");
+	    }
 
 	  if(temp[2])
-	    bookmark_set_url(b, temp[2]);
+	    {
+	      bookmark_set_url(b, temp[2]);
+	    }
 	  else
-	    bookmark_set_url(b, "");
+	    {
+	      bookmark_set_url(b, "");
+	    }
 
 	  if(temp[3])
-	    bookmark_set_comment(b, temp[3]);
+	    {
+	      bookmark_set_comment(b, temp[3]);
+	    }
 	  else
-	    bookmark_set_comment(b, "");
+	    {
+	      bookmark_set_comment(b, "");
+	    }
 
 	  if(temp[4])
-	    bookmark_set_tag(b, temp[4]);
+	    {
+	      bookmark_set_tag(b, temp[4]);
+	    }
 	  else
-	    bookmark_set_tag(b, "");
+	    {
+	      bookmark_set_tag(b, "");
+	    }
 	
 	  return b;
 	}
       else
-	return NULL;
+	{
+	  return NULL;
+	}
     }
   else
-    return NULL;
+    {
+      return NULL;
+    }
 }
 
 void
@@ -296,9 +350,13 @@ row_activated(GtkWidget* tree, GtkTreePath* path, GtkTreeViewColumn* column
   bookmark* b = get_data(path);
 
   if(strlen(bookmark_url(b)) > 1)
-    copy_to_clipboard();
+    {
+      copy_to_clipboard();
+    }
   else
-    row_expander(path, 0);
+    {
+      row_expander(path, 0);
+    }
 
   bookmark_destroy(b);
 }
@@ -307,7 +365,7 @@ GtkWidget*
 tree_view(GtkWidget* search_entry) 
 {
   /* id/tag */
-  cell_renderer_id = cell_renderer_new(opts->id_fg, opts->id_font);
+  g_cell_renderer_id = cell_renderer_new(opts->id_fg, opts->id_font);
 
   /* directory icon */
   GtkCellRenderer* dir_icon = gtk_cell_renderer_pixbuf_new();
@@ -319,10 +377,10 @@ tree_view(GtkWidget* search_entry)
     (GTK_TREE_VIEW_COLUMN(dir_column), dir_icon, FALSE);
 
   gtk_tree_view_column_pack_start
-    (GTK_TREE_VIEW_COLUMN(dir_column), cell_renderer_id, FALSE);
+    (GTK_TREE_VIEW_COLUMN(dir_column), g_cell_renderer_id, FALSE);
 
   gtk_tree_view_column_add_attribute
-    (GTK_TREE_VIEW_COLUMN(dir_column), cell_renderer_id, "text", 0);
+    (GTK_TREE_VIEW_COLUMN(dir_column), g_cell_renderer_id, "text", 0);
 
   gtk_tree_view_column_add_attribute
     (GTK_TREE_VIEW_COLUMN(dir_column), dir_icon, "pixbuf", 5);
@@ -330,24 +388,24 @@ tree_view(GtkWidget* search_entry)
   g_object_set(G_OBJECT(dir_column), "title", "Tag/Id", NULL);
 
   /* name column */
-  cell_renderer_name = cell_renderer_new(opts->name_fg, opts->name_font);
+  g_cell_renderer_name = cell_renderer_new(opts->name_fg, opts->name_font);
   GtkTreeViewColumn* name_view_column = 
     gtk_tree_view_column_new_with_attributes
-    ("Name", cell_renderer_name, "text", 1, NULL);
+    ("Name", g_cell_renderer_name, "text", 1, NULL);
 
   /* url column */
-  cell_renderer_url = cell_renderer_new(opts->url_fg, opts->url_font);
+  g_cell_renderer_url = cell_renderer_new(opts->url_fg, opts->url_font);
   GtkTreeViewColumn* url_view_column = 
     gtk_tree_view_column_new_with_attributes
-    ("Url", cell_renderer_url, "text", 2, NULL);
+    ("Url", g_cell_renderer_url, "text", 2, NULL);
 
   /* comment column */
-  cell_renderer_comment = cell_renderer_new
+  g_cell_renderer_comment = cell_renderer_new
     (opts->comment_fg, opts->comment_font);
   
   GtkTreeViewColumn* comment_view_column = 
     gtk_tree_view_column_new_with_attributes
-    ("Comment", cell_renderer_comment, "text", 3, NULL);
+    ("Comment", g_cell_renderer_comment, "text", 3, NULL);
 
   /* set expand */
   gtk_tree_view_column_set_expand
@@ -360,7 +418,7 @@ tree_view(GtkWidget* search_entry)
     (GTK_TREE_VIEW_COLUMN(comment_view_column), TRUE);
 
   /* tree store */
-  bookmarks = gtk_tree_store_new
+  g_bookmarks = gtk_tree_store_new
     (6
      ,G_TYPE_STRING //bookmark id
      ,G_TYPE_STRING //bookmark name
@@ -373,10 +431,10 @@ tree_view(GtkWidget* search_entry)
 
   /* tree view */
   GtkWidget* tree_view = gtk_tree_view_new_with_model
-    (GTK_TREE_MODEL(bookmarks));
+    (GTK_TREE_MODEL(g_bookmarks));
 
   /* unref bookmarks tree store*/
-  g_object_unref(bookmarks);
+  g_object_unref(g_bookmarks);
 
   /* append columns */
   gtk_tree_view_append_column
@@ -409,12 +467,12 @@ tree_view(GtkWidget* search_entry)
     gtk_tree_view_set_enable_tree_lines(GTK_TREE_VIEW(tree_view), TRUE);
 
   /* model */
-  model = gtk_tree_view_get_model(GTK_TREE_VIEW(tree_view));
+  g_model = gtk_tree_view_get_model(GTK_TREE_VIEW(tree_view));
 
   /* multiple selections */
-  selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(tree_view));
+  g_selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(tree_view));
   gtk_tree_selection_set_mode
-    (GTK_TREE_SELECTION(selection), GTK_SELECTION_MULTIPLE);
+    (GTK_TREE_SELECTION(g_selection), GTK_SELECTION_MULTIPLE);
 
   /* cursor changed */
   g_signal_connect

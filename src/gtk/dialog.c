@@ -4,24 +4,26 @@ char*
 get_full_path(bookmark* b)
 {
   if(strlen(bookmark_tag(b)) > 1)
-    return bookmark_tag(b);
+    {
+      return bookmark_tag(b);
+    }
   else if(bookmark_id(b))
     {
       GtkTreeIter iter, parent;
 
-      if(gtk_tree_model_get_iter(GTK_TREE_MODEL(model), &iter
-				 ,selected_path))
+      if(gtk_tree_model_get_iter(GTK_TREE_MODEL(g_model), &iter
+				 ,g_selected_path))
 	{
 	  GtkTreePath* path;
 	  unsigned int size = 1;
 	  char** parents = calloc(size, sizeof(char*));
 	  char*	dir = bookmark_id(b);
 
-	  while(gtk_tree_model_iter_parent(GTK_TREE_MODEL(model)
+	  while(gtk_tree_model_iter_parent(GTK_TREE_MODEL(g_model)
 					   ,&parent, &iter))
 	    {
 	      path = gtk_tree_model_get_path
-		(GTK_TREE_MODEL(model), &parent);
+		(GTK_TREE_MODEL(g_model), &parent);
 	      
 	      bookmark* bp = get_data(path);
 	      iter = parent;
@@ -50,16 +52,20 @@ get_full_path(bookmark* b)
 		 * sizeof(char));
 
 	      if(strlen(t_path) > 1)
-		snprintf(complete_path, ((strlen(t_path) + 1
-					  + strlen(parents[size_bkp - 1])
-					  + 1) * sizeof(char))
-			 ,"%s/%s"
-			 ,t_path, parents[size_bkp - 1]);
+		{
+		  snprintf(complete_path, ((strlen(t_path) + 1
+					    + strlen(parents[size_bkp - 1])
+					    + 1) * sizeof(char))
+			   ,"%s/%s"
+			   ,t_path, parents[size_bkp - 1]);
+		}
 	      else
-		snprintf(complete_path, ((strlen(parents[size_bkp - 1]) + 1)
-					 * sizeof(char)) 
-			 ,"%s"
-			 ,parents[size_bkp - 1]);
+		{
+		  snprintf(complete_path, ((strlen(parents[size_bkp - 1]) + 1)
+					   * sizeof(char)) 
+			   ,"%s"
+			   ,parents[size_bkp - 1]);
+		}
 
 	      free(parents[size_bkp - 1]);
 	      free(t_path);
@@ -67,7 +73,9 @@ get_full_path(bookmark* b)
 	    }
 
 	  if(strlen(complete_path) > 1)
-	    complete_path[strlen(complete_path)] = '/';
+	    {
+	      complete_path[strlen(complete_path)] = '/';
+	    }
 
 	  char* full_path = malloc((strlen(complete_path)
 				    + strlen(dir) 
@@ -83,7 +91,9 @@ get_full_path(bookmark* b)
 	  return full_path;
 	}
       else
-	return bookmark_id(b);
+	{
+	  return bookmark_id(b);
+	}
     }
 
   return NULL;
@@ -97,8 +107,7 @@ collect_bookmark(GtkTreeIter iter, bookmark_list* bl)
 
   do
     {
-      path = gtk_tree_model_get_path(GTK_TREE_MODEL(model)
-							  ,&iter);
+      path = gtk_tree_model_get_path(GTK_TREE_MODEL(g_model), &iter);
       bookmark* b = get_data(path);
 
       if(b)
@@ -109,11 +118,13 @@ collect_bookmark(GtkTreeIter iter, bookmark_list* bl)
 	  bookmark_destroy(b);
 	}
 
-      if(gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(model), &child, &iter
+      if(gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(g_model), &child, &iter
 				       ,0))
-	collect_bookmark(child, bl);
+	{
+	  collect_bookmark(child, bl);
+	}
     }
-  while(gtk_tree_model_iter_next(GTK_TREE_MODEL(model), &iter));
+  while(gtk_tree_model_iter_next(GTK_TREE_MODEL(g_model), &iter));
 
   gtk_tree_path_free(path);
 }
@@ -186,9 +197,13 @@ favicon_decode(bookmark* b)
       GdkPixbuf* icon = gdk_pixbuf_new_from_stream(memst, NULL, NULL);
 
       if(icon)
-	return icon;
+	{
+	  return icon;
+	}
       else
-	return NULL;
+	{
+	  return NULL;
+	}
     }
 
   return NULL;
@@ -200,8 +215,8 @@ set_url_favicon(GtkWidget* entry)
   GdkPixbuf* 	icon;
   GtkTreeIter iter;
 
-  gtk_tree_model_get_iter(GTK_TREE_MODEL(model), &iter, selected_path);
-  gtk_tree_model_get(GTK_TREE_MODEL(model), &iter, 5, &icon, -1);
+  gtk_tree_model_get_iter(GTK_TREE_MODEL(g_model), &iter, g_selected_path);
+  gtk_tree_model_get(GTK_TREE_MODEL(g_model), &iter, 5, &icon, -1);
 
   gtk_entry_set_icon_from_pixbuf
     (GTK_ENTRY(entry), GTK_ENTRY_ICON_PRIMARY , icon);
@@ -219,7 +234,10 @@ favicon_foreach(GtkTreeModel* m, GtkTreePath* p, GtkTreeIter* i
       char* favicon = download_favicon(bookmark_url(b));
 
       if(favicon)
-	bookmark_db_edit(db, strtol(bookmark_id(b), NULL, 10), 4, favicon);
+	{
+	  bookmark_db_edit(g_db, strtol(bookmark_id(b), NULL, 10), 4
+			   ,favicon);
+	}
     }
 
   bookmark_destroy(b);
@@ -230,7 +248,7 @@ favicon_foreach(GtkTreeModel* m, GtkTreePath* p, GtkTreeIter* i
 void
 get_all_favicons(GtkWidget* button)
 {
-  gtk_tree_model_foreach(GTK_TREE_MODEL(model), favicon_foreach, NULL);
+  gtk_tree_model_foreach(GTK_TREE_MODEL(g_model), favicon_foreach, NULL);
 }
 
 GtkWidget*
@@ -257,7 +275,9 @@ dialog_key_press(GtkWidget* window, GdkEventKey* e)
   char* key = gdk_keyval_name(e->keyval);
 
   if(!strcmp(key, "Escape"))
-    close_window(NULL, window);
+    {
+      close_window(NULL, window);
+    }
 }
 
 GtkWidget*

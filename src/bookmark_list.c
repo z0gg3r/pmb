@@ -171,8 +171,10 @@ bookmark_list_enqueue(bookmark_list* l
 	  l->tag[l->size - 1] 	= NULL;
 	  l->favicon[l->size - 1] = NULL;
 	}
-      else 
-	return 1;
+      else
+	{
+	  return 1;
+	}
     }
 
   return 0;
@@ -281,8 +283,10 @@ bookmark_list_dequeue(bookmark_list* l)
 	      l->tag = ntag;
 	      l->favicon = nfavicon;
 	    }
-	  else 
-	    return NULL;
+	  else
+	    {
+	      return NULL;
+	    }
 	}
 	
       return ret;
@@ -308,7 +312,9 @@ bookmark_list_return_next(bookmark_list* l)
       return ret;
     }
   else
-    return NULL;
+    {
+      return NULL;
+    }
 }
 
 bookmark*
@@ -329,7 +335,9 @@ bookmark_list_return_next_bookmark(bookmark_list* l)
       return b;
     }
   else
-    return NULL;
+    {
+      return NULL;
+    }
 }
 
 void
@@ -342,25 +350,37 @@ int
 bookmark_list_get_size(bookmark_list* l) 
 {
   if(l->size)
-    return l->size;
+    {
+      return l->size;
+    }
   else
-    return 0;
+    {
+      return 0;
+    }
 }
 
 int
 bookmark_list_get_position(bookmark_list* l) 
 {
   if(l->position)
-    return l->position;
+    {
+      return l->position;
+    }
   else
-    return 0;
+    {
+      return 0;
+    }
 }
 
 int
 bookmark_list_get_next_position(bookmark_list* l) 
 {
   if(l->next)
-    return l->next;
+    {
+      return l->next;
+    }
   else
-    return 0;
+    {
+      return 0;
+    }
 }

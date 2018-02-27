@@ -3,22 +3,22 @@
 
 #include "interface.h"
 
-extern GtkCellRenderer*	cell_renderer_text;
-extern GtkCellRenderer*	cell_renderer_id;
-extern GtkCellRenderer*	cell_renderer_name;
-extern GtkCellRenderer*	cell_renderer_url;
-extern GtkCellRenderer*	cell_renderer_comment;
-extern GtkWidget* treeview;
-extern GtkTreeStore* bookmarks;
-extern GtkTreeSelection* selection;
-extern GtkTreeModel* model;
-extern GtkIconTheme*theme;
+extern GtkCellRenderer*	g_cell_renderer_text;
+extern GtkCellRenderer*	g_cell_renderer_id;
+extern GtkCellRenderer*	g_cell_renderer_name;
+extern GtkCellRenderer*	g_cell_renderer_url;
+extern GtkCellRenderer*	g_cell_renderer_comment;
+extern GtkWidget* g_treeview;
+extern GtkTreeStore* g_bookmarks;
+extern GtkTreeSelection* g_selection;
+extern GtkTreeModel* g_model;
+extern GtkIconTheme* theme;
 extern GdkPixbuf* folder_icon;
 extern GdkPixbuf* star_icon;
 
 
 /* selected path in tree view */
-extern GtkTreePath* selected_path;
+extern GtkTreePath* g_selected_path;
 
 /* -- copy the selected bookmark url to clipboard -- */
 void

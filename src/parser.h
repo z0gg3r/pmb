@@ -32,9 +32,10 @@ extern char* url_color;
 extern char* comment_color;
 extern char* tag_color;
 
+extern sqlite3* g_db;
+
 extern int color;
 extern int verbose;
-extern sqlite3* db;
 
 /* read config file */
 char**

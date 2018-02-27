@@ -38,7 +38,7 @@ open_database(GtkWidget* button)
       {
 	if(filename)
 	  {
-	    db = bookmark_db_open(filename);
+	    g_db = bookmark_db_open(filename);
 
 	    free(database_file);
 	    opts->database_file = database_file;
@@ -71,7 +71,7 @@ import_database(GtkWidget* button)
 
 	    if(i_db)
 	      {
-		bookmark_db_import(db, i_db);
+		bookmark_db_import(g_db, i_db);
 		bookmark_db_close(i_db);	
 	      }
 	  }
@@ -100,7 +100,7 @@ export_html_page(GtkWidget* button)
 	if(filename)
 	  {
 	    FILE* fp = fopen(filename, "w");
-	    bookmark_list* bl = bookmark_db_query(db, 0, NULL);
+	    bookmark_list* bl = bookmark_db_query(g_db, 0, NULL);
 
 	    bookmark_html_tree(bl, fp);
 	    fclose(fp);
@@ -155,14 +155,14 @@ selective_copy(GtkWidget* button, char* action)
 
       if(i_db && pattern)
 	{
-	  sqlite3* db_1 = db;
+	  sqlite3* db_1 = g_db;
 	  sqlite3* db_2 = i_db;
 	  bookmark_list* bl = NULL;
 
 	  if(action && !(strcmp(action, "export")))
 	    {
 	      db_1 = i_db;
-	      db_2 = db;
+	      db_2 = g_db;
 	    }
 
 	  if(!(strcmp(field, "any")))

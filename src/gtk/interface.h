@@ -23,7 +23,7 @@
 
 /* globals */
 extern char* database_file;
-extern sqlite3*	db;
+extern sqlite3*	g_db;
 extern GtkWidget* main_box;
 extern GtkWidget* info_box;
 extern GtkWidget* info_label;

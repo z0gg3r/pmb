@@ -34,7 +34,9 @@ gchar*
 download_favicon(char* url)
 {
   if(!url)
-    return NULL;
+    {
+      return NULL;
+    }
 
   struct favicon_mem favicon;
   favicon.memory = malloc(1);
@@ -58,15 +60,23 @@ download_favicon(char* url)
   res 			= curl_easy_perform(curl_handle);
  
   if(res != CURLE_OK)
-    fprintf(stderr, "libcurl: %s\n", curl_easy_strerror(res));
-  else 
-    favicon_enc = g_base64_encode(favicon.memory, favicon.size);
+    {
+      fprintf(stderr, "libcurl: %s\n", curl_easy_strerror(res));
+    }
+  else
+    {
+      favicon_enc = g_base64_encode(favicon.memory, favicon.size);
+    }
  
   curl_easy_cleanup(curl_handle);
   free(favicon.memory);
  
   if(favicon_enc)
-    return favicon_enc;
+    {
+      return favicon_enc;
+    }
   else
-    return NULL;
+    {
+      return NULL;
+    }
 }

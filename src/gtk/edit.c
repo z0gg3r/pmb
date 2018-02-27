@@ -10,13 +10,13 @@ move_directory(char* tag)
   bookmark* sb = get_data(NULL);
   unsigned int parents = 0;
 
-  if(gtk_tree_model_get_iter(GTK_TREE_MODEL(model), &iter, selected_path))
+  if(gtk_tree_model_get_iter(GTK_TREE_MODEL(g_model), &iter, g_selected_path))
     {
       iter_copy = iter;
 
       /* count number of parents */
       while(gtk_tree_model_iter_parent
-	    (GTK_TREE_MODEL(model), &parent, &iter_copy))
+	    (GTK_TREE_MODEL(g_model), &parent, &iter_copy))
 	{
 	  parents++;
 	  iter_copy = parent;
@@ -24,7 +24,7 @@ move_directory(char* tag)
 
       /* collect children, if any */
       if(gtk_tree_model_iter_nth_child
-	 (GTK_TREE_MODEL(model), &child, &iter, 0))
+	 (GTK_TREE_MODEL(g_model), &child, &iter, 0))
 	{
 	  collect_bookmark(child, bl);
 	}
@@ -39,10 +39,14 @@ move_directory(char* tag)
       char* res	= NULL;
 
       if(parents > 0)
-	strsep(&bm_tag, "//");
+	{
+	  strsep(&bm_tag, "//");
+	}
 
       if(!bm_tag)
-	bookmark_db_edit(db, id, 3, tag);
+	{
+	  bookmark_db_edit(g_db, id, 3, tag);
+	}
 
       else if(strlen(tag) < 2)
 	{
@@ -53,7 +57,9 @@ move_directory(char* tag)
 	      n_tag = strsep(&bm_tag, "//");
 
 	      if(!(strcmp(n_tag, bookmark_id(sb))))
-		break;
+		{
+		  break;
+		}
 	    }
 
 	  if(bm_tag)
@@ -64,11 +70,13 @@ move_directory(char* tag)
 	      snprintf
 		(new_tag, strlen(new_tag) - 1, "%s/%s", n_tag, bm_tag);
 
-	      bookmark_db_edit(db, id, 3, new_tag);
+	      bookmark_db_edit(g_db, id, 3, new_tag);
 	      free(new_tag);
 	    }
 	  else
-	    bookmark_db_edit(db, id, 3, n_tag);
+	    {
+	      bookmark_db_edit(g_db, id, 3, n_tag);
+	    }
 	}
       else
 	{
@@ -79,7 +87,9 @@ move_directory(char* tag)
 		  res = strsep(&bm_tag, "//");
 
 		  if(!(strcmp(res, bookmark_id(sb))))
-		    break;
+		    {
+		      break;
+		    }
 		}
 	    }
 
@@ -89,7 +99,7 @@ move_directory(char* tag)
 	  snprintf
 	    (new_tag, strlen(new_tag) - 1, "%s/%s", tag, bm_tag);
 
-	  bookmark_db_edit(db, id, 3, new_tag);
+	  bookmark_db_edit(g_db, id, 3, new_tag);
 	  free(new_tag);
 	}
 
@@ -109,7 +119,7 @@ rename_directory(GtkWidget* button, gpointer** args)
   bookmark* bt = NULL;
   char* path = get_full_path(b);
   
-  bookmark_list* bl = bookmark_db_search(db, TAG, path);
+  bookmark_list* bl = bookmark_db_search(g_db, TAG, path);
   char* input_tag = (char*)gtk_entry_get_text(GTK_ENTRY(args[0]));
   char*	full_tag = get_full_path(b);
   char*	root_tag = NULL;
@@ -201,22 +211,26 @@ rename_directory(GtkWidget* button, gpointer** args)
 	      if(tag)
 		{
 		  bookmark_db_edit
-		    (db, strtol(bookmark_id(bt), NULL, 10), 3, tag);
+		    (g_db, strtol(bookmark_id(bt), NULL, 10), 3, tag);
 
 		  free(tag);
 		}
 	    }
 	  else
-	    bookmark_db_edit
-	      (db, strtol(bookmark_id(bt), NULL, 10), 3, new_tag);
+	    {
+	      bookmark_db_edit
+		(g_db, strtol(bookmark_id(bt), NULL, 10), 3, new_tag);
+	    }
 
 	  bookmark_destroy(bt);
 	  gtk_label_set_text(GTK_LABEL(info_label), "Rename: Done");
 	}
     }
   else
-    gtk_label_set_text
-      (GTK_LABEL(info_label), "Rename: Error, name field empty");
+    {
+      gtk_label_set_text
+	(GTK_LABEL(info_label), "Rename: Error, name field empty");
+    }
 
   free(new_tag);
   bookmark_destroy(b);
@@ -238,7 +252,7 @@ edit_bookmark(GtkWidget* button, gpointer** args)
 
   if(url) 
     {
-      bookmark_list* bl = bookmark_db_search(db, URL, url);
+      bookmark_list* bl = bookmark_db_search(g_db, URL, url);
 		
       if(bl) 
 	{
@@ -249,16 +263,24 @@ edit_bookmark(GtkWidget* button, gpointer** args)
 	      unsigned int id = strtol(bookmark_id(b), NULL, 10);
 
 	      if(name)
-		bookmark_db_edit(db, id, 0, name);
+		{
+		  bookmark_db_edit(g_db, id, 0, name);
+		}
 
 	      if(url)
-		bookmark_db_edit(db, id, 1, url);
+		{
+		  bookmark_db_edit(g_db, id, 1, url);
+		}
 
 	      if(comment)
-		bookmark_db_edit(db, id, 2, comment);
+		{
+		  bookmark_db_edit(g_db, id, 2, comment);
+		}
 
 	      if(tag)
-		bookmark_db_edit(db, id, 3, tag);
+		{
+		  bookmark_db_edit(g_db, id, 3, tag);
+		}
 
 	      unsigned int size = (strlen(bookmark_id(b))
 				   + strlen(bookmark_url(b)) 
@@ -297,7 +319,8 @@ move_directory_wrapper(GtkWidget* button, gpointer** args)
 
   gboolean r;
   g_signal_emit_by_name
-    (treeview, "move-cursor", GTK_MOVEMENT_DISPLAY_LINES, -1, &r);
+    (g_treeview, "move-cursor", GTK_MOVEMENT_DISPLAY_LINES, -1, &r);
+
   gtk_label_set_text(GTK_LABEL(info_label), "Move: Done");
 }
 
@@ -308,7 +331,7 @@ move_multiple(GtkWidget* button, gpointer** args)
     (GTK_COMBO_BOX_TEXT(args[0]));
   
   GList* rows = gtk_tree_selection_get_selected_rows
-    (GTK_TREE_SELECTION(selection), &model);
+    (GTK_TREE_SELECTION(g_selection), &g_model);
 
   do
     {
@@ -317,18 +340,22 @@ move_multiple(GtkWidget* button, gpointer** args)
 	  bookmark* b = get_data(rows->data);
 
 	  if(strlen(bookmark_url(b)) > 1)
-	    bookmark_db_edit
-	      (db, (strtol(bookmark_id(b), NULL, 10)), 3, tag);
+	    {
+	      bookmark_db_edit
+		(g_db, (strtol(bookmark_id(b), NULL, 10)), 3, tag);
+	    }
 	  else
 	    {
-	      selected_path = rows->data;	
+	      g_selected_path = rows->data;	
 	      move_directory(tag);
 	    }
 
 	  bookmark_destroy(b);
 	}
       else
-	break;
+	{
+	  break;
+	}
     }
   while((rows = rows->next));
 
@@ -339,7 +366,8 @@ move_multiple(GtkWidget* button, gpointer** args)
 
   gboolean r;
   g_signal_emit_by_name
-    (treeview, "move-cursor", GTK_MOVEMENT_DISPLAY_LINES, -1, &r);
+    (g_treeview, "move-cursor", GTK_MOVEMENT_DISPLAY_LINES, -1, &r);
+  
   gtk_label_set_text(GTK_LABEL(info_label), "Move Multiple: Done");
 }
 
@@ -348,7 +376,7 @@ edit_delete_favicon()
 {
   bookmark* b = get_data(NULL);
 
-  bookmark_db_edit(db, strtol(bookmark_id(b), NULL, 10), 4, "none");
+  bookmark_db_edit(g_db, strtol(bookmark_id(b), NULL, 10), 4, "none");
   read_database(NULL, NULL);
   bookmark_destroy(b);
 }
@@ -361,7 +389,7 @@ edit_download_favicon()
 
   if(favicon)
     {
-      bookmark_db_edit(db, strtol(bookmark_id(b), NULL, 10), 4, favicon);
+      bookmark_db_edit(g_db, strtol(bookmark_id(b), NULL, 10), 4, favicon);
       read_database(NULL, NULL);
       bookmark_destroy(b);
     }
@@ -377,13 +405,19 @@ edit_bookmark_window(bookmark* b)
   if(b) 
     {
       if(bookmark_name(b))
-	gtk_entry_set_text(GTK_ENTRY(e[1]), bookmark_name(b));
+	{
+	  gtk_entry_set_text(GTK_ENTRY(e[1]), bookmark_name(b));
+	}
 
       if(bookmark_url(b))
-	gtk_entry_set_text(GTK_ENTRY(e[3]), bookmark_url(b));
+	{
+	  gtk_entry_set_text(GTK_ENTRY(e[3]), bookmark_url(b));
+	}
 
       if(bookmark_comment(b))
-	gtk_entry_set_text(GTK_ENTRY(e[5]), bookmark_comment(b));
+	{
+	  gtk_entry_set_text(GTK_ENTRY(e[5]), bookmark_comment(b));
+	}
 
       /* tag */
       GtkWidget* tag_entry = gtk_bin_get_child(GTK_BIN(tag_box));
@@ -579,16 +613,20 @@ rename_directory_wrapper(GtkWidget* button)
   bookmark* b = get_data(NULL);
 
   if((strlen(bookmark_url(b)) < 2))
-    rename_directory_window(b);
+    {
+      rename_directory_window(b);
+    }
   else
-    edit_bookmark_window(b);
+    {
+      edit_bookmark_window(b);
+    }
 }
 
 void
 edit(GtkWidget* button)
 {
   if(gtk_tree_selection_count_selected_rows
-     (GTK_TREE_SELECTION(selection)) > 1)
+     (GTK_TREE_SELECTION(g_selection)) > 1)
     {
       move_multiple_window();
     }
@@ -599,9 +637,13 @@ edit(GtkWidget* button)
       if(b)
 	{
 	  if(strlen(bookmark_url(b)) > 1)
-	    edit_bookmark_window(b);
+	    {
+	      edit_bookmark_window(b);
+	    }
 	  else
-	    move_directory_window(b);
+	    {
+	      move_directory_window(b);
+	    }
 	}
     }
 }

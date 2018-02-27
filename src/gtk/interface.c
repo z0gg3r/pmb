@@ -1,7 +1,7 @@
 #include "interface.h"
 
 /* globals */
-sqlite3* db = NULL;
+sqlite3* g_db = NULL;
 GtkWidget* main_box = NULL;
 GtkWidget* info_box = NULL;
 GtkWidget* info_label = NULL;
@@ -22,17 +22,25 @@ widget_hide(GtkWidget* button, char* name)
   if(!strcmp(name, "info_box"))
     {
       if(gtk_widget_get_visible(GTK_WIDGET(info_box)))
-	gtk_widget_hide(GTK_WIDGET(info_box));
+	{
+	  gtk_widget_hide(GTK_WIDGET(info_box));
+	}
       else
-	gtk_widget_show(GTK_WIDGET(info_box));
+	{
+	  gtk_widget_show(GTK_WIDGET(info_box));
+	}
     }
 
   if(!(strcmp(name, "tool_bar")))
     {
       if(gtk_widget_get_visible(GTK_WIDGET(tool_box)))
-	gtk_widget_hide(GTK_WIDGET(tool_box));
+	{
+	  gtk_widget_hide(GTK_WIDGET(tool_box));
+	}
       else
-	gtk_widget_show(GTK_WIDGET(tool_box));
+	{
+	  gtk_widget_show(GTK_WIDGET(tool_box));
+	}
     }
 }
 
@@ -53,11 +61,11 @@ gtk_interface(int argc, char* argv[])
 
   /* tree view */
   search_entry = gtk_entry_new();
-  treeview = tree_view(search_entry);
+  g_treeview = tree_view(search_entry);
 
   /* scrolled window for bookmark_view */
   s_window = gtk_scrolled_window_new(NULL, NULL);
-  gtk_container_add(GTK_CONTAINER(s_window), treeview);
+  gtk_container_add(GTK_CONTAINER(s_window), g_treeview);
 
   g_signal_connect
     (s_window, "key-press-event", G_CALLBACK(key_press), NULL);
@@ -103,7 +111,7 @@ gtk_interface(int argc, char* argv[])
   read_database(NULL, NULL);
 
   /* focus tree view */
-  gtk_widget_grab_focus(GTK_WIDGET(treeview));
+  gtk_widget_grab_focus(GTK_WIDGET(g_treeview));
 
   gtk_main();
   return 0;

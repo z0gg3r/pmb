@@ -7,7 +7,7 @@ delete_bookmark(GtkWidget* button, gpointer** args)
 
   if(url) 
     {
-      bookmark_list* bl = bookmark_db_search(db, URL, url);
+      bookmark_list* bl = bookmark_db_search(g_db, URL, url);
 		
       if(bl) 
 	{
@@ -17,12 +17,12 @@ delete_bookmark(GtkWidget* button, gpointer** args)
 	    {
 	      GtkTreeIter iter;
 	      gtk_tree_model_get_iter
-		(GTK_TREE_MODEL(model), &iter, selected_path);
+		(GTK_TREE_MODEL(g_model), &iter, g_selected_path);
 
 	      gtk_tree_store_remove
-		(GTK_TREE_STORE(bookmarks), &iter);
+		(GTK_TREE_STORE(g_bookmarks), &iter);
 
-	      bookmark_db_delete(db, strtol(bookmark_id(b), NULL, 10));
+	      bookmark_db_delete(g_db, strtol(bookmark_id(b), NULL, 10));
 	      bookmark_destroy(b);
 	    }
 
@@ -35,7 +35,7 @@ delete_bookmark(GtkWidget* button, gpointer** args)
 
   gboolean r;
   g_signal_emit_by_name
-    (treeview, "move-cursor", GTK_MOVEMENT_DISPLAY_LINES, -1, &r);
+    (g_treeview, "move-cursor", GTK_MOVEMENT_DISPLAY_LINES, -1, &r);
   gtk_label_set_text(GTK_LABEL(info_label), "Delete: Done");
 }
 
@@ -47,9 +47,9 @@ delete_directory(GtkWidget* button, gpointer window)
   bookmark_list* bl = bookmark_list_new(); 
   bookmark* b = NULL;
 
-  if(gtk_tree_model_get_iter(GTK_TREE_MODEL(model), &iter, selected_path))
+  if(gtk_tree_model_get_iter(GTK_TREE_MODEL(g_model), &iter, g_selected_path))
     {
-      if(gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(model), &child
+      if(gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(g_model), &child
 				       ,&iter, 0))
 	{
 	  collect_bookmark(child, bl);
@@ -58,18 +58,18 @@ delete_directory(GtkWidget* button, gpointer window)
 
   while((b = bookmark_list_return_next_bookmark(bl)))
     {
-      bookmark_db_delete(db, (strtol(bookmark_id(b), NULL, 10)));
+      bookmark_db_delete(g_db, (strtol(bookmark_id(b), NULL, 10)));
       bookmark_destroy(b);
     }
 
   bookmark_list_destroy(bl);
-  gtk_tree_store_remove(GTK_TREE_STORE(bookmarks), &iter);
+  gtk_tree_store_remove(GTK_TREE_STORE(g_bookmarks), &iter);
 
   close_window(NULL, window);
 
   gboolean r;
   g_signal_emit_by_name
-    (treeview, "move-cursor", GTK_MOVEMENT_DISPLAY_LINES, -1, &r);
+    (g_treeview, "move-cursor", GTK_MOVEMENT_DISPLAY_LINES, -1, &r);
   gtk_label_set_text(GTK_LABEL(info_label), "Delete Directory: Done");
 }
 
@@ -77,8 +77,8 @@ static void
 delete_multiple(GtkWidget* button, gpointer window)
 {
   GList* rows = gtk_tree_selection_get_selected_rows
-    (GTK_TREE_SELECTION(selection)
-     ,&model);
+    (GTK_TREE_SELECTION(g_selection)
+     ,&g_model);
 
   do
     {
@@ -87,18 +87,21 @@ delete_multiple(GtkWidget* button, gpointer window)
 	  bookmark* b = get_data(rows->data);
 
 	  if(strlen(bookmark_url(b)) > 1)
-	    bookmark_db_delete
-	      (db, (strtol(bookmark_id(b), NULL, 10)));
+	    {
+	      bookmark_db_delete(g_db, (strtol(bookmark_id(b), NULL, 10)));
+	    }
 	  else
 	    {
-	      selected_path = rows->data;	
+	      g_selected_path = rows->data;	
 	      delete_directory(button, window);
 	    }
 
 	  bookmark_destroy(b);
 	}
       else
-	break;
+	{
+	  break;
+	}
     }
   while((rows = rows->next));
 
@@ -108,7 +111,7 @@ delete_multiple(GtkWidget* button, gpointer window)
 	
   gboolean r;
   g_signal_emit_by_name
-    (treeview, "move-cursor", GTK_MOVEMENT_DISPLAY_LINES, -1, &r);
+    (g_treeview, "move-cursor", GTK_MOVEMENT_DISPLAY_LINES, -1, &r);
   gtk_label_set_text(GTK_LABEL(info_label), "Delete Multiple: Done");
 }
 
@@ -121,17 +124,25 @@ delete_bookmark_window(bookmark* b)
   if(b) 
     {
       if(bookmark_name(b))
-	gtk_entry_set_text(GTK_ENTRY(e[1]), bookmark_name(b));
+	{
+	  gtk_entry_set_text(GTK_ENTRY(e[1]), bookmark_name(b));
+	}
 
       if(bookmark_url(b))
-	gtk_entry_set_text(GTK_ENTRY(e[3]), bookmark_url(b));
+	{
+	  gtk_entry_set_text(GTK_ENTRY(e[3]), bookmark_url(b));
+	}
 
       if(bookmark_comment(b))
-	gtk_entry_set_text(GTK_ENTRY(e[5])
-			   ,bookmark_comment(b));
+	{
+	  gtk_entry_set_text
+	    (GTK_ENTRY(e[5]), bookmark_comment(b));
+	}
 
       if(bookmark_tag(b))
-	gtk_entry_set_text(GTK_ENTRY(e[7]), bookmark_tag(b));
+	{
+	  gtk_entry_set_text(GTK_ENTRY(e[7]), bookmark_tag(b));
+	}
 
       gtk_entry_set_icon_from_icon_name
 	(GTK_ENTRY(e[7]), GTK_ENTRY_ICON_PRIMARY, "folder");
@@ -254,7 +265,7 @@ void
 delete(GtkWidget* button)
 {
   if(gtk_tree_selection_count_selected_rows
-     (GTK_TREE_SELECTION(selection)) > 1)
+     (GTK_TREE_SELECTION(g_selection)) > 1)
     {
       delete_multiple_window();
     }
@@ -265,10 +276,13 @@ delete(GtkWidget* button)
       if(b)
 	{
 	  if(strlen(bookmark_url(b)) > 1)
-	    delete_bookmark_window(b);
+	    {
+	      delete_bookmark_window(b);
+	    }
 	  else
-	    delete_directory_window(b);
+	    {
+	      delete_directory_window(b);
+	    }
 	}
     }
 }
-

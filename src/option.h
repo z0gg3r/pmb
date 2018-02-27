@@ -2,6 +2,7 @@
 #define OPTION_H
 
 #include <stdlib.h>
+#include <string.h>
 
 typedef struct cl_option cl_option;
 typedef struct cl_option_list cl_option_list;

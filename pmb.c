@@ -29,8 +29,9 @@ main(int argc, char *argv[])
   struct stat st = {0};
 
   if(stat(path, &st) == -1)
-    mkdir(path,  0700);
-
+    {
+      mkdir(path,  0700);
+    }
 
   /* database */
   int d_size =
@@ -61,20 +62,22 @@ main(int argc, char *argv[])
   parse_options(argc, argv, option, command);
   exec_option(option);
 
-  if(!db)
+  if(!g_db)
     {
       if(database_file) 
 	{
-	  db = bookmark_db_open(database_file);
+	  g_db = bookmark_db_open(database_file);
 	  free(database_file);
 	}
-	else
+      else
+	{
 	  exit(EXIT_FAILURE);
+	}
     }
 
   exec_option(command);
   destroy_option_list(option);
   destroy_option_list(command);
-  bookmark_db_close(db);
+  bookmark_db_close(g_db);
   exit(EXIT_SUCCESS);
 }

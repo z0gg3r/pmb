@@ -13,33 +13,43 @@ add_bookmark(GtkWidget* button, gpointer** args)
   char* favicon	= "none";
 
   if(gtk_entry_get_text_length(GTK_ENTRY(args[0])))
-    name = (char*)gtk_entry_get_text(GTK_ENTRY(args[0]));
+    {
+      name = (char*)gtk_entry_get_text(GTK_ENTRY(args[0]));
+    }
 
   if(gtk_entry_get_text_length(GTK_ENTRY(args[1])))
-    url = (char*)gtk_entry_get_text(GTK_ENTRY(args[1]));
+    {
+      url = (char*)gtk_entry_get_text(GTK_ENTRY(args[1]));
+    }
 
   if(gtk_entry_get_text_length(GTK_ENTRY(args[2])))
-    comment = (char*)gtk_entry_get_text(GTK_ENTRY(args[2]));
+    {
+      comment = (char*)gtk_entry_get_text(GTK_ENTRY(args[2]));
+    }
 
   tag_t = (char*)gtk_combo_box_text_get_active_text
     (GTK_COMBO_BOX_TEXT(args[3]));
 
   if(strlen(tag_t) > 1)
-    tag = tag_t;
+    {
+      tag = tag_t;
+    }
 
   if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(favicon_button)))
     {
       char* favicon_temp = download_favicon(url);
 
       if(favicon_temp)
-	favicon = favicon_temp;
+	{
+	  favicon = favicon_temp;
+	}
     }
 
   if(name && url) 
     {
       /* write to database */
       bookmark* b = bookmark_new(name, url, comment, tag, favicon);
-      bookmark_db_write(b, db);
+      bookmark_db_write(b, g_db);
       bookmark_destroy(b);
 
       /*
@@ -80,8 +90,10 @@ add_bookmark(GtkWidget* button, gpointer** args)
       gtk_label_set_text(GTK_LABEL(info_label), "Add: Done");
     }
   else
-    gtk_label_set_text
-      (GTK_LABEL(info_label) ,"Add: Error, Name or Url field empty");
+    {
+      gtk_label_set_text
+	(GTK_LABEL(info_label) ,"Add: Error, Name or Url field empty");
+    }
 }
 
 void 
@@ -110,6 +122,7 @@ add_window(GtkWidget* button)
     }
 
   GtkWidget** add_bookmark_args = g_new(GtkWidget*, 5);
+  
   add_bookmark_args[0] = e[1];
   add_bookmark_args[1] = e[3];
   add_bookmark_args[2] = e[5];
@@ -131,10 +144,13 @@ add_window(GtkWidget* button)
   favicon_button = gtk_check_button_new_with_label("Favicon");
 
   if(!strcmp(opts->download_favicon, "true"))
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(favicon_button), TRUE);
+    {
+      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(favicon_button), TRUE);
+    }
   
   /* grid */
   GtkWidget *grid = gtk_grid_new();
+  
   gtk_grid_set_column_spacing(GTK_GRID(grid), 2);
   gtk_grid_set_row_spacing(GTK_GRID(grid), 2);
   gtk_grid_set_column_homogeneous(GTK_GRID(grid), 1);

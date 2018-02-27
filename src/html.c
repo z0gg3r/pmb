@@ -39,9 +39,13 @@ print_folder_icon(int* canvas, FILE* fp)
     "</script>\n";
 
   if(fp)
-    fprintf(fp, icon, *canvas, *canvas);
+    {
+      fprintf(fp, icon, *canvas, *canvas);
+    }
   else
-    printf(icon, *canvas, *canvas);
+    {
+      printf(icon, *canvas, *canvas);
+    }
 
   ++(*canvas);
 }
@@ -62,7 +66,9 @@ html_tree_table_row(directory* d, int depth, int* canvas, FILE* fp)
       if(fp)
 	{
 	  for(int i = 0; i <= depth; ++i)
-	    fprintf(fp, open_ul);
+	    {
+	      fprintf(fp, open_ul);
+	    }
 
 	  print_folder_icon(canvas, fp);
 	  fprintf(fp, span_dir_name, directory_name(d));
@@ -74,13 +80,17 @@ html_tree_table_row(directory* d, int depth, int* canvas, FILE* fp)
 		      ,bookmark_url(b), bookmark_name(b));
 
 	      if(strcmp(bookmark_comment(b), "none"))
-		fprintf(fp, comment, bookmark_comment(b));
+		{
+		  fprintf(fp, comment, bookmark_comment(b));
+		}
 
 	      fprintf(fp, link_close);
 	    }
 
 	  for(int i = 0; i <= depth + 2; ++i)
-	    fprintf(fp, close_ul);
+	    {
+	      fprintf(fp, close_ul);
+	    }
 
 	  free(b);
 	  return ++depth;
@@ -89,7 +99,9 @@ html_tree_table_row(directory* d, int depth, int* canvas, FILE* fp)
       else
 	{
 	  for(int i = 0; i <= depth; ++i)
-	    printf(open_ul);
+	    {
+	      printf(open_ul);
+	    }
 
 	  print_folder_icon(canvas, fp);
 	  printf(span_dir_name, directory_name(d));
@@ -101,13 +113,17 @@ html_tree_table_row(directory* d, int depth, int* canvas, FILE* fp)
 		     ,bookmark_url(b), bookmark_name(b));
 
 	      if(strcmp(bookmark_comment(b), "none"))
-		printf(comment, bookmark_comment(b));
+		{
+		  printf(comment, bookmark_comment(b));
+		}
 
 	      printf(link_close);
 	    }
 
 	  for(int i = 0; i <= depth + 2; ++i)
-	    printf(close_ul);
+	    {
+	      printf(close_ul);
+	    }
 
 	  free(b);
 	  return ++depth;
@@ -144,7 +160,7 @@ bookmark_html_tree(bookmark_list* bl, FILE* fp)
 {
   if(bl) 
     {
-      bookmark_list* bl = bookmark_db_query(db, 0, NULL);
+      bookmark_list* bl = bookmark_db_query(g_db, 0, NULL);
       directory* root = create_tree_from_bookmark_list(bl, "root");	
       directory* child = NULL;
       directory* ret = NULL;
@@ -176,9 +192,13 @@ bookmark_html_tree(bookmark_list* bl, FILE* fp)
       directory_rewind(root);
 
       if(fp)
-	fprintf(fp, page_top);
+	{
+	  fprintf(fp, page_top);
+	}
       else
-	printf(page_top);
+	{
+	  printf(page_top);
+	}
 
       //html_tree_table_row(root, 0, &canvas);
 
@@ -188,13 +208,19 @@ bookmark_html_tree(bookmark_list* bl, FILE* fp)
 	  html_tree_table_row(child, 0, &canvas, fp);
 
 	  while((ret = directory_next_children(child)))
-	    html_tree_branch(ret, 1, &canvas, fp);
+	    {
+	      html_tree_branch(ret, 1, &canvas, fp);
+	    }
 	}
 
       if(fp)
-	fprintf(fp, page_bottom ,date(buf, 64));
+	{
+	  fprintf(fp, page_bottom ,date(buf, 64));
+	}
       else
-	printf(page_bottom ,date(buf, 64));
+	{
+	  printf(page_bottom ,date(buf, 64));
+	}
 
       directory_destroy(ret);
       directory_destroy(child);

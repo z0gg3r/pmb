@@ -54,7 +54,6 @@ option_list_new()
       l->size = 1;
 
       l->opt = calloc(l->size, sizeof(cl_option*));
-      l->opt[0] = NULL;
 
       return l;
     }
@@ -70,20 +69,15 @@ option_list_add(cl_option_list* l, cl_option* opt)
       l->opt[l->position] = opt;
 
       ++l->position;
-
-      if(l->position >= l->size - 1) 
-	{
-	  ++l->size;
-	  cl_option** nopt = realloc(l->opt, l->size * sizeof(cl_option*));
-
-	  if(!nopt) 
-	    return 1;
-	  else
-	    l->opt[l->size - 1]	= NULL;
-	}
+      ++l->size;
+      
+      l->opt = realloc(l->opt, l->size * sizeof(cl_option_list*));
+      l->opt[l->position] = calloc(1, sizeof(cl_option*));
     }
   else
-    return 1;
+    {
+      return 1;
+    }
 
   return 0;
 }
@@ -94,7 +88,9 @@ destroy_option_list(cl_option_list* l)
   if(l)
     {
       for(int i = 0; i < l->size - 1; ++i)
-	destroy_option(l->opt[i]);
+	{
+	  destroy_option(l->opt[i]);
+	}
 
       free(l->opt);
       free(l);
@@ -108,5 +104,8 @@ void
 exec_option(cl_option_list* option)
 {
   for(int i = 0; i < option->size - 1; ++i)
-    option->opt[i]->func(option->opt[i]->optarg);
+    {
+      cl_option* opt = option->opt[i];
+      opt->func(opt->optarg);
+    }
 }

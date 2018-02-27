@@ -18,7 +18,7 @@ char* tag_color;
 
 int color = 0;
 int verbose = 0;
-sqlite3* db = NULL;
+sqlite3* g_db = NULL;
 
 void 
 help() 
@@ -316,7 +316,7 @@ parse_config_file(char* optarg)
 int
 add_bookmark(char* optarg) 
 {
-  if(db) 
+  if(g_db) 
     {
       char* name = NULL;
       char* url = NULL;
@@ -417,8 +417,8 @@ add_bookmark(char* optarg)
 
 	  if(b) 
 	    {
-	      if(bookmark_db_write(b, db))
-		printf("failed to write bookmark to database\n");
+	      if(bookmark_db_write(b, g_db))
+		printf("failed to write wbookmark to database\n");
 
 	      bookmark_destroy(b);
 	      return 0;
@@ -441,7 +441,7 @@ add_bookmark(char* optarg)
 int
 edit_bookmark(char* optarg)
 {
-  if(db) 
+  if(g_db) 
     {
       int id = 0;
       char* name = NULL;
@@ -578,50 +578,50 @@ edit_bookmark(char* optarg)
 
       if(field && !strncmp(field, "name", 4) && c_value && n_value) 
 	{
-	  if(bookmark_db_edit_bulk(db, 0, c_value, n_value))
+	  if(bookmark_db_edit_bulk(g_db, 0, c_value, n_value))
 	    printf("can't edit bookmarks named '%s'\n", c_value);
 	}
 
       if(field && !strncmp(field, "url", 3) && c_value && n_value) 
 	{
-	  if(bookmark_db_edit_bulk(db, 1, c_value, n_value))
+	  if(bookmark_db_edit_bulk(g_db, 1, c_value, n_value))
 	    printf("can't edit bookmarks with url '%s'\n", c_value);
 	}
 
       if(field && !strncmp(field, "comment", 7) && c_value && n_value) 
 	{
-	  if(bookmark_db_edit_bulk(db, 2, c_value, n_value))
+	  if(bookmark_db_edit_bulk(g_db, 2, c_value, n_value))
 	    printf("can't edit bookmarks with comment '%s'\n"
 		   ,c_value);
 	}
 
       if(field && !strncmp(field, "tag", 3) && c_value && n_value) 
 	{
-	  if(bookmark_db_edit_bulk(db, 3, c_value, n_value))
+	  if(bookmark_db_edit_bulk(g_db, 3, c_value, n_value))
 	    printf("can't edit bookmarks with tag '%s'\n", c_value);
 	}
 
       if(name && id) 
 	{
-	  if(bookmark_db_edit(db, id, 0, name))
+	  if(bookmark_db_edit(g_db, id, 0, name))
 	    printf("can't edit name of bookmark id=%d\n", id);
 	}
 
       if(url && id) 
 	{
-	  if(bookmark_db_edit(db, id, 1, url))
+	  if(bookmark_db_edit(g_db, id, 1, url))
 	    printf("can't edit url bookmark id=%d\n", id);
 	}
 
       if(comment && id) 
 	{
-	  if(bookmark_db_edit(db, id, 2, comment))
+	  if(bookmark_db_edit(g_db, id, 2, comment))
 	    printf("can't edit comment of bookmark id=%d\n", id);
 	}
 
       if(tag && id) 
 	{
-	  if(bookmark_db_edit(db, id, 3, tag))
+	  if(bookmark_db_edit(g_db, id, 3, tag))
 	    printf("can't edit tag of bookmark id=%d\n", id);
 	}
     }
@@ -640,9 +640,9 @@ open_file(char* optarg)
   if(optarg) 
     {
       //bookmark_db_close(db);	
-      db = bookmark_db_open(optarg);
+      g_db = bookmark_db_open(optarg);
 
-      if(!db) 
+      if(!g_db) 
 	{
 	  printf("error opening database file=%s\n", optarg);
 	  //exit(EXIT_FAILURE);
@@ -666,7 +666,7 @@ import(char* optarg)
       sqlite3* i_db = bookmark_db_open(optarg);
 
       if(i_db)
-	bookmark_db_import(db, i_db);
+	bookmark_db_import(g_db, i_db);
       else
 	return 1;
     }
@@ -679,7 +679,7 @@ import(char* optarg)
 int
 search(char* optarg)
 {
-  if(db) 
+  if(g_db) 
     {
       int del = 0;
       char* subopts = optarg;
@@ -731,7 +731,7 @@ search(char* optarg)
 	  case name_option:
 	  case sname_option:
 	    if(value) 
-	      bl = bookmark_db_search(db, NAME, value);
+	      bl = bookmark_db_search(g_db, NAME, value);
 	    else
 	      printf("search: name needs an argument\n");
 
@@ -739,7 +739,7 @@ search(char* optarg)
 	  case url_option:
 	  case surl_option:
 	    if(value) 
-	      bl = bookmark_db_search(db, URL, value);
+	      bl = bookmark_db_search(g_db, URL, value);
 	    else
 	      printf("search: url needs an argument\n");
 
@@ -747,7 +747,7 @@ search(char* optarg)
 	  case comment_option:
 	  case scomment_option:
 	    if(value) 
-	      bl = bookmark_db_search(db, COMMENT
+	      bl = bookmark_db_search(g_db, COMMENT
 				      ,value);
 	    else
 	      printf("search: comment needs an"
@@ -757,7 +757,7 @@ search(char* optarg)
 	  case tag_option:
 	  case stag_option:
 	    if(value) 
-	      bl = bookmark_db_search(db, TAG, value);
+	      bl = bookmark_db_search(g_db, TAG, value);
 	    else
 	      printf("search: tag needs an argument\n");
 
@@ -785,7 +785,7 @@ search(char* optarg)
 	    break;		
 	  default:
 	    if(value) 
-	      bl = bookmark_db_search(db, NULL, value);
+	      bl = bookmark_db_search(g_db, NULL, value);
 	    else
 	      printf("search needs an argument\n");
 
@@ -855,7 +855,7 @@ search(char* optarg)
 	      while((b = bookmark_list_return_next_bookmark(bl)))
 		{
 		  int id = strtol(bookmark_id(b), NULL, 10);	
-		  bookmark_db_delete(db, id);
+		  bookmark_db_delete(g_db, id);
 		  bookmark_destroy(b);
 		}
 	    }
@@ -875,7 +875,7 @@ search(char* optarg)
 int
 print_bookmark(char* optarg)
 {
-  if(db) 
+  if(g_db) 
     {
       int id = 0;
       char* field = NULL;
@@ -936,7 +936,7 @@ print_bookmark(char* optarg)
 	    break;		
 	  case all_option:
 	  case sall_option:
-	    bl = bookmark_db_query(db, 0 ,NULL);
+	    bl = bookmark_db_query(g_db, 0 ,NULL);
 
 	    if(bl) 
 	      bookmark_print(bl, 0);
@@ -955,9 +955,9 @@ print_bookmark(char* optarg)
 	     ||(!strncmp(field, "n", 1))) 
 	    {
 	      if(id) 
-		bl = bookmark_db_query(db, id, NAME);
+		bl = bookmark_db_query(g_db, id, NAME);
 	      else
-		bl = bookmark_db_query(db, 0, NAME);
+		bl = bookmark_db_query(g_db, 0, NAME);
 
 	      if(bl) 
 		bookmark_print(bl, 2);
@@ -977,9 +977,9 @@ print_bookmark(char* optarg)
 	     ||(!strncmp(field, "u", 1))) 
 	    {
 	      if(id) 
-		bl = bookmark_db_query(db, id, URL);
+		bl = bookmark_db_query(g_db, id, URL);
 	      else
-		bl = bookmark_db_query(db, 0, URL);
+		bl = bookmark_db_query(g_db, 0, URL);
 
 	      if(bl) 
 		bookmark_print(bl, 3);
@@ -999,9 +999,9 @@ print_bookmark(char* optarg)
 	     ||(!strncmp(field, "c", 1))) 
 	    {
 	      if(id) 
-		bl = bookmark_db_query(db, id, COMMENT);
+		bl = bookmark_db_query(g_db, id, COMMENT);
 	      else
-		bl = bookmark_db_query(db, 0, COMMENT);
+		bl = bookmark_db_query(g_db, 0, COMMENT);
 
 	      if(bl) 
 		bookmark_print(bl, 4);
@@ -1021,9 +1021,9 @@ print_bookmark(char* optarg)
 	     ||(!strncmp(field, "t", 1))) 
 	    {
 	      if(id) 
-		bl = bookmark_db_query(db, id, TAG);
+		bl = bookmark_db_query(g_db, id, TAG);
 	      else
-		bl = bookmark_db_query(db, 0, TAG);
+		bl = bookmark_db_query(g_db, 0, TAG);
 
 	      if(bl) 
 		bookmark_print(bl, 5);
@@ -1043,7 +1043,7 @@ print_bookmark(char* optarg)
       /* only identifier */
       if(id) 
 	{
-	  bl = bookmark_db_query(db, id, NULL);
+	  bl = bookmark_db_query(g_db, id, NULL);
 
 	  if(bl) 
 	    bookmark_print(bl, 0);
@@ -1068,7 +1068,7 @@ print_bookmark(char* optarg)
 int
 delete_bookmark(char* optarg)
 {
-  if(db)
+  if(g_db)
     {
       int id = 0;
       int greedy = 0;
@@ -1139,7 +1139,7 @@ delete_bookmark(char* optarg)
 
       if(id)
 	{
-	  if(bookmark_db_delete(db, id))
+	  if(bookmark_db_delete(g_db, id))
 	    printf("failed to delete the bookmark "
 		   "id=%d\n", id);
 	}
@@ -1148,13 +1148,13 @@ delete_bookmark(char* optarg)
 	{
 	  if(greedy)
 	    {
-	      if(bookmark_db_delete_tag(db, tag, 1))
+	      if(bookmark_db_delete_tag(g_db, tag, 1))
 		printf("failed to delete the bookmark "
 		       "tags=%s\n", tag);
 	    }
 	  else
 	    {
-	      if(bookmark_db_delete_tag(db, tag, 0))
+	      if(bookmark_db_delete_tag(g_db, tag, 0))
 		printf("failed to delete the bookmark "
 		       "tag=%s\n", tag);
 	    }
@@ -1172,9 +1172,9 @@ delete_bookmark(char* optarg)
 int
 html(char* optarg) 
 {
-  if(db) 
+  if(g_db) 
     {
-      bookmark_list *bl = bookmark_db_query(db, 0, NULL);
+      bookmark_list *bl = bookmark_db_query(g_db, 0, NULL);
 
       if(bl) 
 	{
