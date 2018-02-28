@@ -87,12 +87,12 @@ add_bookmark(GtkWidget* button, gpointer** args)
       read_database(NULL, NULL);
       close_window(NULL, args[4]);
       g_free(args);
-      gtk_label_set_text(GTK_LABEL(info_label), "Add: Done");
+      gtk_label_set_text(GTK_LABEL(g_info_label), "Add: Done");
     }
   else
     {
       gtk_label_set_text
-	(GTK_LABEL(info_label) ,"Add: Error, Name or Url field empty");
+	(GTK_LABEL(g_info_label) ,"Add: Error, Name or Url field empty");
     }
 }
 
@@ -171,5 +171,5 @@ add_window(GtkWidget* button)
   g_free(e);
   gtk_container_add(GTK_CONTAINER(window), grid);
   gtk_widget_show_all(GTK_WIDGET(window));
-  gtk_spinner_start(GTK_SPINNER(spinner));
+  gtk_spinner_start(GTK_SPINNER(g_spinner));
 }

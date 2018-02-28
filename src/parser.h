@@ -16,26 +16,7 @@
 #include "html.h"
 #include "favicon.h"
 
-extern char* red;
-extern char* green;
-extern char* yellow;
-extern char* blue;
-extern char* magenta;
-extern char* cyan;
-extern char* gray;
-extern char* white;
-extern char* reset;
-
-extern char* id_color;
-extern char* name_color;
-extern char* url_color;
-extern char* comment_color;
-extern char* tag_color;
-
 extern sqlite3* g_db;
-
-extern int color;
-extern int verbose;
 
 /* read config file */
 char**

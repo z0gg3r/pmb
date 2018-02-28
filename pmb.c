@@ -11,13 +11,6 @@
 int 
 main(int argc, char *argv[]) 
 {
-  /* set default colors */
-  id_color = blue;
-  name_color = white;
-  url_color = cyan;
-  comment_color	= white;
-  tag_color = green;
-
   /* dir path */
   const char* home = secure_getenv("HOME");	
   char*	conf_dir = ".config/pmb";

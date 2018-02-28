@@ -177,7 +177,7 @@ bookmark_db_write(bookmark* b, sqlite3* db)
   return 0;
 }
 
-int	/* import i_db bookmarks into db */
+int /* import i_db bookmarks into db */
 bookmark_db_import(sqlite3* db, sqlite3* i_db)
 {
   if(db && i_db)
@@ -213,7 +213,7 @@ bookmark_db_import(sqlite3* db, sqlite3* i_db)
   return 0;
 }
 
-int 	/* used to verify if an id exist on database */
+static int /* used to verify if an id exist on database */
 bookmark_db_id(sqlite3* db, int id) 
 {
   if((db && id) 
@@ -462,19 +462,20 @@ search_db(sqlite3* db, char* field, char* str, char* sql)
 	    {
 	      if(field) 
 		{
+		  char* queue_args[6];
+
+		  queue_args[0] = NULL;
+		  queue_args[1] = NULL;
+		  queue_args[2] = NULL;
+		  queue_args[3] = NULL;
+		  queue_args[4] = NULL;
+		  queue_args[5] = NULL;			  		  
+		  
 		  if(!strncmp(field, ID, strlen(ID))) 
 		    {
 		      if(sqlite3_column_text(res, 0))
 			{
-			  bookmark_list_enqueue
-			    (bl
-			     ,(char*)sqlite3_column_text
-			     (res, 0)
-			     ,NULL
-			     ,NULL
-			     ,NULL
-			     ,NULL
-			     ,NULL);
+			  queue_args[0] = (char*)sqlite3_column_text(res, 0);
 			}
 		    }
 						
@@ -482,15 +483,7 @@ search_db(sqlite3* db, char* field, char* str, char* sql)
 		    {
 		      if(sqlite3_column_text(res, 1))
 			{
-			  bookmark_list_enqueue
-			    (bl
-			     ,NULL
-			     ,(char*)sqlite3_column_text
-			     (res, 1)
-			     ,NULL
-			     ,NULL
-			     ,NULL
-			     ,NULL);
+			  queue_args[1] = (char*)sqlite3_column_text(res, 1);
 			}
 		    }
 
@@ -498,15 +491,7 @@ search_db(sqlite3* db, char* field, char* str, char* sql)
 		    {
 		      if(sqlite3_column_text(res, 2))
 			{
-			  bookmark_list_enqueue
-			    (bl
-			     ,NULL
-			     ,NULL
-			     ,(char*)sqlite3_column_text
-			     (res, 2)
-			     ,NULL
-			     ,NULL
-			     ,NULL);
+			  queue_args[2] = (char*)sqlite3_column_text(res, 2);
 			}
 		    }
 
@@ -514,15 +499,7 @@ search_db(sqlite3* db, char* field, char* str, char* sql)
 		    {
 		      if(sqlite3_column_text(res, 3))
 			{
-			  bookmark_list_enqueue
-			    (bl
-			     ,NULL
-			     ,NULL
-			     ,NULL
-			     ,(char*)sqlite3_column_text
-			     (res, 3)
-			     ,NULL
-			     ,NULL);
+			  queue_args[3] = (char*)sqlite3_column_text(res, 3);
 			}
 		    }
 
@@ -530,17 +507,18 @@ search_db(sqlite3* db, char* field, char* str, char* sql)
 		    {
 		      if(sqlite3_column_text(res, 4))
 			{
-			  bookmark_list_enqueue
-			    (bl
-			     ,NULL
-			     ,NULL
-			     ,NULL
-			     ,NULL
-			     ,(char*)sqlite3_column_text
-			     (res, 4)
-			     ,NULL);
+			  queue_args[4] = (char*)sqlite3_column_text(res, 4);
 			}
 		    }
+
+		  bookmark_list_enqueue
+		    (bl
+		     ,queue_args[0]
+		     ,queue_args[1]
+		     ,queue_args[2]
+		     ,queue_args[3]
+		     ,queue_args[4]
+		     ,queue_args[5]);
 		}
 	      else
 		{

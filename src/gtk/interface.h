@@ -22,14 +22,13 @@
 #include "tagbox.h"
 
 /* globals */
-extern char* database_file;
+extern char* g_database_file;
 extern sqlite3*	g_db;
-extern GtkWidget* main_box;
-extern GtkWidget* info_box;
-extern GtkWidget* info_label;
-extern GtkWidget* search_entry;
-extern GtkWidget* spinner;
-extern GtkWidget* s_window;
+//extern GtkWidget* main_box;
+extern GtkWidget* g_info_label;
+extern GtkWidget* g_search_entry;
+extern GtkWidget* g_spinner;
+extern GtkWidget* g_scrolled_window;
 extern GtkWidget* gpmb_window;
 
 /* -- quit -- */

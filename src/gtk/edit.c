@@ -36,7 +36,6 @@ move_directory(char* tag)
       unsigned int id = strtol(bookmark_id(b), NULL, 10);
       char* bm_tag = bookmark_tag(b);
       char* bm_tag_bkp = strdup(bm_tag);
-      char* res	= NULL;
 
       if(parents > 0)
 	{
@@ -82,6 +81,8 @@ move_directory(char* tag)
 	{
 	  if(parents > 1)
 	    {
+	      char* res	= NULL;
+	      
 	      while(strcmp(bm_tag, bookmark_id(sb)))
 		{
 		  res = strsep(&bm_tag, "//");
@@ -223,13 +224,13 @@ rename_directory(GtkWidget* button, gpointer** args)
 	    }
 
 	  bookmark_destroy(bt);
-	  gtk_label_set_text(GTK_LABEL(info_label), "Rename: Done");
+	  gtk_label_set_text(GTK_LABEL(g_info_label), "Rename: Done");
 	}
     }
   else
     {
       gtk_label_set_text
-	(GTK_LABEL(info_label), "Rename: Error, name field empty");
+	(GTK_LABEL(g_info_label), "Rename: Error, name field empty");
     }
 
   free(new_tag);
@@ -293,7 +294,7 @@ edit_bookmark(GtkWidget* button, gpointer** args)
 		(message, size - 1, "edit: id = %s, url = %s"
 		 ,bookmark_id(b), bookmark_url(b));
 
-	      gtk_label_set_text(GTK_LABEL(info_label), message);
+	      gtk_label_set_text(GTK_LABEL(g_info_label), message);
 
 	      bookmark_destroy(b);
 	    }
@@ -321,7 +322,7 @@ move_directory_wrapper(GtkWidget* button, gpointer** args)
   g_signal_emit_by_name
     (g_treeview, "move-cursor", GTK_MOVEMENT_DISPLAY_LINES, -1, &r);
 
-  gtk_label_set_text(GTK_LABEL(info_label), "Move: Done");
+  gtk_label_set_text(GTK_LABEL(g_info_label), "Move: Done");
 }
 
 static void
@@ -368,7 +369,7 @@ move_multiple(GtkWidget* button, gpointer** args)
   g_signal_emit_by_name
     (g_treeview, "move-cursor", GTK_MOVEMENT_DISPLAY_LINES, -1, &r);
   
-  gtk_label_set_text(GTK_LABEL(info_label), "Move Multiple: Done");
+  gtk_label_set_text(GTK_LABEL(g_info_label), "Move Multiple: Done");
 }
 
 static void
@@ -480,7 +481,7 @@ edit_bookmark_window(bookmark* b)
   g_free(e);
   gtk_container_add(GTK_CONTAINER(window), grid);
   gtk_widget_show_all(GTK_WIDGET(window));
-  gtk_spinner_start(GTK_SPINNER(spinner));
+  gtk_spinner_start(GTK_SPINNER(g_spinner));
 }
 
 static void
@@ -523,7 +524,7 @@ move_directory_window(bookmark* b)
 
   gtk_container_add(GTK_CONTAINER(window), grid);
   gtk_widget_show_all(GTK_WIDGET(window));
-  gtk_spinner_start(GTK_SPINNER(spinner));
+  gtk_spinner_start(GTK_SPINNER(g_spinner));
 }
 
 static void
@@ -559,7 +560,7 @@ move_multiple_window()
 
   gtk_container_add(GTK_CONTAINER(window), grid);
   gtk_widget_show_all(GTK_WIDGET(window));
-  gtk_spinner_start(GTK_SPINNER(spinner));
+  gtk_spinner_start(GTK_SPINNER(g_spinner));
 }
 
 static void
@@ -604,7 +605,7 @@ rename_directory_window(bookmark* b)
 
   gtk_container_add(GTK_CONTAINER(window), grid);
   gtk_widget_show_all(GTK_WIDGET(window));
-  gtk_spinner_start(GTK_SPINNER(spinner));
+  gtk_spinner_start(GTK_SPINNER(g_spinner));
 }
 
 void

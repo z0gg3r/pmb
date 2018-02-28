@@ -76,7 +76,7 @@ key_press(GtkWidget* window, GdkEventKey* e)
   else if(!strcmp(key, "dollar"))
     {
       GtkAdjustment* adj = gtk_scrolled_window_get_hadjustment
-	(GTK_SCROLLED_WINDOW(s_window));
+	(GTK_SCROLLED_WINDOW(g_scrolled_window));
       
       gdouble upper = gtk_adjustment_get_upper
 	(GTK_ADJUSTMENT(adj));
@@ -90,7 +90,7 @@ key_press(GtkWidget* window, GdkEventKey* e)
 	  ||(!strcmp(key, "bar")))
     {
       GtkAdjustment* adj = gtk_scrolled_window_get_hadjustment
-	(GTK_SCROLLED_WINDOW(s_window));
+	(GTK_SCROLLED_WINDOW(g_scrolled_window));
       
       gdouble lower = gtk_adjustment_get_lower
 	(GTK_ADJUSTMENT(adj));
@@ -136,7 +136,7 @@ key_press(GtkWidget* window, GdkEventKey* e)
 
   else if(!strcmp(key, "s"))
     {
-      gtk_widget_grab_focus(GTK_WIDGET(search_entry));
+      gtk_widget_grab_focus(GTK_WIDGET(g_search_entry));
     }
 
   else if(!strcmp(key, "r"))

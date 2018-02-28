@@ -109,12 +109,18 @@ bookmark_print_field(unsigned int i, char* r)
   if(color && isatty(STDOUT_FILENO)) 
     {
       if(i % 2)
-	printf("%s%s%s\n", white, r, reset);
+	{
+	  printf("%s%s%s\n", white, r, reset);
+	}
       else
-	printf("%s%s%s\n", green, r, reset);
+	{
+	  printf("%s%s%s\n", green, r, reset);
+	}
     }
   else
-    printf("%s\n", r);
+    {
+      printf("%s\n", r);
+    }
 }
 
 void
@@ -155,52 +161,60 @@ bookmark_print(bookmark_list* bl, int field)
 	  if(verbose)
 	    {
 	      if(color && isatty(STDOUT_FILENO))
-		printf("id\t\t%s%s%s\n"
-		       "name\t\t%s%s%s\n"
-		       "url\t\t%s%s%s\n"
-		       "comment\t\t%s%s%s\n"
-		       "tag\t\t%s%s%s\n\n"
-		       ,id_color, bookmark_id(b), reset 
-		       ,name_color, bookmark_name(b), reset
-		       ,url_color, bookmark_url(b), reset
-		       ,comment_color, bookmark_comment(b), reset
-		       ,tag_color, bookmark_tag(b), reset);
+		{
+		  printf("id\t\t%s%s%s\n"
+			 "name\t\t%s%s%s\n"
+			 "url\t\t%s%s%s\n"
+			 "comment\t\t%s%s%s\n"
+			 "tag\t\t%s%s%s\n\n"
+			 ,id_color, bookmark_id(b), reset 
+			 ,name_color, bookmark_name(b), reset
+			 ,url_color, bookmark_url(b), reset
+			 ,comment_color, bookmark_comment(b), reset
+			 ,tag_color, bookmark_tag(b), reset);
+		}
 	      else
-		printf("id\t\t%s\n"
-		       "name\t\t%s\n"
-		       "url\t\t%s\n"
-		       "comment\t\t%s\n"
-		       "tag\t\t%s\n\n"
-		       ,bookmark_id(b)
-		       ,bookmark_name(b)
-		       ,bookmark_url(b)
-		       ,bookmark_comment(b)
-		       ,bookmark_tag(b));
+		{
+		  printf("id\t\t%s\n"
+			 "name\t\t%s\n"
+			 "url\t\t%s\n"
+			 "comment\t\t%s\n"
+			 "tag\t\t%s\n\n"
+			 ,bookmark_id(b)
+			 ,bookmark_name(b)
+			 ,bookmark_url(b)
+			 ,bookmark_comment(b)
+			 ,bookmark_tag(b));
+		}
 	    }
 	  else
 	    {
 	      if(color && isatty(STDOUT_FILENO))
-		printf("%s%s%s\n"
-		       "%s%s%s\n"
-		       "%s%s%s\n"
-		       "%s%s%s\n"
-		       "%s%s%s\n\n"
-		       ,id_color, bookmark_id(b), reset 
-		       ,name_color, bookmark_name(b), reset
-		       ,url_color, bookmark_url(b), reset
-		       ,comment_color, bookmark_comment(b), reset
-		       ,tag_color, bookmark_tag(b), reset);
+		{
+		  printf("%s%s%s\n"
+			 "%s%s%s\n"
+			 "%s%s%s\n"
+			 "%s%s%s\n"
+			 "%s%s%s\n\n"
+			 ,id_color, bookmark_id(b), reset 
+			 ,name_color, bookmark_name(b), reset
+			 ,url_color, bookmark_url(b), reset
+			 ,comment_color, bookmark_comment(b), reset
+			 ,tag_color, bookmark_tag(b), reset);
+		}
 	      else
-		printf("%s\n"
-		       "%s\n"
-		       "%s\n"
-		       "%s\n"
-		       "%s\n\n"
-		       ,bookmark_id(b)
-		       ,bookmark_name(b)
-		       ,bookmark_url(b)
-		       ,bookmark_comment(b)
-		       ,bookmark_tag(b));
+		{
+		  printf("%s\n"
+			 "%s\n"
+			 "%s\n"
+			 "%s\n"
+			 "%s\n\n"
+			 ,bookmark_id(b)
+			 ,bookmark_name(b)
+			 ,bookmark_url(b)
+			 ,bookmark_comment(b)
+			 ,bookmark_tag(b));
+		}
 	    }
 	}
 
@@ -214,42 +228,62 @@ find_color(char* color)
 {
   if((!strcmp(color, "red")
       ||(!strcmp(color, "Red"))))
-    return red;
+    {
+      return red;
+    }
 
   else if((!strcmp(color, "blue")
 	   ||(!strcmp(color, "Blue"))))
-    return blue;
+    {
+      return blue;
+    }
 
   else if((!strcmp(color, "cyan")
 	   ||(!strcmp(color, "Cyan"))))
-    return cyan;
+    {
+      return cyan;
+    }
 
   else if((!strcmp(color, "green")
 	   ||(!strcmp(color, "Green"))))
-    return green;
+    {
+      return green;
+    }
 		
   else if((!strcmp(color, "reset")
 	   ||(!strcmp(color, "Reset"))))
-    return reset;
+    {
+      return reset;
+    }
 
   else if((!strcmp(color, "white")
 	   ||(!strcmp(color, "White"))))
-    return white;
+    {
+      return white;
+    }
 
   else if((!strcmp(color, "magenta")
 	   ||(!strcmp(color, "Magenta"))))
-    return magenta;
+    {
+      return magenta;
+    }
 
   else if((!strcmp(color, "gray")
 	   ||(!strcmp(color, "Gray"))))
-    return gray;
+    {
+      return gray;
+    }
 
   else if((!strcmp(color, "yellow")
 	   ||(!strcmp(color, "Yellow"))))
-    return yellow;
+    {
+      return yellow;
+    }
 
   else
-    return reset;
+    {
+      return reset;
+    }
 }
 
 int
@@ -258,9 +292,13 @@ parse_config_file(char* optarg)
   char** res = NULL;
 
   if(optarg)
-    res 	= read_config(optarg);
+    {
+      res = read_config(optarg);
+    }
   else
-    return 1;
+    {
+      return 1;
+    }
 
   if(res)
     {
@@ -269,7 +307,9 @@ parse_config_file(char* optarg)
 	  unsigned int r = strtol(res[0], NULL, 10);	
 
 	  if(r == 0 || r == 1)
-	    color = r;
+	    {
+	      color = r;
+	    }
 	  else
 	    {
 	      printf("unknown color parameter\nshoud be 0 or 1\n");
@@ -282,7 +322,9 @@ parse_config_file(char* optarg)
 	  unsigned int r = strtol(res[1], NULL, 10);	
 
 	  if(r == 0 || r == 1)
-	    verbose = r;
+	    {
+	      verbose = r;
+	    }
 	  else
 	    {
 	      printf("unknown verbose parameter\nshoud be 0 or 1\n");
@@ -291,24 +333,36 @@ parse_config_file(char* optarg)
 	}
 
       if(res[2])
-	id_color = find_color(res[2]);
+	{
+	  id_color = find_color(res[2]);
+	}
 
       if(res[3])
-	name_color = find_color(res[3]);
+	{
+	  name_color = find_color(res[3]);
+	}
 
       if(res[4])
-	url_color = find_color(res[4]);
+	{
+	  url_color = find_color(res[4]);
+	}
 
       if(res[5])
-	comment_color = find_color(res[5]);
+	{
+	  comment_color = find_color(res[5]);
+	}
 
       if(res[6])
-	tag_color = find_color(res[6]);
+	{
+	  tag_color = find_color(res[6]);
+	}
 
       free(res);
     }
   else
-    return 1;
+    {
+      return 1;
+    }
 
   return 0;
 }
@@ -362,34 +416,50 @@ add_bookmark(char* optarg)
 	  {
 	  case name_option:
 	  case sname_option:
-	    if(value) 
-	      name = value;
+	    if(value)
+	      {
+		name = value;
+	      }
 	    else
-	      printf("add: name needs an argument\n");
+	      {
+		printf("add: name needs an argument\n");
+	      }
 
 	    break;
 	  case url_option:
 	  case surl_option:
-	    if(value) 
-	      url = value;
+	    if(value)
+	      {
+		url = value;
+	      }
 	    else
-	      printf("add: url needs an argument\n");
+	      {
+		printf("add: url needs an argument\n");
+	      }
 
 	    break;
 	  case comment_option:
 	  case scomment_option:
-	    if(value) 
-	      comment = value;
+	    if(value)
+	      {
+		comment = value;
+	      }
 	    else
-	      printf("add: comment needs an argument\n");
+	      {
+		printf("add: comment needs an argument\n");
+	      }
 
 	    break;
 	  case tag_option:
 	  case stag_option:
-	    if(value) 
-	      tag = value;
+	    if(value)
+	      {
+		tag = value;
+	      }
 	    else
-	      printf("add: tag needs an argument\n");
+	      {
+		printf("add: tag needs an argument\n");
+	      }
 
 	    break;		
 	  case favicon_option:
@@ -408,26 +478,36 @@ add_bookmark(char* optarg)
 	      char* favicon_temp = download_favicon(url);
 
 	      if(favicon_temp)
-		favicon = favicon_temp;
+		{
+		  favicon = favicon_temp;
+		}
 	    }
 	  else
-	    favicon = "none";
+	    {
+	      favicon = "none";
+	    }
 
 	  b = bookmark_new(name, url, comment, tag, favicon);
 
 	  if(b) 
 	    {
 	      if(bookmark_db_write(b, g_db))
-		printf("failed to write wbookmark to database\n");
+		{
+		  printf("failed to write wbookmark to database\n");
+		}
 
 	      bookmark_destroy(b);
 	      return 0;
 	    }
 	  else
-	    printf("error creating bookmark\n");
+	    {
+	      printf("error creating bookmark\n");
+	    }
 	}
-      else 
-	printf("need at least name and url to create a bookmark.\n");
+      else
+	{
+	  printf("need at least name and url to create a bookmark.\n");
+	}
     }
   else 
     {
@@ -517,59 +597,86 @@ edit_bookmark(char* optarg)
 	    break;
 	  case name_option:
 	  case sname_option:
-	    if(value) 
-	      name = value;
+	    if(value)
+	      {
+		name = value;
+	      }
 	    else
-	      printf("edit: name needs an argument\n");
+	      {
+		printf("edit: name needs an argument\n");
+	      }
 
 	    break;
 	  case url_option:
 	  case surl_option:
-	    if(value) 
-	      url = value;
+	    if(value)
+	      {
+		url = value;
+	      }
 	    else
-	      printf("edit: url needs an argument\n");
+	      {
+		printf("edit: url needs an argument\n");
+	      }
 
 	    break;
 	  case comment_option:
 	  case scomment_option:
-	    if(value) 
-	      comment = value;
+	    if(value)
+	      {
+		comment = value;
+	      }
 	    else
-	      printf("edit: comment needs an argument\n");
+	      {
+		printf("edit: comment needs an argument\n");
+	      }
 
 	    break;
 	  case tag_option:
 	  case stag_option:
-	    if(value) 
-	      tag = value;
+	    if(value)
+	      {
+		tag = value;
+	      }
 	    else
-	      printf("edit: tag needs an argument\n");
+	      {
+		printf("edit: tag needs an argument\n");
+	      }
 
 	    break;		
 	  case field_option:
 	  case sfield_option:
-	    if(value) 
-	      field = value;	
+	    if(value)
+	      {
+		field = value;
+	      }
 	    else
-	      printf("edit: field needs an argument\n");
+	      {
+		printf("edit: field needs an argument\n");
+	      }
 
 	    break;
 	  case value_option:
 	  case svalue_option:
-	    if(value) 
-	      c_value = value;
+	    if(value)
+	      {
+		c_value = value;
+	      }
 	    else
-	      printf("edit: value needs an argument\n");
+	      {
+		printf("edit: value needs an argument\n");
+	      }
 
 	    break;
 	  case new_value_option:
 	  case snew_value_option:
-	    if(value) 
-	      n_value = value;
+	    if(value)
+	      {
+		n_value = value;
+	      }
 	    else
-	      printf("edit: new-value needs an"
-		     " argument\n");
+	      {
+		printf("edit: new-value needs an argument\n");
+	      }
 
 	    break;
 	  default:
@@ -579,50 +686,66 @@ edit_bookmark(char* optarg)
       if(field && !strncmp(field, "name", 4) && c_value && n_value) 
 	{
 	  if(bookmark_db_edit_bulk(g_db, 0, c_value, n_value))
-	    printf("can't edit bookmarks named '%s'\n", c_value);
+	    {
+	      printf("can't edit bookmarks named '%s'\n", c_value);
+	    }
 	}
 
       if(field && !strncmp(field, "url", 3) && c_value && n_value) 
 	{
 	  if(bookmark_db_edit_bulk(g_db, 1, c_value, n_value))
-	    printf("can't edit bookmarks with url '%s'\n", c_value);
+	    {
+	      printf("can't edit bookmarks with url '%s'\n", c_value);
+	    }
 	}
 
       if(field && !strncmp(field, "comment", 7) && c_value && n_value) 
 	{
 	  if(bookmark_db_edit_bulk(g_db, 2, c_value, n_value))
-	    printf("can't edit bookmarks with comment '%s'\n"
-		   ,c_value);
+	    {
+	      printf("can't edit bookmarks with comment '%s'\n"
+		     ,c_value);
+	    }
 	}
 
       if(field && !strncmp(field, "tag", 3) && c_value && n_value) 
 	{
 	  if(bookmark_db_edit_bulk(g_db, 3, c_value, n_value))
-	    printf("can't edit bookmarks with tag '%s'\n", c_value);
+	    {
+	      printf("can't edit bookmarks with tag '%s'\n", c_value);
+	    }
 	}
 
       if(name && id) 
 	{
 	  if(bookmark_db_edit(g_db, id, 0, name))
-	    printf("can't edit name of bookmark id=%d\n", id);
+	    {
+	      printf("can't edit name of bookmark id=%d\n", id);
+	    }
 	}
 
       if(url && id) 
 	{
 	  if(bookmark_db_edit(g_db, id, 1, url))
-	    printf("can't edit url bookmark id=%d\n", id);
+	    {
+	      printf("can't edit url bookmark id=%d\n", id);
+	    }
 	}
 
       if(comment && id) 
 	{
 	  if(bookmark_db_edit(g_db, id, 2, comment))
-	    printf("can't edit comment of bookmark id=%d\n", id);
+	    {
+	      printf("can't edit comment of bookmark id=%d\n", id);
+	    }
 	}
 
       if(tag && id) 
 	{
 	  if(bookmark_db_edit(g_db, id, 3, tag))
-	    printf("can't edit tag of bookmark id=%d\n", id);
+	    {
+	      printf("can't edit tag of bookmark id=%d\n", id);
+	    }
 	}
     }
   else
@@ -666,12 +789,18 @@ import(char* optarg)
       sqlite3* i_db = bookmark_db_open(optarg);
 
       if(i_db)
-	bookmark_db_import(g_db, i_db);
+	{
+	  bookmark_db_import(g_db, i_db);
+	}
       else
-	return 1;
+	{
+	  return 1;
+	}
     }
   else
-    return 1;
+    {
+      return 1;
+    }
 
   return 0;
 }
@@ -730,45 +859,60 @@ search(char* optarg)
 	  {
 	  case name_option:
 	  case sname_option:
-	    if(value) 
-	      bl = bookmark_db_search(g_db, NAME, value);
+	    if(value)
+	      {
+		bl = bookmark_db_search(g_db, NAME, value);
+	      }
 	    else
-	      printf("search: name needs an argument\n");
+	      {
+		printf("search: name needs an argument\n");
+	      }
 
 	    break;
 	  case url_option:
 	  case surl_option:
-	    if(value) 
-	      bl = bookmark_db_search(g_db, URL, value);
+	    if(value)
+	      {
+		bl = bookmark_db_search(g_db, URL, value);
+	      }
 	    else
 	      printf("search: url needs an argument\n");
 
 	    break;
 	  case comment_option:
 	  case scomment_option:
-	    if(value) 
-	      bl = bookmark_db_search(g_db, COMMENT
-				      ,value);
+	    if(value)
+	      {
+		bl = bookmark_db_search(g_db, COMMENT, value);
+	      }
 	    else
-	      printf("search: comment needs an"
-		     " argument\n");
+	      {
+		printf("search: comment needs an argument\n");
+	      }
 
 	    break;
 	  case tag_option:
 	  case stag_option:
-	    if(value) 
-	      bl = bookmark_db_search(g_db, TAG, value);
+	    if(value)
+	      {
+		bl = bookmark_db_search(g_db, TAG, value);
+	      }
 	    else
-	      printf("search: tag needs an argument\n");
+	      {
+		printf("search: tag needs an argument\n");
+	      }
 
 	    break;		
 	  case export_option:
 	  case sexport_option:
-	    if(value) 
-	      export = value;
+	    if(value)
+	      {
+		export = value;
+	      }
 	    else
-	      printf("search: export needs an"
-		     " argument\n");
+	      {
+		printf("search: export needs an argument\n");
+	      }
 
 	    break;		
 	  case delete_option:
@@ -778,16 +922,24 @@ search(char* optarg)
 	  case field_option:
 	  case sfield_option:
 	    if(value)
-	      field = value;
+	      {
+		field = value;
+	      }
 	    else
-	      printf("search field needs an argument\n");
+	      {
+		printf("search field needs an argument\n");
+	      }
 
 	    break;		
 	  default:
-	    if(value) 
-	      bl = bookmark_db_search(g_db, NULL, value);
+	    if(value)
+	      {
+		bl = bookmark_db_search(g_db, NULL, value);
+	      }
 	    else
-	      printf("search needs an argument\n");
+	      {
+		printf("search needs an argument\n");
+	      }
 
 	    break;
 	  }
@@ -799,24 +951,34 @@ search(char* optarg)
 	  if(field)
 	    {
 	      if(!strncmp(field, ID, strlen(ID)) 
-		 ||(!strncmp(field, "i", 1))) 
-		f = 1;
+		 ||(!strncmp(field, "i", 1)))
+		{
+		  f = 1;
+		}
 
 	      if(!strncmp(field, NAME, strlen(NAME)) 
-		 ||(!strncmp(field, "n", 1))) 
-		f = 2;
+		 ||(!strncmp(field, "n", 1)))
+		{
+		  f = 2;
+		}
 
 	      if(!strncmp(field, URL, strlen(URL)) 
-		 ||(!strncmp(field, "u", 1))) 
-		f = 3;
+		 ||(!strncmp(field, "u", 1)))
+		{
+		  f = 3;
+		}
 
 	      if(!strncmp(field, COMMENT, strlen(COMMENT)) 
-		 ||(!strncmp(field, "c", 1))) 
-		f = 4;
+		 ||(!strncmp(field, "c", 1)))
+		{
+		  f = 4;
+		}
 
 	      if(!strncmp(field, TAG, strlen(TAG)) 
-		 ||(!strncmp(field, "t", 1))) 
-		f = 5;
+		 ||(!strncmp(field, "t", 1)))
+		{
+		  f = 5;
+		}
 	    }
 
 	  bookmark_print(bl, f);
@@ -834,8 +996,10 @@ search(char* optarg)
 		  while((b = bookmark_list_return_next_bookmark(bl)))
 		    {
 		      if(bookmark_db_write(b, e_db))
-			printf("search: failed to export"
-			       " bookmark\n");
+			{
+			  printf("search: failed to export"
+				 " bookmark\n");
+			}
 
 		      bookmark_destroy(b);
 		    }
@@ -843,7 +1007,9 @@ search(char* optarg)
 		  bookmark_db_close(e_db);
 		}
 	      else
-		printf("failed to open database %s\n", export);
+		{
+		  printf("failed to open database %s\n", export);
+		}
 	    }
 
 	  if(del)
@@ -928,20 +1094,28 @@ print_bookmark(char* optarg)
 	    break;
 	  case field_option:
 	  case sfield_option:
-	    if(value) 
-	      field = value;
+	    if(value)
+	      {
+		field = value;
+	      }
 	    else
-	      printf("print: field needs an argument\n");
+	      {
+		printf("print: field needs an argument\n");
+	      }
 
 	    break;		
 	  case all_option:
 	  case sall_option:
 	    bl = bookmark_db_query(g_db, 0 ,NULL);
 
-	    if(bl) 
-	      bookmark_print(bl, 0);
+	    if(bl)
+	      {
+		bookmark_print(bl, 0);
+	      }
 	    else
-	      printf("failed to print bookmarks\n");
+	      {
+		printf("failed to print bookmarks\n");
+	      }
 
 	    break;
 	  default:
@@ -954,20 +1128,30 @@ print_bookmark(char* optarg)
 	  if(!strncmp(field, NAME, strlen(NAME)) 
 	     ||(!strncmp(field, "n", 1))) 
 	    {
-	      if(id) 
-		bl = bookmark_db_query(g_db, id, NAME);
+	      if(id)
+		{
+		  bl = bookmark_db_query(g_db, id, NAME);
+		}
 	      else
-		bl = bookmark_db_query(g_db, 0, NAME);
+		{
+		  bl = bookmark_db_query(g_db, 0, NAME);
+		}
 
-	      if(bl) 
-		bookmark_print(bl, 2);
+	      if(bl)
+		{
+		  bookmark_print(bl, 2);
+		}
 	      else
 		{
 		  if(id)
-		    printf("failed to print name of"
-			   " bookmark id=%d\n", id);
+		    {
+		      printf("failed to print name of"
+			     " bookmark id=%d\n", id);
+		    }
 		  else
-		    printf("failed to print name\n");
+		    {
+		      printf("failed to print name\n");
+		    }
 		}
 
 	      return 0;
@@ -976,20 +1160,30 @@ print_bookmark(char* optarg)
 	  if(!strncmp(field, URL, strlen(URL))
 	     ||(!strncmp(field, "u", 1))) 
 	    {
-	      if(id) 
-		bl = bookmark_db_query(g_db, id, URL);
+	      if(id)
+		{
+		  bl = bookmark_db_query(g_db, id, URL);
+		}
 	      else
-		bl = bookmark_db_query(g_db, 0, URL);
+		{
+		  bl = bookmark_db_query(g_db, 0, URL);
+		}
 
-	      if(bl) 
-		bookmark_print(bl, 3);
+	      if(bl)
+		{
+		  bookmark_print(bl, 3);
+		}
 	      else
 		{
 		  if(id)
-		    printf("failed to print url of"
-			   " bookmark id=%d\n", id);
+		    {
+		      printf("failed to print url of"
+			     " bookmark id=%d\n", id);
+		    }
 		  else
-		    printf("failed to print url\n");
+		    {
+		      printf("failed to print url\n");
+		    }
 		}
 
 	      return 0;
@@ -998,20 +1192,30 @@ print_bookmark(char* optarg)
 	  if(!strncmp(field, COMMENT, strlen(COMMENT))
 	     ||(!strncmp(field, "c", 1))) 
 	    {
-	      if(id) 
-		bl = bookmark_db_query(g_db, id, COMMENT);
+	      if(id)
+		{
+		  bl = bookmark_db_query(g_db, id, COMMENT);
+		}
 	      else
-		bl = bookmark_db_query(g_db, 0, COMMENT);
+		{
+		  bl = bookmark_db_query(g_db, 0, COMMENT);
+		}
 
-	      if(bl) 
-		bookmark_print(bl, 4);
+	      if(bl)
+		{
+		  bookmark_print(bl, 4);
+		}
 	      else
 		{
 		  if(id)
-		    printf("failed to print comment"
-			   " of bookmark id=%d\n", id);
+		    {
+		      printf("failed to print comment"
+			     " of bookmark id=%d\n", id);
+		    }
 		  else
-		    printf("failed to print comment\n");
+		    {
+		      printf("failed to print comment\n");
+		    }
 		}
 
 	      return 0;
@@ -1020,20 +1224,30 @@ print_bookmark(char* optarg)
 	  if(!strncmp(field, TAG, strlen(TAG)) 
 	     ||(!strncmp(field, "t", 1))) 
 	    {
-	      if(id) 
-		bl = bookmark_db_query(g_db, id, TAG);
+	      if(id)
+		{
+		  bl = bookmark_db_query(g_db, id, TAG);
+		}
 	      else
-		bl = bookmark_db_query(g_db, 0, TAG);
+		{
+		  bl = bookmark_db_query(g_db, 0, TAG);
+		}
 
-	      if(bl) 
-		bookmark_print(bl, 5);
+	      if(bl)
+		{
+		  bookmark_print(bl, 5);
+		}
 	      else
 		{
 		  if(id)
-		    printf("failed to print tag of"
-			   " bookmark id=%d\n", id);
+		    {
+		      printf("failed to print tag of"
+			     " bookmark id=%d\n", id);
+		    }
 		  else
-		    printf("failed to print tag\n");
+		    {
+		      printf("failed to print tag\n");
+		    }
 		}
 
 	      return 0;
@@ -1045,16 +1259,22 @@ print_bookmark(char* optarg)
 	{
 	  bl = bookmark_db_query(g_db, id, NULL);
 
-	  if(bl) 
-	    bookmark_print(bl, 0);
+	  if(bl)
+	    {
+	      bookmark_print(bl, 0);
+	    }
 	  else
-	    printf("failed to print bookmark id=%d\n", id);
+	    {
+	      printf("failed to print bookmark id=%d\n", id);
+	    }
 
 	  return 0;
 	}
 
       if(bl)
-	bookmark_list_destroy(bl);
+	{
+	  bookmark_list_destroy(bl);
+	}
     }
   else
     {
@@ -1121,7 +1341,9 @@ delete_bookmark(char* optarg)
 	  case tag_option:
 	  case stag_option:
 	    if(value)
-	      tag = value;
+	      {
+		tag = value;
+	      }
 	    else
 	      {
 		printf("delete: tag needs argument\n");
@@ -1140,8 +1362,10 @@ delete_bookmark(char* optarg)
       if(id)
 	{
 	  if(bookmark_db_delete(g_db, id))
-	    printf("failed to delete the bookmark "
-		   "id=%d\n", id);
+	    {
+	      printf("failed to delete the bookmark "
+		     "id=%d\n", id);
+	    }
 	}
 
       if(tag)
@@ -1149,14 +1373,18 @@ delete_bookmark(char* optarg)
 	  if(greedy)
 	    {
 	      if(bookmark_db_delete_tag(g_db, tag, 1))
-		printf("failed to delete the bookmark "
-		       "tags=%s\n", tag);
+		{
+		  printf("failed to delete the bookmark "
+			 "tags=%s\n", tag);
+		}
 	    }
 	  else
 	    {
 	      if(bookmark_db_delete_tag(g_db, tag, 0))
-		printf("failed to delete the bookmark "
-		       "tag=%s\n", tag);
+		{
+		  printf("failed to delete the bookmark "
+			 "tag=%s\n", tag);
+		}
 	    }
 	}
     }
@@ -1183,7 +1411,9 @@ html(char* optarg)
 	}
     }
   else
-    return 1;
+    {
+      return 1;
+    }
 
   return 0;
 }
@@ -1232,7 +1462,9 @@ color_list(char* optarg)
 	  case sid_option:
 	    {
 	      if(value)
-		id_color = find_color(value);
+		{
+		  id_color = find_color(value);
+		}
 
 	      break;
 	    }
@@ -1240,7 +1472,9 @@ color_list(char* optarg)
 	  case sname_option:
 	    {
 	      if(value)
-		name_color = find_color(value);
+		{
+		  name_color = find_color(value);
+		}
 
 	      break;
 	    }
@@ -1248,7 +1482,9 @@ color_list(char* optarg)
 	  case surl_option:
 	    {
 	      if(value)
-		url_color = find_color(value);
+		{
+		  url_color = find_color(value);
+		}
 
 	      break;
 	    }
@@ -1256,7 +1492,9 @@ color_list(char* optarg)
 	  case scomment_option:
 	    {
 	      if(value)
-		comment_color = find_color(value);
+		{
+		  comment_color = find_color(value);
+		}
 
 	      break;
 	    }
@@ -1264,7 +1502,9 @@ color_list(char* optarg)
 	  case stag_option:
 	    {
 	      if(value)
-		tag_color = find_color(value);
+		{
+		  tag_color = find_color(value);
+		}
 
 	      break;
 	    }
@@ -1294,6 +1534,13 @@ void
 parse_options(int argc, char* argv[], cl_option_list* option
 	      ,cl_option_list* command) 
 {
+  /* set default colors */
+  id_color = blue;
+  name_color = white;
+  url_color = cyan;
+  comment_color = white;
+  tag_color = green;
+
   int c, option_index 	= 0; 	/* getopt */
 
   static struct option long_options[] = 
@@ -1318,8 +1565,10 @@ parse_options(int argc, char* argv[], cl_option_list* option
   while((c = getopt_long(argc, argv, "a:C:e:d:s:f:i:p:l:chHVv", long_options
 			 ,&option_index))) 
     {
-      if(c == -1) 
-	break;	
+      if(c == -1)
+	{
+	  break;
+	}
 
       switch(c) 
 	{
@@ -1379,9 +1628,11 @@ parse_options(int argc, char* argv[], cl_option_list* option
 	    break;
 	  }
 	case 'h': /* help */
-	  help();
-	  version();
-	  exit(EXIT_SUCCESS);
+	  {
+	    help();
+	    version();
+	    exit(EXIT_SUCCESS);
+	  }
 
 	case 'i': /* import file */
 	  {
@@ -1423,13 +1674,17 @@ parse_options(int argc, char* argv[], cl_option_list* option
 	    break;
 	  }
 	case 'V': /* version */
-	  version();
-	  exit(EXIT_SUCCESS);
+	  {
+	    version();
+	    exit(EXIT_SUCCESS);
+	  }
 
 	default: /* anything else */
-	  printf("unknown option\n");
-	  help();
-	  exit(EXIT_FAILURE);
+	  {
+	    printf("unknown option\n");
+	    help();
+	    exit(EXIT_FAILURE);
+	  }
 	}
     }
 }
@@ -1460,30 +1715,46 @@ read_config(char* filename)
 		 ||(option[0] == ' ')
 		 ||(option[0] == '\t')
 		 ||(option[0] == '#'))		/* comment */
-		goto new_option;
+		{
+		  goto new_option;
+		}
 
 	      char* str = strsep(&option, "=");
 
 	      if(!(strcmp(str, "color")))
-		ret[0] = strsep(&option, "=");
+		{
+		  ret[0] = strsep(&option, "=");
+		}
 
 	      else if(!(strcmp(str, "verbose")))
-		ret[1] = strsep(&option, "=");
+		{
+		  ret[1] = strsep(&option, "=");
+		}
 
 	      else if(!(strcmp(str, "id_color")))
-		ret[2] = strsep(&option, "=");
+		{
+		  ret[2] = strsep(&option, "=");
+		}
 
 	      else if(!(strcmp(str, "name_color")))
-		ret[3] = strsep(&option, "=");
+		{
+		  ret[3] = strsep(&option, "=");
+		}
 
 	      else if(!(strcmp(str, "url_color")))
-		ret[4] = strsep(&option, "=");
+		{
+		  ret[4] = strsep(&option, "=");
+		}
 
 	      else if(!(strcmp(str, "comment_color")))
-		ret[5] = strsep(&option, "=");
+		{
+		  ret[5] = strsep(&option, "=");
+		}
 
 	      else if(!(strcmp(str, "tag_color")))
-		ret[6] = strsep(&option, "=");
+		{
+		  ret[6] = strsep(&option, "=");
+		}
 
 	      else
 		{
@@ -1511,5 +1782,7 @@ read_config(char* filename)
       return ret;
     }
   else
-    return NULL;
+    {
+      return NULL;
+    }
 }

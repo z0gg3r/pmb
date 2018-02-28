@@ -21,7 +21,7 @@ set_options()
 
   if(opts) 
     {
-      opts->database_file = database_file;
+      opts->database_file = g_database_file;
       opts->tree_lines = "true";
       opts->download_favicon = "false";
       opts->id_fg = NULL;
@@ -588,5 +588,5 @@ options_window(GtkWidget* button)
   gtk_container_add(GTK_CONTAINER(window), main_box);
 
   gtk_widget_show_all(GTK_WIDGET(window));
-  gtk_spinner_start(GTK_SPINNER(spinner));
+  gtk_spinner_start(GTK_SPINNER(g_spinner));
 }

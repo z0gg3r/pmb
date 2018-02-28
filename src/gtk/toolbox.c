@@ -1,6 +1,6 @@
 #include "toolbox.h"
 
-GtkWidget* tool_box = NULL;
+GtkWidget* g_tool_box = NULL;
 
 GtkWidget*
 tool_box_new(GtkWidget* main_window) 
@@ -80,4 +80,3 @@ tool_box_new(GtkWidget* main_window)
 
   return tool_bar;
 }
-

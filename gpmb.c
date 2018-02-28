@@ -3,7 +3,7 @@
 #include <sys/stat.h>
 #include "src/gtk/interface.h"
 
-char* database_file = NULL;
+char* g_database_file = NULL;
 
 int 
 main(int argc, char *argv[]) 
@@ -26,12 +26,12 @@ main(int argc, char *argv[])
   int size = (strlen(home) + (strlen(conf_dir)) + strlen(DATABASE)
 	      + 5) * sizeof(char);
 
-  database_file = calloc(1, size);
+  g_database_file = calloc(1, size);
 
-  snprintf(database_file, size, "%s/%s" 
+  snprintf(g_database_file, size, "%s/%s" 
 	   ,path, DATABASE);
 
-  if(database_file) 
+  if(g_database_file) 
     {
       read_config();
       free(path);
@@ -45,7 +45,7 @@ main(int argc, char *argv[])
   short res = gtk_interface(argc, argv);
 
   free(opts);
-  free(database_file);
+  free(g_database_file);
   bookmark_db_close(g_db);
   return res;
 }

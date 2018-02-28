@@ -71,7 +71,7 @@ option_list_add(cl_option_list* l, cl_option* opt)
       ++l->position;
       ++l->size;
       
-      l->opt = realloc(l->opt, l->size * sizeof(cl_option_list*));
+      l->opt = realloc(l->opt, l->size * sizeof(cl_option*));
       l->opt[l->position] = calloc(1, sizeof(cl_option*));
     }
   else

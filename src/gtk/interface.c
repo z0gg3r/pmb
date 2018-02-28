@@ -2,13 +2,13 @@
 
 /* globals */
 sqlite3* g_db = NULL;
-GtkWidget* main_box = NULL;
-GtkWidget* info_box = NULL;
-GtkWidget* info_label = NULL;
-GtkWidget* search_entry	= NULL;
-GtkWidget* spinner = NULL;
-GtkWidget* s_window = NULL;
+GtkWidget* g_info_label = NULL;
+GtkWidget* g_search_entry = NULL;
+GtkWidget* g_spinner = NULL;
+GtkWidget* g_scrolled_window = NULL;
 GtkWidget* gpmb_window 	= NULL;
+
+GtkWidget* info_box = NULL;
 
 void 
 destroy() 
@@ -33,13 +33,13 @@ widget_hide(GtkWidget* button, char* name)
 
   if(!(strcmp(name, "tool_bar")))
     {
-      if(gtk_widget_get_visible(GTK_WIDGET(tool_box)))
+      if(gtk_widget_get_visible(GTK_WIDGET(g_tool_box)))
 	{
-	  gtk_widget_hide(GTK_WIDGET(tool_box));
+	  gtk_widget_hide(GTK_WIDGET(g_tool_box));
 	}
       else
 	{
-	  gtk_widget_show(GTK_WIDGET(tool_box));
+	  gtk_widget_show(GTK_WIDGET(g_tool_box));
 	}
     }
 }
@@ -60,47 +60,47 @@ gtk_interface(int argc, char* argv[])
     (gpmb_window, "destroy", G_CALLBACK(destroy), NULL);
 
   /* tree view */
-  search_entry = gtk_entry_new();
-  g_treeview = tree_view(search_entry);
+  g_search_entry = gtk_entry_new();
+  g_treeview = tree_view(g_search_entry);
 
   /* scrolled window for bookmark_view */
-  s_window = gtk_scrolled_window_new(NULL, NULL);
-  gtk_container_add(GTK_CONTAINER(s_window), g_treeview);
+  g_scrolled_window = gtk_scrolled_window_new(NULL, NULL);
+  gtk_container_add(GTK_CONTAINER(g_scrolled_window), g_treeview);
 
   g_signal_connect
-    (s_window, "key-press-event", G_CALLBACK(key_press), NULL);
+    (g_scrolled_window, "key-press-event", G_CALLBACK(key_press), NULL);
 
   g_signal_connect
-    (search_entry, "key-release-event", G_CALLBACK(search_entry_key_press)
+    (g_search_entry, "key-release-event", G_CALLBACK(search_entry_key_press)
      ,NULL);
 
   /* menu bar */
   GtkWidget* menu_bar = menu_bar_new(gpmb_window);
 
   /* tool box */
-  tool_box = tool_box_new(gpmb_window);
+  g_tool_box = tool_box_new(gpmb_window);
 
   /* search box */
-  GtkWidget* search_box = search_box_new(search_entry);
+  GtkWidget* search_box = search_box_new(g_search_entry);
 
   /* info label */
-  info_label = gtk_label_new(" ");
-  gtk_label_set_xalign(GTK_LABEL(info_label), 1);
+  g_info_label = gtk_label_new(" ");
+  gtk_label_set_xalign(GTK_LABEL(g_info_label), 1);
 
   /* spinner */
-  spinner = gtk_spinner_new();
+  g_spinner = gtk_spinner_new();
 
   /* info box */
   info_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
-  gtk_box_pack_start(GTK_BOX(info_box), info_label, TRUE, TRUE, 1);
-  gtk_container_add(GTK_CONTAINER(info_box), spinner);
+  gtk_box_pack_start(GTK_BOX(info_box), g_info_label, TRUE, TRUE, 1);
+  gtk_container_add(GTK_CONTAINER(info_box), g_spinner);
 
   /* add to main */
-  main_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
+  GtkWidget* main_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
   gtk_container_add(GTK_CONTAINER(main_box), menu_bar);
-  gtk_container_add(GTK_CONTAINER(main_box), tool_box);
+  gtk_container_add(GTK_CONTAINER(main_box), g_tool_box);
   gtk_container_add(GTK_CONTAINER(main_box), search_box);
-  gtk_box_pack_start(GTK_BOX(main_box), s_window, TRUE, TRUE, 1);
+  gtk_box_pack_start(GTK_BOX(main_box), g_scrolled_window, TRUE, TRUE, 1);
   gtk_container_add(GTK_CONTAINER(main_box), info_box);
 
   /* add main_box into window */

@@ -36,7 +36,7 @@ delete_bookmark(GtkWidget* button, gpointer** args)
   gboolean r;
   g_signal_emit_by_name
     (g_treeview, "move-cursor", GTK_MOVEMENT_DISPLAY_LINES, -1, &r);
-  gtk_label_set_text(GTK_LABEL(info_label), "Delete: Done");
+  gtk_label_set_text(GTK_LABEL(g_info_label), "Delete: Done");
 }
 
 static void
@@ -70,7 +70,7 @@ delete_directory(GtkWidget* button, gpointer window)
   gboolean r;
   g_signal_emit_by_name
     (g_treeview, "move-cursor", GTK_MOVEMENT_DISPLAY_LINES, -1, &r);
-  gtk_label_set_text(GTK_LABEL(info_label), "Delete Directory: Done");
+  gtk_label_set_text(GTK_LABEL(g_info_label), "Delete Directory: Done");
 }
 
 static void
@@ -112,7 +112,7 @@ delete_multiple(GtkWidget* button, gpointer window)
   gboolean r;
   g_signal_emit_by_name
     (g_treeview, "move-cursor", GTK_MOVEMENT_DISPLAY_LINES, -1, &r);
-  gtk_label_set_text(GTK_LABEL(info_label), "Delete Multiple: Done");
+  gtk_label_set_text(GTK_LABEL(g_info_label), "Delete Multiple: Done");
 }
 
 static void
@@ -186,7 +186,7 @@ delete_bookmark_window(bookmark* b)
   gtk_container_add(GTK_CONTAINER(window), grid);
   gtk_widget_show_all(GTK_WIDGET(window));
   gtk_widget_grab_focus(GTK_WIDGET(cancel_button));
-  gtk_spinner_start(GTK_SPINNER(spinner));
+  gtk_spinner_start(GTK_SPINNER(g_spinner));
 }
 
 static void
@@ -227,7 +227,7 @@ delete_directory_window(bookmark* b)
   gtk_container_add(GTK_CONTAINER(window), grid);
   gtk_widget_show_all(GTK_WIDGET(window));
   gtk_widget_grab_focus(GTK_WIDGET(cancel_button));
-  gtk_spinner_start(GTK_SPINNER(spinner));
+  gtk_spinner_start(GTK_SPINNER(g_spinner));
 }
 
 static void
@@ -258,7 +258,7 @@ delete_multiple_window()
   gtk_container_add(GTK_CONTAINER(window), grid);
   gtk_widget_show_all(GTK_WIDGET(window));
   gtk_widget_grab_focus(GTK_WIDGET(cancel_button));
-  gtk_spinner_start(GTK_SPINNER(spinner));
+  gtk_spinner_start(GTK_SPINNER(g_spinner));
 }
 
 void

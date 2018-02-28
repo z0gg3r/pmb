@@ -266,7 +266,7 @@ void
 close_window(GtkWidget* button, gpointer window) 
 {
   gtk_widget_destroy(window);
-  gtk_spinner_stop(GTK_SPINNER(spinner));
+  gtk_spinner_stop(GTK_SPINNER(g_spinner));
 }
 
 void

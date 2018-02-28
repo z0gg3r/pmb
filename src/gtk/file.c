@@ -10,7 +10,7 @@ GtkWidget* field_box;
 int
 file_dialog(GtkFileChooserAction action, char* title)
 {
-  gtk_spinner_start(GTK_SPINNER(spinner));
+  gtk_spinner_start(GTK_SPINNER(g_spinner));
 
   GtkWidget* file_chooser = gtk_file_chooser_dialog_new
     (title, GTK_WINDOW(gpmb_window), action
@@ -23,7 +23,7 @@ file_dialog(GtkFileChooserAction action, char* title)
   filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(file_chooser));
 
   gtk_widget_destroy(file_chooser);
-  gtk_spinner_stop(GTK_SPINNER(spinner));
+  gtk_spinner_stop(GTK_SPINNER(g_spinner));
   return result;
 }
 
@@ -40,8 +40,8 @@ open_database(GtkWidget* button)
 	  {
 	    g_db = bookmark_db_open(filename);
 
-	    free(database_file);
-	    opts->database_file = database_file;
+	    free(g_database_file);
+	    opts->database_file = g_database_file;
 
 	    g_free(filename);
 	    read_database(NULL, NULL);
@@ -254,12 +254,12 @@ selective_dialog_content(GtkWidget* window, char* action)
   /* grid */
   GtkWidget* grid = grid_new();
 
-  gtk_grid_attach(GTK_GRID(grid), db_entry_label, 0,   0, 30, 1);
-  gtk_grid_attach(GTK_GRID(grid), db_entry, 30,  0, 30, 1);
-  gtk_grid_attach(GTK_GRID(grid), select_button, 60,  0, 30, 1);
-  gtk_grid_attach(GTK_GRID(grid), pattern_label, 0,   1, 30, 1);
-  gtk_grid_attach(GTK_GRID(grid), pattern_entry, 30,  1, 30, 1);
-  gtk_grid_attach(GTK_GRID(grid), field_box, 60,  1, 30, 1);
+  gtk_grid_attach(GTK_GRID(grid), db_entry_label, 0, 0, 30, 1);
+  gtk_grid_attach(GTK_GRID(grid), db_entry, 30, 0, 30, 1);
+  gtk_grid_attach(GTK_GRID(grid), select_button, 60, 0, 30, 1);
+  gtk_grid_attach(GTK_GRID(grid), pattern_label, 0, 1, 30, 1);
+  gtk_grid_attach(GTK_GRID(grid), pattern_entry, 30, 1, 30, 1);
+  gtk_grid_attach(GTK_GRID(grid), field_box, 60, 1, 30, 1);
 
   /* main box */
   GtkWidget* main_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
@@ -268,7 +268,7 @@ selective_dialog_content(GtkWidget* window, char* action)
   gtk_container_add(GTK_CONTAINER(window), main_box);
 
   gtk_widget_show_all(GTK_WIDGET(window));
-  gtk_spinner_start(GTK_SPINNER(spinner));
+  gtk_spinner_start(GTK_SPINNER(g_spinner));
 }
 
 void
