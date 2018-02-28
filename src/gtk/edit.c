@@ -253,7 +253,10 @@ edit_bookmark(GtkWidget* button, gpointer** args)
 
   if(url) 
     {
-      bookmark_list* bl = bookmark_db_search(g_db, URL, url);
+      bookmark* selected_b = get_bookmark_from_row(NULL);
+      bookmark_list* bl = bookmark_db_search(g_db, URL
+					     ,bookmark_url(selected_b));
+      bookmark_destroy(selected_b);
 		
       if(bl) 
 	{
