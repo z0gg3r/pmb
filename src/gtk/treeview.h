@@ -35,7 +35,7 @@ tree_view(GtkWidget*);
 
 /* -- get data of current selected bookmark -- */
 bookmark* 
-get_data(GtkTreePath*); 
+get_bookmark_from_row(GtkTreePath*); 
 
 /* -- read database -- */
 void 

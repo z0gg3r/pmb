@@ -23,7 +23,7 @@ copy_to_clipboard()
 {
   GtkClipboard* clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
   GtkClipboard* primary	= gtk_clipboard_get(GDK_SELECTION_PRIMARY);
-  bookmark* b = get_data(NULL);
+  bookmark* b = get_bookmark_from_row(NULL);
 
   if(b)
     {
@@ -258,7 +258,7 @@ read_database(GtkWidget* button, GtkWidget* entry)
 }
 
 bookmark*
-get_data(GtkTreePath* path) 
+get_bookmark_from_row(GtkTreePath* path) 
 {
   if(!path)
     {
@@ -347,7 +347,7 @@ void
 row_activated(GtkWidget* tree, GtkTreePath* path, GtkTreeViewColumn* column
 	      ,gpointer data)
 {
-  bookmark* b = get_data(path);
+  bookmark* b = get_bookmark_from_row(path);
 
   if(strlen(bookmark_url(b)) > 1)
     {
@@ -453,6 +453,9 @@ tree_view(GtkWidget* search_entry)
   gtk_tree_view_set_search_entry
     (GTK_TREE_VIEW(tree_view), GTK_ENTRY(search_entry));	
 
+  gtk_entry_set_icon_from_icon_name
+    (GTK_ENTRY(search_entry), GTK_ENTRY_ICON_PRIMARY, "find");
+  
   /* enable searching in the tree */
   gtk_tree_view_set_enable_search(GTK_TREE_VIEW(tree_view), FALSE);
 
@@ -488,4 +491,3 @@ tree_view(GtkWidget* search_entry)
 
   return tree_view;	
 }
-

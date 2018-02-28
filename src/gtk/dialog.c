@@ -25,7 +25,7 @@ get_full_path(bookmark* b)
 	      path = gtk_tree_model_get_path
 		(GTK_TREE_MODEL(g_model), &parent);
 	      
-	      bookmark* bp = get_data(path);
+	      bookmark* bp = get_bookmark_from_row(path);
 	      iter = parent;
 
 	      parents[size - 1]	= bookmark_id(bp);
@@ -108,7 +108,7 @@ collect_bookmark(GtkTreeIter iter, bookmark_list* bl)
   do
     {
       path = gtk_tree_model_get_path(GTK_TREE_MODEL(g_model), &iter);
-      bookmark* b = get_data(path);
+      bookmark* b = get_bookmark_from_row(path);
 
       if(b)
 	{
@@ -227,7 +227,7 @@ static gboolean
 favicon_foreach(GtkTreeModel* m, GtkTreePath* p, GtkTreeIter* i
 		,gpointer data)
 {
-  bookmark* b = get_data(p);
+  bookmark* b = get_bookmark_from_row(p);
 
   if(strlen(bookmark_url(b)) > 2)
     {
@@ -281,7 +281,7 @@ dialog_key_press(GtkWidget* window, GdkEventKey* e)
 }
 
 GtkWidget*
-dialogs(char* title, gpointer main_window)
+dialog_new(char* title, gpointer main_window)
 {
   if(title && main_window)
     {

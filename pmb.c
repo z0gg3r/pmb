@@ -19,12 +19,15 @@ main(int argc, char *argv[])
 
   snprintf(path, strlen(path) - 1, "%s/%s", home, conf_dir);
 
-  struct stat st = {0};
+  /* create directory, if not exist */
+  {
+    struct stat st = {0};
 
-  if(stat(path, &st) == -1)
-    {
-      mkdir(path,  0700);
-    }
+    if(stat(path, &st) == -1)
+      {
+	mkdir(path,  0700);
+      }
+  }
 
   /* database */
   int d_size =

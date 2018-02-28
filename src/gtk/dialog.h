@@ -33,7 +33,7 @@ close_window(GtkWidget*, gpointer);
 
 /* -- set up dialog windows -- */
 GtkWidget*
-dialogs(char*, gpointer);
+dialog_new(char*, gpointer);
 
 #endif
 

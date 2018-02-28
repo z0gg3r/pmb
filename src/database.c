@@ -82,8 +82,7 @@ bookmark_db_open(char *db_name)
 
 		  if(rc) 
 		    {
-		      printf("error creating table on"
-			     " database\n");
+		      printf("error creating table on database\n");
 		      return NULL;
 		    }
 		}
@@ -136,8 +135,8 @@ bookmark_db_write(bookmark* b, sqlite3* db)
 {
   if(b && db) 
     {
-      const char* sql = "INSERT INTO bookmark (name, url, comment, tag, favicon)"
-	" VALUES(?,?,?,?,?)";
+      const char* sql = "INSERT INTO bookmark (name, url, comment, tag"
+	", favicon) VALUES(?,?,?,?,?)";
 
       sqlite3_stmt* res;
 

@@ -84,7 +84,7 @@ delete_multiple(GtkWidget* button, gpointer window)
     {
       if(rows)
 	{
-	  bookmark* b = get_data(rows->data);
+	  bookmark* b = get_bookmark_from_row(rows->data);
 
 	  if(strlen(bookmark_url(b)) > 1)
 	    {
@@ -118,7 +118,7 @@ delete_multiple(GtkWidget* button, gpointer window)
 static void
 delete_bookmark_window(bookmark* b) 
 {
-  GtkWidget* window = dialogs("Delete bookmark", gpmb_window);
+  GtkWidget* window = dialog_new("Delete bookmark", gpmb_window);
   GtkWidget** e = entries(FALSE);
 
   if(b) 
@@ -192,7 +192,7 @@ delete_bookmark_window(bookmark* b)
 static void
 delete_directory_window(bookmark* b)
 {
-  GtkWidget* window = dialogs("Delete directory", gpmb_window);
+  GtkWidget* window = dialog_new("Delete directory", gpmb_window);
 
   GtkWidget* name_entry_label = gtk_label_new("Name");
   gtk_widget_set_halign(GTK_WIDGET(name_entry_label), GTK_ALIGN_START);
@@ -233,7 +233,7 @@ delete_directory_window(bookmark* b)
 static void
 delete_multiple_window()
 {
-  GtkWidget* window = dialogs("Delete multiple bookmarks", gpmb_window);
+  GtkWidget* window = dialog_new("Delete multiple bookmarks", gpmb_window);
   GtkWidget* advice = gtk_label_new
     ("Delete all selected bookmarks/directories?");
 
@@ -271,7 +271,7 @@ delete(GtkWidget* button)
     }
   else
     {
-      bookmark* b = get_data(NULL);
+      bookmark* b = get_bookmark_from_row(NULL);
 
       if(b)
 	{

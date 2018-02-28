@@ -274,14 +274,14 @@ selective_dialog_content(GtkWidget* window, char* action)
 void
 selective_import_window(GtkWidget* button)
 {
-  GtkWidget* window = dialogs("Selective import", gpmb_window);
+  GtkWidget* window = dialog_new("Selective import", gpmb_window);
   selective_dialog_content(window, "import");
 }
 
 void
 selective_export_window(GtkWidget* button)
 {
-  GtkWidget* window = dialogs("Selective export", gpmb_window);
+  GtkWidget* window = dialog_new("Selective export", gpmb_window);
   selective_dialog_content(window, "export");
 }
 

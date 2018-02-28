@@ -6,7 +6,7 @@ static int
 compare_tags(GtkTreeModel* m, GtkTreePath* path, GtkTreeIter* iter
 	     ,void* data)
 {
-  bookmark* b = get_data(NULL);
+  bookmark* b = get_bookmark_from_row(NULL);
   char*	b_tag = bookmark_tag(b);
   char* t_path = NULL;
   char*	full_path = get_full_path(b);
@@ -52,7 +52,7 @@ tag_box_new()
 
       bookmark_list_destroy(bl);
 	
-      b = get_data(NULL);
+      b = get_bookmark_from_row(NULL);
       gtk_entry_set_text(GTK_ENTRY(entry), get_full_path(b));
       bookmark_destroy(b);
     }

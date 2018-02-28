@@ -542,7 +542,7 @@ settings_page()
 void
 options_window(GtkWidget* button) 
 {
-  GtkWidget* window = dialogs("Options", gpmb_window);
+  GtkWidget* window = dialog_new("Options", gpmb_window);
 
   /* settings page */
   GtkWidget* page_settings_l = gtk_label_new("Settings");

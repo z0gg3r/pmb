@@ -99,9 +99,9 @@ add_bookmark(GtkWidget* button, gpointer** args)
 void 
 add_window(GtkWidget* button) 
 {
-  GtkWidget* window = dialogs("Add bookmark", gpmb_window);
+  GtkWidget* window = dialog_new("Add bookmark", gpmb_window);
   GtkWidget** e = entries(TRUE);
-  bookmark* b = get_data(NULL);
+  bookmark* b = get_bookmark_from_row(NULL);
 
   /* tag box */
   GtkWidget* tag_box = tag_box_new();

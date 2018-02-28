@@ -7,7 +7,7 @@ move_directory(char* tag)
 
   bookmark_list* bl = bookmark_list_new(); 
   bookmark* b = NULL;
-  bookmark* sb = get_data(NULL);
+  bookmark* sb = get_bookmark_from_row(NULL);
   unsigned int parents = 0;
 
   if(gtk_tree_model_get_iter(GTK_TREE_MODEL(g_model), &iter, g_selected_path))
@@ -116,7 +116,7 @@ move_directory(char* tag)
 static void
 rename_directory(GtkWidget* button, gpointer** args)
 {
-  bookmark* b = get_data(NULL);
+  bookmark* b = get_bookmark_from_row(NULL);
   bookmark* bt = NULL;
   char* path = get_full_path(b);
   
@@ -290,8 +290,7 @@ edit_bookmark(GtkWidget* button, gpointer** args)
 
 	      message = calloc(1, size);
 
-	      snprintf
-		(message, size - 1, "edit: id = %s, url = %s"
+	      snprintf(message, size - 1, "edit: id = %s, url = %s"
 		 ,bookmark_id(b), bookmark_url(b));
 
 	      gtk_label_set_text(GTK_LABEL(g_info_label), message);
@@ -338,7 +337,7 @@ move_multiple(GtkWidget* button, gpointer** args)
     {
       if(rows)
 	{
-	  bookmark* b = get_data(rows->data);
+	  bookmark* b = get_bookmark_from_row(rows->data);
 
 	  if(strlen(bookmark_url(b)) > 1)
 	    {
@@ -375,7 +374,7 @@ move_multiple(GtkWidget* button, gpointer** args)
 static void
 edit_delete_favicon()
 {
-  bookmark* b = get_data(NULL);
+  bookmark* b = get_bookmark_from_row(NULL);
 
   bookmark_db_edit(g_db, strtol(bookmark_id(b), NULL, 10), 4, "none");
   read_database(NULL, NULL);
@@ -385,7 +384,7 @@ edit_delete_favicon()
 static void
 edit_download_favicon()
 {
-  bookmark* b = get_data(NULL);
+  bookmark* b = get_bookmark_from_row(NULL);
   char* favicon = download_favicon(bookmark_url(b));
 
   if(favicon)
@@ -399,7 +398,7 @@ edit_download_favicon()
 static void
 edit_bookmark_window(bookmark* b) 
 {
-  GtkWidget* window = dialogs("Edit bookmark", gpmb_window);
+  GtkWidget* window = dialog_new("Edit bookmark", gpmb_window);
   GtkWidget** e = entries(TRUE);
   GtkWidget* tag_box = tag_box_new();
 
@@ -487,9 +486,13 @@ edit_bookmark_window(bookmark* b)
 static void
 move_directory_window(bookmark* b)
 {
-  GtkWidget* window = dialogs("Move directory", gpmb_window);
+  GtkWidget* window = dialog_new("Move directory", gpmb_window);
   GtkWidget* tag_box = tag_box_new();
+  GtkWidget* tag_entry = gtk_bin_get_child(GTK_BIN(tag_box));
 
+  gtk_entry_set_icon_from_icon_name
+    (GTK_ENTRY(tag_entry), GTK_ENTRY_ICON_PRIMARY, "folder-new");
+  
   GtkWidget* name_entry_label = gtk_label_new("Move to");
   gtk_widget_set_halign(GTK_WIDGET(name_entry_label), GTK_ALIGN_START);
 
@@ -530,9 +533,13 @@ move_directory_window(bookmark* b)
 static void
 move_multiple_window()
 {
-  GtkWidget* window = dialogs("Move multiple", gpmb_window);
+  GtkWidget* window = dialog_new("Move multiple", gpmb_window);
   GtkWidget* tag_box = tag_box_new();
+  GtkWidget* tag_entry = gtk_bin_get_child(GTK_BIN(tag_box));
 
+  gtk_entry_set_icon_from_icon_name
+    (GTK_ENTRY(tag_entry), GTK_ENTRY_ICON_PRIMARY, "folder-new");
+  
   GtkWidget* name_entry_label = gtk_label_new("Move to");
   gtk_widget_set_halign(GTK_WIDGET(name_entry_label), GTK_ALIGN_START);
 
@@ -566,7 +573,7 @@ move_multiple_window()
 static void
 rename_directory_window(bookmark* b)
 {
-  GtkWidget* window = dialogs("Rename directory", gpmb_window);
+  GtkWidget* window = dialog_new("Rename directory", gpmb_window);
 
   /* name entry */
   GtkWidget* name_entry_label = gtk_label_new("New name");
@@ -574,7 +581,9 @@ rename_directory_window(bookmark* b)
 
   GtkWidget* name_entry = gtk_entry_new();
   gtk_entry_set_placeholder_text(GTK_ENTRY(name_entry), "new name");
-
+  gtk_entry_set_icon_from_icon_name
+    (GTK_ENTRY(name_entry), GTK_ENTRY_ICON_PRIMARY, "folder-new");
+  
   if(b)
     {
       gtk_entry_set_text(GTK_ENTRY(name_entry), bookmark_id(b));
@@ -611,7 +620,7 @@ rename_directory_window(bookmark* b)
 void
 rename_directory_wrapper(GtkWidget* button)
 {
-  bookmark* b = get_data(NULL);
+  bookmark* b = get_bookmark_from_row(NULL);
 
   if((strlen(bookmark_url(b)) < 2))
     {
@@ -633,7 +642,7 @@ edit(GtkWidget* button)
     }
   else
     {
-      bookmark* b = get_data(NULL);
+      bookmark* b = get_bookmark_from_row(NULL);
 
       if(b)
 	{
