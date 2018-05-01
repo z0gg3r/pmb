@@ -90,6 +90,7 @@ define BUILD_GPMB_DEP
 endef
 
 define BUILD_GPMB
+	$(BUILD_GPMB_DEP)
 	$(CC) $(CCFLAGS) $(GTKFLAGS) $(GLIBFLAGS) $(SQLITE_FLAGS) \
 	$(BUILD_DIR)/$(BOOKMARK).o \
 	$(BUILD_DIR)/$(BOOKMARK_LIST).o \
@@ -140,13 +141,13 @@ grun:$(GPMB)
 	./$(GPMB) $(args)
 
 install:$(PMB)
-	cp "$(PWD)/$(PMB)" $(DEST_DIR)
-	cp "$(PWD)/$(GPMB)" $(DEST_DIR)
+	$(shell if [ -e "$(PMB)" ]; then cp "$(PWD)/$(PMB)" $(DEST_DIR); fi)
+	$(shell if [ -e "$(GPMB)" ]; then cp "$(PWD)/$(GPMB)" $(DEST_DIR); fi)
 
 clean:
-	$(shell if [ -e "./pmb" ]; then rm pmb; fi)
-	$(shell if [ -e "./gpmb" ]; then rm gpmb; fi)
-	$(shell if [ -e "./build" ]; then rm -r build; fi)
+	$(shell if [ -e "$(PMB)" ]; then rm "$(PMB)"; fi)
+	$(shell if [ -e "$(GPMB)" ]; then rm "$(GPMB)"; fi)
+	$(shell if [ -e "$(BUILD_DIR)" ]; then rm -r "$(BUILD_DIR)"; fi)
 
 $(GPMB):$(INC_DIR)/$(OPTION).c $(INC_DIR)/$(BOOKMARK).c \
 $(INC_DIR)/$(BOOKMARK_LIST).c $(INC_DIR)/$(DATABASE).c \
@@ -271,4 +272,3 @@ valgrind_gpmb:
 
 valgrind_pmb:
 	valgrind --leak-check=full --track-origins=yes --log-file=log.txt -v ./pmb 
-
