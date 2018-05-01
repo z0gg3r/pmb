@@ -50,6 +50,28 @@ print_folder_icon(int* canvas, FILE* fp)
   ++(*canvas);
 }
 
+char*
+get_favicon(bookmark* b)
+{
+  char* favicon_img = NULL;
+  
+  if(strcmp(bookmark_favicon(b), "none"))
+    {
+      char* favicon = bookmark_favicon(b);
+      char* favicon_string = "<image src='data:image/png;base64,";
+      int size = strlen(favicon_string) + strlen(favicon) + 3;
+      favicon_img = malloc(size);
+      snprintf(favicon_img, size, "%s%s'>", favicon_string, favicon);
+    }
+  else
+    {
+      favicon_img = malloc(2);
+      snprintf(favicon_img, 1, " ");
+    }
+
+  return favicon_img;
+}
+
 int
 html_tree_table_row(directory* d, int depth, int* canvas, FILE* fp)
 {
@@ -59,10 +81,11 @@ html_tree_table_row(directory* d, int depth, int* canvas, FILE* fp)
       char* open_ul = "<ul>\n";
       char* close_ul = "</ul>\n";
       char* span_dir_name = "<span style='color:#056B24;'>%s</span>\n";
-      char* link_open = "<li><a href=\'%s\'>%s";
-      char* link_close = "</a></li>\n";
+      char* link_open = "<li>%s<a href=\'%s\'>%s";
+      char* link_close = "</a></li></br>\n";
       char* comment = " - %s";
- 
+      char* favicon_img = NULL;
+      
       if(fp)
 	{
 	  for(int i = 0; i <= depth; ++i)
@@ -76,8 +99,10 @@ html_tree_table_row(directory* d, int depth, int* canvas, FILE* fp)
 
 	  while((b = directory_next_bookmark(d)))
 	    {
+	      favicon_img = get_favicon(b);
+	      
 	      fprintf(fp, link_open
-		      ,bookmark_url(b), bookmark_name(b));
+		      ,favicon_img, bookmark_url(b), bookmark_name(b));
 
 	      if(strcmp(bookmark_comment(b), "none"))
 		{
@@ -85,6 +110,7 @@ html_tree_table_row(directory* d, int depth, int* canvas, FILE* fp)
 		}
 
 	      fprintf(fp, link_close);
+	      free(favicon_img);
 	    }
 
 	  for(int i = 0; i <= depth + 2; ++i)
@@ -109,8 +135,10 @@ html_tree_table_row(directory* d, int depth, int* canvas, FILE* fp)
 
 	  while((b = directory_next_bookmark(d)))
 	    {
+	      favicon_img = get_favicon(b);
+	      
 	      printf(link_open
-		     ,bookmark_url(b), bookmark_name(b));
+		     ,favicon_img, bookmark_url(b), bookmark_name(b));
 
 	      if(strcmp(bookmark_comment(b), "none"))
 		{
@@ -118,6 +146,7 @@ html_tree_table_row(directory* d, int depth, int* canvas, FILE* fp)
 		}
 
 	      printf(link_close);
+	      free(favicon_img);
 	    }
 
 	  for(int i = 0; i <= depth + 2; ++i)
@@ -164,7 +193,7 @@ bookmark_html_tree(bookmark_list* bl, FILE* fp)
       directory* root = create_tree_from_bookmark_list(bl, "root");	
       directory* child = NULL;
       directory* ret = NULL;
-      int canvas	= 0;
+      int canvas = 0;
       char buf[64]; 
 
       char* page_top = "<!DOCTYPE html>\n"

@@ -254,8 +254,8 @@ edit_bookmark(GtkWidget* button, gpointer** args)
   if(url) 
     {
       bookmark* selected_b = get_bookmark_from_row(NULL);
-      bookmark_list* bl = bookmark_db_search(g_db, URL
-					     ,bookmark_url(selected_b));
+      bookmark_list* bl = bookmark_db_search
+	(g_db, URL, bookmark_url(selected_b));
       bookmark_destroy(selected_b);
 		
       if(bl) 
@@ -638,8 +638,8 @@ rename_directory_wrapper(GtkWidget* button)
 void
 edit(GtkWidget* button)
 {
-  if(gtk_tree_selection_count_selected_rows
-     (GTK_TREE_SELECTION(g_selection)) > 1)
+  if(gtk_tree_selection_count_selected_rows(GTK_TREE_SELECTION(g_selection))
+     > 1)
     {
       move_multiple_window();
     }

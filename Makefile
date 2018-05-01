@@ -114,6 +114,7 @@ define BUILD_GPMB
 endef
 
 define BUILD_PMB
+	$(BUILD_DEP)
 	$(CC) $(CCFLAGS) $(GLIBFLAGS) $(SQLITE_FLAGS) \
 	$(BUILD_DIR)/$(BOOKMARK).o \
 	$(BUILD_DIR)/$(BOOKMARK_LIST).o \
