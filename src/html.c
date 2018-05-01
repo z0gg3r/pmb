@@ -2,7 +2,7 @@
 
 /* -- encoded gnome icons with base64 -- */
 /* gnome/16x16/status/starred.png */
-char* starred_icon =
+char* html_starred_icon =
   "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABHNCSVQICAgIfAhkiAAAAAlwSFlz"
   "AAAN1wAADdcBQiibeAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAAUdEVY"
   "dEF1dGhvcgBKYWt1YiBTdGVpbmVy5vv3LwAAAm9JREFUOI2VUktIVGEYPfe/81BTRxtHTWfCwNJs"
@@ -19,7 +19,7 @@ char* starred_icon =
   "qDeNYFXQf6ibpmgH8uJwJx0JfZHGd8/+AZMBHx1uqe9MAAAAAElFTkSuQmCC";
 
 /* gnome/16x16/places/folder.png */
-char* folder_icon =
+char* html_folder_icon =
   "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABHNCSVQICAgIfAhkiAAAAAlwSFlz"
   "AAAN1wAADdcBQiibeAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAAOdEVY"
   "dFRpdGxlAEZvbGRlcnMhVKpgQQAAABd0RVh0QXV0aG9yAExhcG8gQ2FsYW1hbmRyZWnfkRoqAAAA"
@@ -47,7 +47,7 @@ favicon_tag(bookmark* b)
     }
   else
     {
-      favicon = starred_icon;      
+      favicon = html_starred_icon;      
     }
 
   int size = strlen(favicon_string) + strlen(favicon) + 3;
@@ -78,7 +78,7 @@ html_tree_table_row(directory* d, int depth, FILE* fp)
 	      fprintf(fp, open_ul);
 	    }
 
-	  fprintf(fp, "<img src=data:image/png;base64,%s>", folder_icon);
+	  fprintf(fp, "<img src=data:image/png;base64,%s>", html_folder_icon);
 	  fprintf(fp, span_dir_name, directory_name(d));
 	  fprintf(fp, open_ul);
 
@@ -113,7 +113,7 @@ html_tree_table_row(directory* d, int depth, FILE* fp)
 	      printf(open_ul);
 	    }
 
-	  printf("<img src=data:image/png;base64,%s>", folder_icon);
+	  printf("<img src=data:image/png;base64,%s>", html_folder_icon);
 	  printf(span_dir_name, directory_name(d));
 	  printf(open_ul);
 
