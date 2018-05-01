@@ -143,10 +143,10 @@ install:$(PMB)
 	cp "$(PWD)/$(PMB)" $(DEST_DIR)
 	cp "$(PWD)/$(GPMB)" $(DEST_DIR)
 
-clean:$(PMB)
-	rm $(PMB)
-	rm $(GPMB)
-	rm -r $(BUILD_DIR)
+clean:
+	$(shell if [ -e "./pmb" ]; then rm pmb; fi)
+	$(shell if [ -e "./gpmb" ]; then rm gpmb; fi)
+	$(shell if [ -e "./build" ]; then rm -r build; fi)
 
 $(GPMB):$(INC_DIR)/$(OPTION).c $(INC_DIR)/$(BOOKMARK).c \
 $(INC_DIR)/$(BOOKMARK_LIST).c $(INC_DIR)/$(DATABASE).c \
