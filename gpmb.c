@@ -11,10 +11,15 @@ main(int argc, char *argv[])
   /* dir path */
   const char* home = secure_getenv("HOME");	
   char*	conf_dir = ".config/pmb";
-  char*	path = calloc(1, (strlen(home)+ strlen(conf_dir) + 3) * sizeof(char));
+
+  int size = strlen(home)
+    + strlen(conf_dir)
+    + 3;
+  
+  char*	path = calloc(1, size * sizeof(char));
 
   snprintf(path, strlen(path) - 1, "%s/%s", home, conf_dir);
-
+  
   /* create directory, if not exist */
   {
     struct stat st = {0};
@@ -26,14 +31,15 @@ main(int argc, char *argv[])
   }
   
   /* database */
-  int size = (strlen(home) + (strlen(conf_dir)) + strlen(DATABASE)
-	      + 5) * sizeof(char);
+  size = strlen(path)
+    + strlen(DATABASE)
+    + 3;
 
-  g_database_file = calloc(1, size);
+  g_database_file = calloc(1, size * sizeof(char));
 
-  snprintf(g_database_file, size, "%s/%s" 
+  snprintf(g_database_file, strlen(g_database_file) - 1, "%s/%s" 
 	   ,path, DATABASE);
-
+  
   if(g_database_file) 
     {
       read_config();
@@ -49,6 +55,7 @@ main(int argc, char *argv[])
 
   free(opts);
   free(g_database_file);
+  free(path);
   bookmark_db_close(g_db);
   return res;
 }

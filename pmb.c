@@ -14,8 +14,12 @@ main(int argc, char *argv[])
   /* dir path */
   const char* home = secure_getenv("HOME");	
   char*	conf_dir = ".config/pmb";
-  char*	path = calloc
-    (1, (strlen(home) + strlen(conf_dir) + 3) * sizeof(char));
+
+  int size = strlen(home)
+    + strlen(conf_dir)
+    + 3;
+  
+  char*	path = calloc(1, size * sizeof(char));
 
   snprintf(path, strlen(path) - 1, "%s/%s", home, conf_dir);
 
@@ -30,22 +34,24 @@ main(int argc, char *argv[])
   }
 
   /* database */
-  int d_size =
-    (strlen(home) + (strlen(conf_dir)) + strlen(DATABASE) + 5) * sizeof(char);
+  size = strlen(path)
+    + strlen(DATABASE)
+    + 3;
 
-  char*	database_file = calloc(1, d_size);
+  char*	database_file = calloc(1, size * sizeof(char));
 
-  snprintf(database_file, d_size - 1, "%s/%s" 
+  snprintf(database_file, strlen(database_file) - 1, "%s/%s" 
 	   ,path, DATABASE);
 
   /* config file */
-  int c_size =
-    (strlen(home) + (strlen(conf_dir)) + strlen(CONFIG_FILE) + 5)
-    * sizeof(char);
+  size = strlen(home)
+    + strlen(conf_dir)
+    + strlen(CONFIG_FILE)
+    + 5;
 
-  char* config_file = calloc(1, c_size);
+  char* config_file = calloc(1, size * sizeof(char));
 
-  snprintf(config_file, c_size - 1, "%s/%s"
+  snprintf(config_file, strlen(config_file) - 1, "%s/%s"
 	   ,path, CONFIG_FILE);
 
   parse_config_file(config_file);
@@ -74,6 +80,9 @@ main(int argc, char *argv[])
   exec_option(command);
   destroy_option_list(option);
   destroy_option_list(command);
+  free(path);
+  free(database_file);
+  free(config_file);
   bookmark_db_close(g_db);
   exit(EXIT_SUCCESS);
 }
