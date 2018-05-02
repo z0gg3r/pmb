@@ -10,11 +10,15 @@ set_options()
   char*	conf_dir = ".config/pmb";
   char*	config_filename = "gpmb.conf";
 
+  int size = strlen(home)
+    + strlen(conf_dir)
+    + strlen(config_filename)
+    + 3;
+  
   config_file = calloc
-    (1, (strlen(home) + strlen(config_filename)
-	 + strlen(conf_dir) + 2) * sizeof(char));
+    (1, size * sizeof(char));
 
-  snprintf(config_file, strlen(config_file) - 1, "%s/%s/%s", home
+  snprintf(config_file, size, "%s/%s/%s", home
 	   ,conf_dir, config_filename);
 
   opts = malloc(sizeof(gpmb_options));
@@ -114,7 +118,7 @@ read_config()
     {
       int size = 1;
       char* option = calloc(size, sizeof(char));
-      char* option_bkp = strdup(option);
+      char* option_bkp = NULL;
 
       while(!feof(fp))
 	{
@@ -130,6 +134,7 @@ read_config()
 		  goto new_option;
 		}
 
+	      option_bkp = strdup(option);
 	      char* str = strsep(&option, "=");
 
 	      if(!(strcmp(str, "database")))
@@ -196,14 +201,13 @@ read_config()
 	      free(option_bkp);
 	      size = 1;
 	      option = calloc(size, sizeof(char));
-	      option_bkp = strdup(option);
+	      option_bkp = NULL;
 	    }
 	  else
 	    {
 	      option[size - 1] = st;
 	      option = realloc(option, ++size * sizeof(char));
 	      option[size - 1] = '\0';
-	      option_bkp = strdup(option);
 	    }
 	}
 

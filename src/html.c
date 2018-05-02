@@ -57,6 +57,57 @@ favicon_tag(bookmark* b)
   return favicon_img;
 }
 
+/* build row */
+char*
+bookmark_row(bookmark* b)
+{
+  char* html_link = NULL;
+  char* link = NULL;
+  char* comment = NULL;
+  char* favicon_img = favicon_tag(b);
+  int size = 0;
+  
+  if(strcmp(bookmark_comment(b), "none"))
+    {
+      link = "<li>%s<a href=\'%s\'>%s</a> - %s</li>\n";
+      comment = bookmark_comment(b);
+    }
+  else
+    {
+      link = "<li>%s<a href=\'%s\'>%s</a></li>\n";
+    }
+  
+  if(comment)
+    {
+      size = strlen(link)
+	+ strlen(bookmark_url(b))
+	+ strlen(bookmark_name(b))
+	+ strlen(favicon_img)
+	+ strlen(comment)
+	+ 1;
+
+      html_link = malloc(size * sizeof(char));
+      
+      snprintf(html_link, size, link, favicon_img, bookmark_url(b)
+	       ,bookmark_name(b), comment);
+    }
+  else
+    {
+      size = strlen(link)
+	+ strlen(bookmark_url(b))
+	+ strlen(bookmark_name(b))
+	+ strlen(favicon_img)
+	+ 1;
+
+      html_link = malloc(size * sizeof(char));
+      
+      snprintf(html_link, size, link, favicon_img, bookmark_url(b)
+	       ,bookmark_name(b));
+    }
+
+  return html_link;
+}
+
 int
 html_tree_table_row(directory* d, int depth, FILE* fp)
 {
@@ -66,11 +117,8 @@ html_tree_table_row(directory* d, int depth, FILE* fp)
       char* open_ul = "<ul>\n";
       char* close_ul = "</ul>\n";
       char* span_dir_name = "<span style='color:#056B24;'>%s</span>\n";
-      char* link_open = "<li>%s<a href=\'%s\'>%s";
-      char* link_close = "</a></li>\n";
-      char* comment = " - %s";
       char* favicon_img = NULL;
-      
+
       if(fp)
 	{
 	  for(int i = 0; i <= depth; ++i)
@@ -84,18 +132,10 @@ html_tree_table_row(directory* d, int depth, FILE* fp)
 
 	  while((b = directory_next_bookmark(d)))
 	    {
-	      favicon_img = favicon_tag(b);
-	      
-	      fprintf(fp, link_open
-		      ,favicon_img, bookmark_url(b), bookmark_name(b));
-
-	      if(strcmp(bookmark_comment(b), "none"))
-		{
-		  fprintf(fp, comment, bookmark_comment(b));
-		}
-
-	      fprintf(fp, link_close);
+	      char* row = bookmark_row(b);
+	      fprintf(fp, row);
 	      free(favicon_img);
+	      free(row);
 	    }
 
 	  for(int i = 0; i <= depth + 2; ++i)
@@ -116,21 +156,13 @@ html_tree_table_row(directory* d, int depth, FILE* fp)
 	  printf("<img src=data:image/png;base64,%s>", html_folder_icon);
 	  printf(span_dir_name, directory_name(d));
 	  printf(open_ul);
-
+	  
 	  while((b = directory_next_bookmark(d)))
 	    {
-	      favicon_img = favicon_tag(b);
-	      
-	      printf(link_open
-		     ,favicon_img, bookmark_url(b), bookmark_name(b));
-
-	      if(strcmp(bookmark_comment(b), "none"))
-		{
-		  printf(comment, bookmark_comment(b));
-		}
-
-	      printf(link_close);
+	      char* row = bookmark_row(b);
+	      printf(row);
 	      free(favicon_img);
+	      free(row);
 	    }
 
 	  for(int i = 0; i <= depth + 2; ++i)
@@ -185,8 +217,7 @@ bookmark_html_tree(bookmark_list* bl, FILE* fp)
 	"<style>\n"
 	"html, body, table { font-size: 12px; }\n"
 	"h3 { margin: 0; border: 0; color: steelblue; }\n"
-	"</style>\n"
-	"</head>\n"
+	"</style>"
 	"<body bgcolor=mintcream>\n"
 	"<h3>Bookmarks:</h3>\n"
 	"<div style='border:1px solid green;"
@@ -195,7 +226,7 @@ bookmark_html_tree(bookmark_list* bl, FILE* fp)
 	"border-radius:3px;"
 	"background-color:lavender;"
 	"padding:4px;'>\n";
-
+      
       char* page_bottom = "</div>\n<br />\nGenerated in: "
 	"<span style='color:green;'>%s</span>\n"
 	"</body>\n</html>\n";

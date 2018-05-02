@@ -129,9 +129,7 @@ define BUILD_PMB
 endef
 
 default:
-	$(BUILD_DEP)
 	$(BUILD_PMB)
-	$(BUILD_GPMB_DEP)
 	$(BUILD_GPMB)
 
 run:$(PMB)

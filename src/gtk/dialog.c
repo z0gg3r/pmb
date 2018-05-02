@@ -196,6 +196,9 @@ favicon_decode(bookmark* b)
 
       GdkPixbuf* icon = gdk_pixbuf_new_from_stream(memst, NULL, NULL);
 
+      g_input_stream_close(memst, NULL, NULL);
+      g_free(favicon);
+      
       if(icon)
 	{
 	  return icon;

@@ -184,6 +184,8 @@ directory_destroy(directory* d)
 		  d->bookmark[d->bookmark_position] = NULL;
 		}
 	    }
+
+	  free(b);
 	}
 		
       if(d->n_children)
@@ -199,6 +201,8 @@ directory_destroy(directory* d)
 		  d->children[d->children_position] = NULL;
 		}
 	    }
+
+	  free(ret);
 	}
 
       free(d->children);
@@ -428,7 +432,7 @@ directory_name_list_add_dir(directory_name_list* l, char* name)
       l->size++;
       l->list = realloc(l->list, (l->size + 1) 
 			* sizeof(char*));
-      l->list[l->size] 	= NULL;
+      l->list[l->size] = NULL;
     }
 }
 
@@ -474,11 +478,12 @@ dismember(bookmark* b)
       char* name = NULL;
       char* tag	= bookmark_tag(b);
       char* path = malloc(strlen(tag) * sizeof(char) + 1);
-      char* path_bkp = strdup(path);
+      char* path_bkp = NULL;
       directory_name_list* l = directory_name_list_new();
 
       strcpy(path, tag);
-
+      path_bkp = strdup(path);
+      
       while((name = strsep(&path, "/")))
 	{
 	  directory_name_list_add_dir(l, name);
