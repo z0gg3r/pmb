@@ -65,7 +65,7 @@ bookmark_row(bookmark* b)
   char* link = NULL;
   char* comment = NULL;
   char* favicon_img = favicon_tag(b);
-  int size = 0;
+  unsigned int size = 0;
   
   if(strcmp(bookmark_comment(b), "none"))
     {
@@ -84,11 +84,11 @@ bookmark_row(bookmark* b)
 	+ strlen(bookmark_name(b))
 	+ strlen(favicon_img)
 	+ strlen(comment)
-	+ 1;
+	+ 2;
 
       html_link = malloc(size * sizeof(char));
       
-      snprintf(html_link, size, link, favicon_img, bookmark_url(b)
+      snprintf(html_link, size - 1, link, favicon_img, bookmark_url(b)
 	       ,bookmark_name(b), comment);
     }
   else
@@ -97,11 +97,11 @@ bookmark_row(bookmark* b)
 	+ strlen(bookmark_url(b))
 	+ strlen(bookmark_name(b))
 	+ strlen(favicon_img)
-	+ 1;
+	+ 2;
 
       html_link = malloc(size * sizeof(char));
       
-      snprintf(html_link, size, link, favicon_img, bookmark_url(b)
+      snprintf(html_link, size - 1, link, favicon_img, bookmark_url(b)
 	       ,bookmark_name(b));
     }
 

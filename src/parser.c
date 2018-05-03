@@ -1702,6 +1702,9 @@ read_config(char* filename)
       char* option_bkp = strdup(option);
       char** ret = calloc(7, sizeof(char*));
 
+      check_oom(option, "parser - option");
+      check_oom(ret, "parser - ret");
+      
       ret[0] = NULL;
       ret[1] = NULL;
 
@@ -1766,12 +1769,14 @@ read_config(char* filename)
 	      free(option_bkp);
 	      size = 1;
 	      option = calloc(size, sizeof(char));
+	      check_oom(option, "parser - option");
 	      option_bkp = strdup(option);
 	    }
 	  else
 	    {
 	      option[size - 1] = st;
 	      option = realloc(option, ++size * sizeof(char));
+	      check_oom(option, "parser - option");
 	      option[size - 1] = '\0';
 	      option_bkp = strdup(option);
 	    }

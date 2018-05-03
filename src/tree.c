@@ -25,6 +25,8 @@ directory_new(char* name)
 {
   directory* d = malloc(sizeof(directory));
 
+  check_oom(d, "directory_new - b");
+  
   if(d)
     {
       d->n_children = 0;
@@ -220,6 +222,8 @@ directory_add_children(directory* d, directory* children)
       d->n_children++;
       d->children = realloc(d->children, (d->n_children + 1)
 			    * sizeof(directory));
+      check_oom(d->children,
+		"directory > directory_add_children - d->children");
       d->children[d->n_children] = NULL;
     }
 }

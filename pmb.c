@@ -11,16 +11,20 @@
 int 
 main(int argc, char *argv[]) 
 {
+  unsigned int size = 0;
+  
   /* dir path */
   const char* home = secure_getenv("HOME");	
   char*	conf_dir = ".config/pmb";
 
-  int size = strlen(home)
+  size = strlen(home)
     + strlen(conf_dir)
     + 3;
   
-  char*	path = calloc(1, size * sizeof(char));
+  char*	path = calloc(size, sizeof(char));
 
+  check_oom(path, "path");
+  
   snprintf(path, strlen(path) - 1, "%s/%s", home, conf_dir);
 
   /* create directory, if not exist */
@@ -38,8 +42,10 @@ main(int argc, char *argv[])
     + strlen(DATABASE)
     + 3;
 
-  char*	database_file = calloc(1, size * sizeof(char));
+  char*	database_file = calloc(size, sizeof(char));
 
+  check_oom(database_file, "database_file");
+  
   snprintf(database_file, strlen(database_file) - 1, "%s/%s" 
 	   ,path, DATABASE);
 
@@ -47,13 +53,17 @@ main(int argc, char *argv[])
   size = strlen(home)
     + strlen(conf_dir)
     + strlen(CONFIG_FILE)
-    + 5;
+    + 3;
 
-  char* config_file = calloc(1, size * sizeof(char));
+  char* config_file = calloc(size, sizeof(char));
 
+  check_oom(config_file, "config_file");
+  
   snprintf(config_file, strlen(config_file) - 1, "%s/%s"
 	   ,path, CONFIG_FILE);
 
+  printf("%s\n", config_file);
+  
   parse_config_file(config_file);
   free(config_file);
 
@@ -81,8 +91,6 @@ main(int argc, char *argv[])
   destroy_option_list(option);
   destroy_option_list(command);
   free(path);
-  free(database_file);
-  free(config_file);
   bookmark_db_close(g_db);
   exit(EXIT_SUCCESS);
 }

@@ -285,30 +285,30 @@ bookmark_db_delete_tag(sqlite3* db, char* tag, int greedy)
       if(greedy)
 	{
 	  char* sql_head = "DELETE FROM bookmark WHERE";
+	  char* sql_arg = "%s tag LIKE '%%%s%%'";
 
-	  char* sql = calloc((strlen(sql_head) 
-			      + strlen(" tag LIKE '%%%%'") 
-			      + strlen(tag) + 1)
-			     ,sizeof(char));
+	  unsigned int size = strlen(sql_head)
+	    + strlen(sql_arg)
+	    + 1;
+	  
+	  char* sql = calloc(size, sizeof(char));
 
-	  if(sql) 
+	  check_oom(sql, "database > bookmark_db_delete_tag - sql");
+	  
+	  snprintf(sql, strlen(sql) - 1, sql_arg, sql_head, tag);
+	  sqlite3_stmt* res;
+
+	  if((sqlite3_prepare_v2(db, sql, -1, &res, 0)) == SQLITE_OK)
 	    {
-	      snprintf(sql, strlen(sql) - 1, "%s tag LIKE '%%%s%%'"
-		       ,sql_head, tag);
-	      sqlite3_stmt* res;
-
-	      if((sqlite3_prepare_v2(db, sql, -1, &res, 0)) == SQLITE_OK)
-		{
-		  sqlite3_step(res);
-		}
-	      else
-		{
-		  return 1;
-		}
-
-	      free(sql);
-	      sqlite3_finalize(res);
+	      sqlite3_step(res);
 	    }
+	  else
+	    {
+	      return 1;
+	    }
+
+	  free(sql);
+	  sqlite3_finalize(res);
 	}
       else
 	{
@@ -594,123 +594,108 @@ bookmark_db_search(sqlite3* db, char* field, char* str)
     {
       bookmark_list* bl = NULL;
       const char* sql = "SELECT * FROM bookmark WHERE";
-
+      unsigned int size = 0;
+      
       if(field && !strncmp(field, NAME, strlen(NAME))) 
 	{
-	  char* search_name = calloc((strlen(sql) 
-				      + strlen(" name LIKE '%%%%'") 
-				      + strlen(str) + 1)
-				     ,sizeof(char));
+	  char* sql_arg = "%s name LIKE '%%%s%%'";
 
-	  if(search_name) 
-	    {
-	      snprintf(search_name, strlen(search_name) - 1
-		       ,"%s name LIKE '%%%s%%'", sql, str);
+	  size = strlen(sql)
+	    + strlen(sql_arg)
+	    + strlen(str)
+	    + 1;
+	  
+	  char* search_name = calloc(size, sizeof(char));
 
-	      bl = search_db(db, NULL, str, search_name);
-	      free(search_name);
-	      search_name = NULL;
-	    }
-	  else 
-	    {
-	      printf("error allocating memory\n");
-	      return NULL;
-	    }
+	  check_oom(search_name
+		    ,"database > bookmark_db_search - search_name");
+	  
+	  snprintf(search_name, strlen(search_name) - 1
+		   ,sql_arg, sql, str);
+
+	  bl = search_db(db, NULL, str, search_name);
+	  free(search_name);
 	}
       else if(field && !strncmp(field, URL, strlen(URL)))  
 	{
-	  char* search_url = calloc((strlen(sql) 
-				     + strlen(" url LIKE '%%%%'") 
-				     + strlen(str) + 1)
-				    ,sizeof(char));
+	  char* sql_arg = "%s url LIKE '%%%s%%'";
 
-	  if(search_url) 
-	    {
-	      snprintf(search_url, strlen(search_url) - 1
-		       ,"%s url LIKE '%%%s%%'", sql, str);
+	  size = strlen(sql)
+	    + strlen(sql_arg)
+	    + strlen(str)
+	    + 1;
+	  
+	  char* search_url = calloc(size, sizeof(char));
 
-	      bl = search_db(db, NULL, str, search_url);
-	      free(search_url);
-	      search_url = NULL;
-	    }
-	  else 
-	    {
-	      printf("error allocating memory\n");
-	      return NULL;
-	    }	
+	  check_oom(search_url, "database > bookmark_db_search - search_url");
+	  
+	  snprintf(search_url, strlen(search_url) - 1
+		   ,sql_arg, sql, str);
+
+	  bl = search_db(db, NULL, str, search_url);
+	  free(search_url);
 	}
       else if(field && !strncmp(field, COMMENT, strlen(COMMENT))) 
 	{
-	  char* search_comment = calloc((strlen(sql) 
-					 + strlen(" comment LIKE '%%%%'") 
-					 + strlen(str) + 1)
-					,sizeof(char));
+	  char* sql_arg = "%s comment LIKE '%%%s%%'";
 
-	  if(search_comment) 
-	    {
-	      snprintf(search_comment, strlen(search_comment) - 1
-		       ,"%s comment LIKE '%%%s%%'", sql, str);
+	  size = strlen(sql)
+	    + strlen(sql_arg)
+	    + strlen(str)
+	    + 1;
+	  
+	  char* search_comment = calloc(size, sizeof(char));
 
-	      bl = search_db(db, NULL, str, search_comment);
-	      free(search_comment);
-	      search_comment = NULL;
-	    }
-	  else 
-	    {
-	      printf("error allocating memory\n");
-	      return NULL;
-	    }
+	  check_oom(search_comment
+		    ,"database > bookmark_db_search - seach_comment");
+	  
+	  snprintf(search_comment, strlen(search_comment) - 1
+		   ,sql_arg, sql, str);
+
+	  bl = search_db(db, NULL, str, search_comment);
+	  free(search_comment);
 	}
       else if(field && !strncmp(field, TAG, strlen(TAG))) 
 	{
-	  char* search_tag = calloc((strlen(sql) 
-				     + strlen(" tag LIKE '%%%%'") 
-				     + strlen(str) + 1)
-				    ,sizeof(char));
+	  char* sql_arg = "%s tag LIKE '%%%s%%'";
 
-	  if(search_tag) 
-	    {
-	      snprintf(search_tag, strlen(search_tag) - 1
-		       ,"%s tag LIKE '%%%s%%'", sql, str);
+	  size = strlen(sql)
+	    + strlen(sql_arg)
+	    + strlen(str)
+	    + 1;
 
-	      bl = search_db(db, NULL, str, search_tag);
-	      free(search_tag);
-	      search_tag = NULL;
-	    }
-	  else 
-	    {
-	      printf("error allocating memory\n");
-	      return NULL;
-	    }
+	  char* search_tag = calloc(size, sizeof(char));
+
+	  check_oom(search_tag
+		    ,"database > bookmark_db_search - search_tag");
+	  
+	  snprintf(search_tag, strlen(search_tag) - 1
+		   ,sql_arg, sql, str);
+
+	  bl = search_db(db, NULL, str, search_tag);
+	  free(search_tag);
 	}
       else 
 	{ 
-	  char* search = calloc((strlen(sql) 
-				 + strlen(" name LIKE '%%%s%%' "
-					  "OR url LIKE '%%%s%%' "
-					  "OR comment LIKE '%%%s%%' "
-					  "OR tag LIKE '%%%s%%'") 
-				 + strlen(str) * 4 + 1)
-				,sizeof(char));
+	  char* sql_arg = "%s  name LIKE '%%%s%%' "
+	    "OR url LIKE '%%%s%%' "
+	    "OR comment LIKE '%%%s%%' "
+	    "OR tag LIKE '%%%s%%'";
 
-	  if(search) 
-	    {
-	      snprintf(search, strlen(search) - 1
-		       ,"%s  name LIKE '%%%s%%' "
-		       "OR url LIKE '%%%s%%' "
-		       "OR comment LIKE '%%%s%%' "
-		       "OR tag LIKE '%%%s%%'"
-		       ,sql, str, str, str, str);
+	  size = strlen(sql)
+	    + strlen(sql_arg)
+	    + (strlen(str) * 4)
+	    + 1;
+	    
+	  char* search = calloc(size, sizeof(char));
 
-	      bl = search_db(db, NULL, str, search);
-	      free(search);
-	      search = NULL;
-	    }
-	  else 
-	    {
-	      printf("error allocating memory\n");
-	      return NULL;
-	    }
+	  check_oom(search, "database > bookmark_db_search - search");
+	  
+	  snprintf(search, strlen(search) - 1
+		   ,sql_arg, sql, str, str, str, str);
+
+	  bl = search_db(db, NULL, str, search);
+	  free(search);
 	}
 
       return bl;

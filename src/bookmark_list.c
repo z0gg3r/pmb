@@ -18,7 +18,8 @@ bookmark_list*
 bookmark_list_new() 
 {
   bookmark_list* l = calloc(1, sizeof(bookmark_list));
-
+  check_oom(l, "bookmark_list - l");
+  
   if(l) 
     {
       l->position = 0;
@@ -110,36 +111,60 @@ bookmark_list_enqueue(bookmark_list* l
   if(id) 
     {
       l->id[l->position] = calloc(strlen(id) + 1, sizeof(char));
+      
+      check_oom(l->id[l->position]
+		,"bookmark_list_enqueue - l->id[l->position]");
+
       strncpy(l->id[l->position], id, strlen(id));
     }
 
   if(name) 
     {
       l->name[l->position] = calloc(strlen(name) + 1, sizeof(char));
+
+      check_oom(l->name[l->position]
+		,"bookmark_list_enqueue - l->name[l->position]");
+      
       strncpy(l->name[l->position], name, strlen(name));
     }
 
   if(url) 
     {
       l->url[l->position] = calloc(strlen(url) + 1, sizeof(char));
+
+      check_oom(l->url[l->position]
+		,"bookmark_list_enqueue - l->url[l->position]");
+      
       strncpy(l->url[l->position], url, strlen(url));
     }
 
   if(comment) 
     {
       l->comment[l->position] = calloc(strlen(comment) + 1, sizeof(char));
+
+      check_oom(l->comment[l->position]
+		,"bookmark_list_enqueue - l->comment[l->position]");
+      
       strncpy(l->comment[l->position], comment, strlen(comment));
     }
 
   if(tag) 
     {
       l->tag[l->position] = calloc(strlen(tag) + 1, sizeof(char));
+
+      check_oom(l->tag[l->position]
+		,"bookmark_list_enqueue - l->tag[l->position]");
+      
       strncpy(l->tag[l->position], tag, strlen(tag));
     }
 
   if(favicon) 
     {
       l->favicon[l->position] = calloc(strlen(favicon) + 1, sizeof(char));
+
+      check_oom(l->favicon[l->position]
+		,"bookmark_list_enqueue - l->favicon[l->position]");
+      
       strncpy(l->favicon[l->position], favicon, strlen(favicon));
     }
 
@@ -173,7 +198,7 @@ bookmark_list_enqueue(bookmark_list* l
 	}
       else
 	{
-	  return 1;
+	  check_oom(NULL, "bookmark_list_enqueue - **n realloc");
 	}
     }
 
@@ -285,6 +310,7 @@ bookmark_list_dequeue(bookmark_list* l)
 	    }
 	  else
 	    {
+	      check_oom(NULL, "bookmark_list_dequeue - **n realloc");
 	      return NULL;
 	    }
 	}

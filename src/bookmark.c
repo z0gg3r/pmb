@@ -15,7 +15,8 @@ bookmark*
 bookmark_new(char* name, char* url, char* comment, char* tag, char* favicon) 
 {
   bookmark* b = malloc(sizeof(bookmark));
-	
+  check_oom(b, "bookmark - b");
+  
   if(b) 
     {
       b->id = NULL;

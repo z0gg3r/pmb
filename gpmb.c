@@ -8,16 +8,20 @@ char* g_database_file = NULL;
 int 
 main(int argc, char *argv[]) 
 {
+  unsigned int size = 0;
+  
   /* dir path */
   const char* home = secure_getenv("HOME");	
   char*	conf_dir = ".config/pmb";
-
-  int size = strlen(home)
+  
+  size = strlen(home)
     + strlen(conf_dir)
     + 3;
   
-  char*	path = calloc(1, size * sizeof(char));
+  char*	path = calloc(size, sizeof(char));
 
+  check_oom(path, "path");
+  
   snprintf(path, strlen(path) - 1, "%s/%s", home, conf_dir);
   
   /* create directory, if not exist */
@@ -35,8 +39,10 @@ main(int argc, char *argv[])
     + strlen(DATABASE)
     + 3;
 
-  g_database_file = calloc(1, size * sizeof(char));
+  g_database_file = calloc(size, sizeof(char));
 
+  check_oom(g_database_file, "database_file");
+  
   snprintf(g_database_file, strlen(g_database_file) - 1, "%s/%s" 
 	   ,path, DATABASE);
   
@@ -55,8 +61,6 @@ main(int argc, char *argv[])
 
   free(opts);
   free(g_database_file);
-  free(path);
   bookmark_db_close(g_db);
   return res;
 }
-

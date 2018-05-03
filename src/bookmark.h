@@ -10,6 +10,7 @@
 #define DATABASE "bookmarks.db"
 
 #include <stdlib.h>
+#include "error.h"
 
 typedef struct bookmark bookmark;
 

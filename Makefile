@@ -22,6 +22,7 @@ DATABASE=database
 TREE=tree
 HTML=html
 FAVICON=favicon
+ERROR=error
 
 GPMB=gpmb
 G_TREEVIEW=treeview
@@ -56,6 +57,8 @@ define BUILD_DEP
 	-o $(BUILD_DIR)/$(TREE).o
 	$(CC) $(CCFLAGS) -c $(INC_DIR)/$(HTML).c \
 	-o $(BUILD_DIR)/$(HTML).o
+	$(CC) $(CCFLAGS) -c $(INC_DIR)/$(ERROR).c \
+	-o $(BUILD_DIR)/$(ERROR).o
 	$(CC) $(CCFLAGS) $(GLIBFLAGS) -lcurl -c $(INC_DIR)/$(FAVICON).c \
 	-o $(BUILD_DIR)/$(FAVICON).o
 endef
@@ -98,6 +101,7 @@ define BUILD_GPMB
 	$(BUILD_DIR)/$(TREE).o \
 	$(BUILD_DIR)/$(HTML).o \
 	$(BUILD_DIR)/$(FAVICON).o \
+	$(BUILD_DIR)/$(ERROR).o \
 	$(BUILD_DIR)/$(G_TREEVIEW).o \
 	$(BUILD_DIR)/$(G_KEYPRESS).o \
 	$(BUILD_DIR)/$(G_DIALOG).o \
@@ -125,6 +129,7 @@ define BUILD_PMB
 	$(BUILD_DIR)/$(TREE).o \
 	$(BUILD_DIR)/$(HTML).o\
 	$(BUILD_DIR)/$(FAVICON).o\
+	$(BUILD_DIR)/$(ERROR).o\
 	$(PMB).c -o $(PMB)
 endef
 
