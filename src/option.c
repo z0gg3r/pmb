@@ -54,7 +54,7 @@ option_list_new()
       l->size = 1;
 
       l->opt = calloc(l->size, sizeof(cl_option*));
-
+      check_oom(l->opt, "option > option_list_new - l->opt");
       return l;
     }
 
@@ -72,7 +72,11 @@ option_list_add(cl_option_list* l, cl_option* opt)
       ++l->size;
       
       l->opt = realloc(l->opt, l->size * sizeof(cl_option*));
+      check_oom(l->opt, "option > option_list_add - l->opt");
+      
       l->opt[l->position] = calloc(1, sizeof(cl_option*));
+      check_oom(l->opt[l->position]
+		,"option > option_list_add - l->opt[l->position]");
     }
   else
     {

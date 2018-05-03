@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include "error.h"
 
 typedef struct cl_option cl_option;
 typedef struct cl_option_list cl_option_list;

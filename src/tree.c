@@ -237,6 +237,8 @@ directory_add_bookmark(directory* d, bookmark* b)
       d->n_bookmark++;
       d->bookmark = realloc(d->bookmark, (d->n_bookmark + 1)
 			    * sizeof(bookmark*));
+      check_oom(d->bookmark
+		,"directory > directory_add_bookmark - d->bookmark");
       d->bookmark[d->n_bookmark] = NULL;
     }
 }
@@ -253,6 +255,10 @@ directory_delete_children(directory* d, int index)
       directory* ret = NULL;
       directory** new_children = calloc(d->n_children - 1
 					,sizeof(directory*));
+
+      check_oom(new_children
+		,"directory > directory_delete_children - new_children");
+      
       int j = 0;
 
       while((ret = directory_next_children(d)))
@@ -287,6 +293,9 @@ directory_delete_bookmark(directory* d, int index)
       bookmark** new_bookmark = calloc(d->n_bookmark
 				       ,sizeof(bookmark*));
 
+      check_oom(new_bookmark
+		,"directory > directory_delete_bookmark - new_bookmark");
+      
       for(i = 0; i < d->n_bookmark; ++i)
 	{
 	  if(d->bookmark[i])
@@ -388,6 +397,7 @@ directory_name_list_new()
       d->size = 0;
       d->position = 0;
       d->list = calloc(1, sizeof(char*));
+      check_oom(d->list, "directory > directory_name_list_new - d->list");
       d->list[0] = NULL;
       return d;
     }
@@ -436,6 +446,8 @@ directory_name_list_add_dir(directory_name_list* l, char* name)
       l->size++;
       l->list = realloc(l->list, (l->size + 1) 
 			* sizeof(char*));
+      check_oom(l->list
+		,"directory > directory_name_list_add_dir - l->list");
       l->list[l->size] = NULL;
     }
 }
@@ -482,6 +494,7 @@ dismember(bookmark* b)
       char* name = NULL;
       char* tag	= bookmark_tag(b);
       char* path = malloc(strlen(tag) * sizeof(char) + 1);
+      check_oom(path, "directory > dismember - path");
       char* path_bkp = NULL;
       directory_name_list* l = directory_name_list_new();
 
@@ -543,6 +556,7 @@ create_directory_tree_from_list(directory_name_list* l, int index)
       directory* head = directory_new(ret);
       directory* tail = head;
       directory** list = calloc(2, sizeof(directory*));
+      check_oom(list, "directory > create_direcory_tree_from_list - list");
 
       while((ret = directory_name_list_return_next(l)))
 	{

@@ -34,6 +34,7 @@ move_directory(char* tag)
   while((b = bookmark_list_return_next_bookmark(bl)))
     {
       unsigned int id = strtol(bookmark_id(b), NULL, 10);
+      unsigned int size = 0;
       char* bm_tag = bookmark_tag(b);
       char* bm_tag_bkp = strdup(bm_tag);
 
@@ -63,11 +64,14 @@ move_directory(char* tag)
 
 	  if(bm_tag)
 	    {
-	      char* new_tag = calloc
-		(1, (strlen(n_tag) + strlen(bm_tag) + 2) * sizeof(char));
+	      size = strlen(n_tag)
+		+ strlen(bm_tag)
+		+ 3;
+	      
+	      char* new_tag = calloc(size, sizeof(char));
+	      check_oom(new_tag, "edit > move_directory - new_tag");
 
-	      snprintf
-		(new_tag, strlen(new_tag) - 1, "%s/%s", n_tag, bm_tag);
+	      snprintf(new_tag, size - 1, "%s/%s", n_tag, bm_tag);
 
 	      bookmark_db_edit(g_db, id, 3, new_tag);
 	      free(new_tag);
@@ -94,11 +98,14 @@ move_directory(char* tag)
 		}
 	    }
 
-	  char* new_tag = calloc
-	    (1, (strlen(tag) + strlen(bm_tag)+ 2) * sizeof(char));
-
-	  snprintf
-	    (new_tag, strlen(new_tag) - 1, "%s/%s", tag, bm_tag);
+	  size = strlen(tag)
+	    + strlen(bm_tag)
+	    + 3;
+	  
+	  char* new_tag = calloc(size, sizeof(char));
+	  check_oom(new_tag, "edit > move_directory - new_tag");
+	  
+	  snprintf(new_tag, size - 1, "%s/%s", tag, bm_tag);
 
 	  bookmark_db_edit(g_db, id, 3, new_tag);
 	  free(new_tag);

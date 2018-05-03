@@ -168,6 +168,17 @@ tree_store_add_child(GtkTreeIter* iter, directory* child)
   g_object_unref(G_OBJECT(folder_icon));
 }
 
+static gboolean
+find_path_position(GtkTreeModel* m, GtkTreePath* p, GtkTreeIter* i
+		   ,gpointer path)
+{
+  if(!(gtk_tree_path_compare(p, path)))
+    {
+      path = p;
+      return TRUE;
+    }
+}
+
 void 
 read_database(GtkWidget* button, GtkWidget* entry) 
 {
@@ -237,6 +248,9 @@ read_database(GtkWidget* button, GtkWidget* entry)
     {
       g_selected_path = gtk_tree_path_new_from_string(path_s);
 
+      gtk_tree_model_foreach(GTK_TREE_MODEL(g_model), find_path_position
+			     ,g_selected_path);
+      
       if(gtk_tree_path_get_depth(g_selected_path) > 1)
 	{
 	  gtk_tree_view_expand_to_path

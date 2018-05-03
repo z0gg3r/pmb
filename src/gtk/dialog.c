@@ -17,6 +17,7 @@ get_full_path(bookmark* b)
 	  GtkTreePath* path;
 	  unsigned int size = 1;
 	  char** parents = calloc(size, sizeof(char*));
+	  check_oom(parents, "dialog > get_full_path - parents");
 	  char*	dir = bookmark_id(b);
 
 	  while(gtk_tree_model_iter_parent(GTK_TREE_MODEL(g_model)
@@ -30,40 +31,53 @@ get_full_path(bookmark* b)
 
 	      parents[size - 1]	= bookmark_id(bp);
 	      parents = realloc(parents, (size + 1) * sizeof(char*));
+	      check_oom(parents, "dialog > get_full_path - parents");	      
 	      ++size;
 
 	      bookmark_destroy(bp);
 	      gtk_tree_path_free(path);
 	    }
 
-	  char*	complete_path = calloc(1, 1 * sizeof(char));
+	  char*	complete_path = calloc(1, sizeof(char));
+	  check_oom(complete_path, "dialog > get_full_path - complete_path");
 	  unsigned int size_bkp = size - 1;
 
 	  while(size_bkp)
 	    {
-	      char* t_path = calloc
-		(1, (strlen(complete_path) + 3) * sizeof(char));
-
+	      size = strlen(complete_path)
+		+ 3;
+	      
+	      char* t_path = calloc(size, sizeof(char));
+	      check_oom(t_path, "dialog > get_full_path - t_path");
+	      
 	      strcpy(t_path, complete_path);
 	      free(complete_path);
 
-	      complete_path = calloc
-		(1, (strlen(t_path) + strlen(parents[size_bkp - 1]) + 3) 
-		 * sizeof(char));
-
 	      if(strlen(t_path) > 1)
-		{
-		  snprintf(complete_path, ((strlen(t_path) + 1
-					    + strlen(parents[size_bkp - 1])
-					    + 1) * sizeof(char))
-			   ,"%s/%s"
+		{	  
+		  size = strlen(t_path)
+		    + strlen(parents[size_bkp - 1])
+		    + 3;	      
+
+		  complete_path = calloc(size, sizeof(char));
+		  
+ 		  check_oom(complete_path
+			    ,"dialog > get_full_path - complete_path");
+
+		  snprintf(complete_path, size - 1, "%s/%s"
 			   ,t_path, parents[size_bkp - 1]);
 		}
 	      else
 		{
-		  snprintf(complete_path, ((strlen(parents[size_bkp - 1]) + 1)
-					   * sizeof(char)) 
-			   ,"%s"
+		  size = strlen(parents[size_bkp - 1])
+		    + 2;
+		  
+		  complete_path = calloc(size, sizeof(char));
+
+ 		  check_oom(complete_path
+			    ,"dialog > get_full_path - complete_path");
+		  
+		  snprintf(complete_path, size - 1, "%s"
 			   ,parents[size_bkp - 1]);
 		}
 
@@ -77,13 +91,14 @@ get_full_path(bookmark* b)
 	      complete_path[strlen(complete_path)] = '/';
 	    }
 
-	  char* full_path = malloc((strlen(complete_path)
-				    + strlen(dir) 
-				    + 2) * sizeof(char));
-
-	  snprintf(full_path, (strlen(complete_path) 
-		    + strlen(dir) + 2) * sizeof(char) 
-		   ,"%s%s"
+	  size = strlen(complete_path)
+	    + strlen(dir)
+	    + 3;
+	  
+	  char* full_path = malloc(size * sizeof(char));
+	  check_oom(full_path, "dialog > get_full_path - full_path");
+	  
+	  snprintf(full_path, size - 1, "%s%s"
 		   ,complete_path, dir);
 
 	  free(parents);
