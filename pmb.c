@@ -62,8 +62,6 @@ main(int argc, char *argv[])
   snprintf(config_file, strlen(config_file) - 1, "%s/%s"
 	   ,path, CONFIG_FILE);
 
-  printf("%s\n", config_file);
-  
   parse_config_file(config_file);
   free(config_file);
 
