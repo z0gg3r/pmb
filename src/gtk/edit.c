@@ -66,12 +66,12 @@ move_directory(char* tag)
 	    {
 	      size = strlen(n_tag)
 		+ strlen(bm_tag)
-		+ 3;
+		+ 2;
 	      
 	      char* new_tag = calloc(size, sizeof(char));
 	      check_oom(new_tag, "edit > move_directory - new_tag");
 
-	      snprintf(new_tag, size - 1, "%s/%s", n_tag, bm_tag);
+	      snprintf(new_tag, size, "%s/%s", n_tag, bm_tag);
 
 	      bookmark_db_edit(g_db, id, 3, new_tag);
 	      free(new_tag);
@@ -100,12 +100,12 @@ move_directory(char* tag)
 
 	  size = strlen(tag)
 	    + strlen(bm_tag)
-	    + 3;
+	    + 2;
 	  
 	  char* new_tag = calloc(size, sizeof(char));
 	  check_oom(new_tag, "edit > move_directory - new_tag");
 	  
-	  snprintf(new_tag, size - 1, "%s/%s", tag, bm_tag);
+	  snprintf(new_tag, size, "%s/%s", tag, bm_tag);
 
 	  bookmark_db_edit(g_db, id, 3, new_tag);
 	  free(new_tag);
@@ -130,9 +130,11 @@ rename_directory(GtkWidget* button, gpointer** args)
   bookmark_list* bl = bookmark_db_search(g_db, TAG, path);
   char* input_tag = (char*)gtk_entry_get_text(GTK_ENTRY(args[0]));
   char*	full_tag = get_full_path(b);
+  char* full_tag_bkp = strdup(full_tag);
   char*	root_tag = NULL;
   char*	new_tag	= NULL;
-
+  unsigned int size = 0;
+  
   /* assembly the tag */
   while(full_tag && strcmp(full_tag, bookmark_id(b)))
     {
@@ -141,36 +143,49 @@ rename_directory(GtkWidget* button, gpointer** args)
       if(root_tag)
 	{
 	  char* r_tag_bkp = strdup(root_tag);
-	  unsigned int size =
-	    (strlen(r_tag_bkp) + strlen(full_tag_sep) + 2)
-	    * sizeof(char);
 
-	  root_tag = realloc(root_tag, size);
+	  size = strlen(r_tag_bkp)
+	    + strlen(full_tag_sep)
+	    + 2;
 
+	  root_tag = realloc(root_tag, size * sizeof(char));
+	  check_oom(root_tag, "edit > rename_directory - root_tag");
+	  
 	  snprintf(root_tag, size, "%s/%s", r_tag_bkp, full_tag_sep);
 	  free(r_tag_bkp);
 	}
       else
 	{
-	  root_tag = calloc(1, strlen(full_tag_sep) + 1 * sizeof(char));
-
+	  size = strlen(full_tag_sep)
+	    + 1;
+	  
+	  root_tag = calloc(size, sizeof(char));
+	  check_oom(root_tag, "edit > rename_directory - root_tag");
+	  
 	  strcpy(root_tag, full_tag_sep);
 	}
     }
 
   if(root_tag)
     {
-      unsigned int new_tag_size =
-	(strlen(root_tag) + strlen(input_tag) + 2) * sizeof(char);
+      size = strlen(root_tag)
+	+ strlen(input_tag)
+	+ 2;
 
-      new_tag = calloc(1, new_tag_size);
-
-      snprintf(new_tag, new_tag_size, "%s/%s", root_tag, input_tag);
+      new_tag = calloc(size, sizeof(char));
+      check_oom(new_tag, "edit > rename_directory - new_tag");
+      
+      snprintf(new_tag, size, "%s/%s", root_tag, input_tag);
       free(root_tag);
     }
   else
     {
-      new_tag = calloc(1, (strlen(input_tag) + 1) * sizeof(char));
+      size = strlen(input_tag)
+	+ 1;
+      
+      new_tag = calloc(size, sizeof(char));
+      check_oom(new_tag, "edit > rename_directory - new_tag");
+      
       strcpy(new_tag, input_tag);
     }
 
@@ -181,15 +196,19 @@ rename_directory(GtkWidget* button, gpointer** args)
 	{
 	  char* new_tag_bkp = strdup(new_tag);
 	  char* b_tag = bookmark_tag(bt);
+	  char* b_tag_bkp = strdup(b_tag);
 	  char* nt_sep = strsep(&new_tag_bkp, "//");
 	  char* tag_sep = strsep(&b_tag, "//");
 	  char* tag_root = NULL;
 
 	  if(nt_sep)
 	    {
-	      tag_root = realloc
-		(tag_root, (strlen(nt_sep) + 1) * sizeof(char));
-
+	      size = strlen(nt_sep)
+		+ 1;
+	      
+	      tag_root = realloc(tag_root, size * sizeof(char));
+	      check_oom(tag_root, "edit > rename_directory - tag_root");
+	      
 	      strcpy(tag_root, nt_sep);
 	    }
 
@@ -198,22 +217,27 @@ rename_directory(GtkWidget* button, gpointer** args)
 	      nt_sep = strsep(&new_tag_bkp, "//");
 	      tag_sep = strsep(&b_tag, "//");
 	      char* tr_bkp = strdup(tag_root);
-	      unsigned int size =
-		(strlen(tr_bkp) + strlen(nt_sep) + 2) * sizeof(char);
 
-	      tag_root = realloc(tag_root, size); 
+	      size = strlen(tr_bkp)
+		+ strlen(nt_sep)
+		+ 2;
 
-	      snprintf(tag_root, size - 1, tr_bkp, nt_sep);
+	      tag_root = realloc(tag_root, size * sizeof(char)); 
+	      check_oom(tag_root, "edit > rename_directory - tag_root");
+	      
+	      snprintf(tag_root, size, tr_bkp, nt_sep);
 	      free(tr_bkp);
 	    }
 
 	  if(b_tag)
 	    {
-	      unsigned int size =
-		(strlen(new_tag) + strlen(b_tag) + 2) * sizeof(char);
+	      size = strlen(new_tag)
+		+ strlen(b_tag)
+		+ 2;
 
-	      char* tag = calloc(1, size);
-
+	      char* tag = calloc(size, sizeof(char));
+	      check_oom(tag, "edit > rename_directory - tag");
+	      
 	      snprintf(tag, size, "%s/%s", new_tag, b_tag);
 
 	      if(tag)
@@ -230,6 +254,7 @@ rename_directory(GtkWidget* button, gpointer** args)
 		(g_db, strtol(bookmark_id(bt), NULL, 10), 3, new_tag);
 	    }
 
+	  free(b_tag_bkp);
 	  bookmark_destroy(bt);
 	  gtk_label_set_text(GTK_LABEL(g_info_label), "Rename: Done");
 	}
@@ -240,6 +265,7 @@ rename_directory(GtkWidget* button, gpointer** args)
 	(GTK_LABEL(g_info_label), "Rename: Error, name field empty");
     }
 
+  free(full_tag_bkp);
   free(new_tag);
   bookmark_destroy(b);
   bookmark_list_destroy(bl);
@@ -257,7 +283,8 @@ edit_bookmark(GtkWidget* button, gpointer** args)
   char* tag = (char*)gtk_combo_box_text_get_active_text
     (GTK_COMBO_BOX_TEXT(args[3]));
   char* message	= NULL;
-
+  unsigned int size = 0;
+  
   if(url) 
     {
       bookmark* selected_b = get_bookmark_from_row(NULL);
@@ -293,14 +320,16 @@ edit_bookmark(GtkWidget* button, gpointer** args)
 		  bookmark_db_edit(g_db, id, 3, tag);
 		}
 
-	      unsigned int size = (strlen(bookmark_id(b))
-				   + strlen(bookmark_url(b)) 
-				   + strlen("edit: id = , url = ")
-				   + 3) * sizeof(char);
+	      char* message_body = "edit: id = %s, url = %s";
+	      
+	      size = strlen(bookmark_id(b))
+		+ strlen(bookmark_url(b)) 
+		+ strlen(message_body)
+		+ 2;
 
-	      message = calloc(1, size);
+	      message = calloc(size, sizeof(char));
 
-	      snprintf(message, size - 1, "edit: id = %s, url = %s"
+	      snprintf(message, size, message_body
 		 ,bookmark_id(b), bookmark_url(b));
 
 	      gtk_label_set_text(GTK_LABEL(g_info_label), message);

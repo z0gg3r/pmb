@@ -19,13 +19,12 @@ main(int argc, char *argv[])
 
   size = strlen(home)
     + strlen(conf_dir)
-    + 3;
+    + 2;
   
   char*	path = calloc(size, sizeof(char));
-
   check_oom(path, "path");
   
-  snprintf(path, strlen(path) - 1, "%s/%s", home, conf_dir);
+  snprintf(path, size, "%s/%s", home, conf_dir);
 
   /* create directory, if not exist */
   {
@@ -40,26 +39,23 @@ main(int argc, char *argv[])
   /* database */
   size = strlen(path)
     + strlen(DATABASE)
-    + 3;
+    + 2;
 
   char*	database_file = calloc(size, sizeof(char));
-
   check_oom(database_file, "database_file");
   
-  snprintf(database_file, strlen(database_file) - 1, "%s/%s" 
+  snprintf(database_file, size, "%s/%s" 
 	   ,path, DATABASE);
 
   /* config file */
-  size = strlen(home)
-    + strlen(conf_dir)
+  size = strlen(path)
     + strlen(CONFIG_FILE)
-    + 3;
+    + 2;
 
   char* config_file = calloc(size, sizeof(char));
-
   check_oom(config_file, "config_file");
   
-  snprintf(config_file, strlen(config_file) - 1, "%s/%s"
+  snprintf(config_file, size, "%s/%s"
 	   ,path, CONFIG_FILE);
 
   parse_config_file(config_file);

@@ -50,6 +50,7 @@ add_bookmark(GtkWidget* button, gpointer** args)
       /* write to database */
       bookmark* b = bookmark_new(name, url, comment, tag, favicon);
       bookmark_db_write(b, g_db);
+      g_free(favicon);
       bookmark_destroy(b);
 
       /*

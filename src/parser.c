@@ -1698,13 +1698,13 @@ read_config(char* filename)
   if(fp)
     {
       int size = 1;
+      char* option_bkp = NULL;
       char* option = calloc(size, sizeof(char));
-      char* option_bkp = strdup(option);
-      char** ret = calloc(7, sizeof(char*));
-
       check_oom(option, "parser - option");
-      check_oom(ret, "parser - ret");
       
+      char** ret = calloc(7, sizeof(char*));
+      check_oom(ret, "parser - ret");
+
       ret[0] = NULL;
       ret[1] = NULL;
 
@@ -1722,6 +1722,7 @@ read_config(char* filename)
 		  goto new_option;
 		}
 
+	      option_bkp = strdup(option);
 	      char* str = strsep(&option, "=");
 
 	      if(!(strcmp(str, "color")))
@@ -1770,7 +1771,7 @@ read_config(char* filename)
 	      size = 1;
 	      option = calloc(size, sizeof(char));
 	      check_oom(option, "parser - option");
-	      option_bkp = strdup(option);
+	      option_bkp = NULL;
 	    }
 	  else
 	    {
@@ -1778,7 +1779,6 @@ read_config(char* filename)
 	      option = realloc(option, ++size * sizeof(char));
 	      check_oom(option, "parser - option");
 	      option[size - 1] = '\0';
-	      option_bkp = strdup(option);
 	    }
 	}
 

@@ -9,35 +9,33 @@ set_options()
   const char* home = secure_getenv("HOME");	
   char*	conf_dir = ".config/pmb";
   char*	config_filename = "gpmb.conf";
-
-  int size = strlen(home)
+  
+  unsigned int size = strlen(home)
     + strlen(conf_dir)
     + strlen(config_filename)
     + 3;
   
-  config_file = calloc
-    (1, size * sizeof(char));
-
+  config_file = calloc(size, sizeof(char));
+  check_oom(config_file, "options > set_options - config_file");
+  
   snprintf(config_file, size, "%s/%s/%s", home
 	   ,conf_dir, config_filename);
 
   opts = malloc(sizeof(gpmb_options));
-
-  if(opts) 
-    {
-      opts->database_file = g_database_file;
-      opts->tree_lines = "true";
-      opts->download_favicon = "false";
-      opts->id_fg = NULL;
-      opts->name_fg = NULL;
-      opts->url_fg = NULL;
-      opts->comment_fg = NULL;
-      opts->tag_fg = NULL;
-      opts->id_font = NULL;
-      opts->name_font = NULL;
-      opts->url_font = NULL;
-      opts->comment_font = NULL;
-    }
+  check_oom(config_file, "options > set_options - opts");
+  
+  opts->database_file = g_database_file;
+  opts->tree_lines = "true";
+  opts->download_favicon = "false";
+  opts->id_fg = NULL;
+  opts->name_fg = NULL;
+  opts->url_fg = NULL;
+  opts->comment_fg = NULL;
+  opts->tag_fg = NULL;
+  opts->id_font = NULL;
+  opts->name_font = NULL;
+  opts->url_font = NULL;
+  opts->comment_font = NULL;
 }
 
 void
@@ -117,7 +115,10 @@ read_config()
   if(fp)
     {
       int size = 1;
+      
       char* option = calloc(size, sizeof(char));
+      check_oom(option, "options > read_config - option");
+      
       char* option_bkp = NULL;
 
       while(!feof(fp))
@@ -201,12 +202,14 @@ read_config()
 	      free(option_bkp);
 	      size = 1;
 	      option = calloc(size, sizeof(char));
+	      check_oom(option, "options > read_config - option");
 	      option_bkp = NULL;
 	    }
 	  else
 	    {
 	      option[size - 1] = st;
 	      option = realloc(option, ++size * sizeof(char));
+	      check_oom(option, "options > read_config - option");
 	      option[size - 1] = '\0';
 	    }
 	}

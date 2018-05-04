@@ -17,60 +17,53 @@ bookmark_new(char* name, char* url, char* comment, char* tag, char* favicon)
   bookmark* b = malloc(sizeof(bookmark));
   check_oom(b, "bookmark - b");
   
-  if(b) 
+  b->id = NULL;
+
+  if(name)
     {
-      b->id = NULL;
-
-      if(name)
-	{
-	  b->name = name;
-	}
-      else
-	{
-	  b->name = NULL;
-	}
-      if(url)
-	{
-	  b->url = url;
-	}
-      else
-	{
-	  b->url = NULL;
-	}
-
-      if(comment)
-	{
-	  b->comment = comment;
-	}
-      else
-	{
-	  b->comment = "none";
-	}
-
-      if(tag)
-	{
-	  b->tag = tag;
-	}
-      else
-	{
-	  b->tag = "none";
-	}
-
-      if(favicon)
-	{
-	  b->favicon = favicon;
-	}
-      else
-	{
-	  b->favicon = "none";
-	}
-
-      return b;
+      b->name = name;
     }
   else
     {
-      return NULL;
+      b->name = NULL;
     }
+  if(url)
+    {
+      b->url = url;
+    }
+  else
+    {
+      b->url = NULL;
+    }
+  
+  if(comment)
+    {
+      b->comment = comment;
+    }
+  else
+    {
+      b->comment = "none";
+    }
+  
+  if(tag)
+    {
+      b->tag = tag;
+    }
+  else
+    {
+      b->tag = "none";
+    }
+  
+  if(favicon)
+    {
+      b->favicon = favicon;
+    }
+  else
+    {
+      b->favicon = "none";
+    }
+  
+  return b;
 }
 
 void 

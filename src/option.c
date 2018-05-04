@@ -19,16 +19,12 @@ cl_option*
 option_new(int(*func)(char*), char* optarg) 
 {
   cl_option* opt = calloc(1, sizeof(cl_option));
-
-  if(opt)
-    {
-      opt->func	= func;	
-      opt->optarg = optarg;
-
-      return opt;
-    }
-
-  return NULL;
+  check_oom(opt, "option - opt");
+  
+  opt->func = func;	
+  opt->optarg = optarg;
+      
+  return opt;
 }
 
 int
@@ -47,18 +43,15 @@ cl_option_list*
 option_list_new() 
 {
   cl_option_list* l = calloc(1, sizeof(cl_option_list));
+  check_oom(l, "option - l");
+  
+  l->position = 0;
+  l->size = 1;
 
-  if(l) 
-    {
-      l->position = 0;
-      l->size = 1;
+  l->opt = calloc(l->size, sizeof(cl_option*));
+  check_oom(l->opt, "option > option_list_new - l->opt");
 
-      l->opt = calloc(l->size, sizeof(cl_option*));
-      check_oom(l->opt, "option > option_list_new - l->opt");
-      return l;
-    }
-
-  return NULL;
+  return l;
 }
 
 int

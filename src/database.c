@@ -295,7 +295,7 @@ bookmark_db_delete_tag(sqlite3* db, char* tag, int greedy)
 
 	  check_oom(sql, "database > bookmark_db_delete_tag - sql");
 	  
-	  snprintf(sql, strlen(sql) - 1, sql_arg, sql_head, tag);
+	  snprintf(sql, size, sql_arg, sql_head, tag);
 	  sqlite3_stmt* res;
 
 	  if((sqlite3_prepare_v2(db, sql, -1, &res, 0)) == SQLITE_OK)
@@ -610,8 +610,7 @@ bookmark_db_search(sqlite3* db, char* field, char* str)
 	  check_oom(search_name
 		    ,"database > bookmark_db_search - search_name");
 	  
-	  snprintf(search_name, strlen(search_name) - 1
-		   ,sql_arg, sql, str);
+	  snprintf(search_name, size, sql_arg, sql, str);
 
 	  bl = search_db(db, NULL, str, search_name);
 	  free(search_name);
@@ -629,8 +628,7 @@ bookmark_db_search(sqlite3* db, char* field, char* str)
 
 	  check_oom(search_url, "database > bookmark_db_search - search_url");
 	  
-	  snprintf(search_url, strlen(search_url) - 1
-		   ,sql_arg, sql, str);
+	  snprintf(search_url, size, sql_arg, sql, str);
 
 	  bl = search_db(db, NULL, str, search_url);
 	  free(search_url);
@@ -649,8 +647,7 @@ bookmark_db_search(sqlite3* db, char* field, char* str)
 	  check_oom(search_comment
 		    ,"database > bookmark_db_search - seach_comment");
 	  
-	  snprintf(search_comment, strlen(search_comment) - 1
-		   ,sql_arg, sql, str);
+	  snprintf(search_comment, size, sql_arg, sql, str);
 
 	  bl = search_db(db, NULL, str, search_comment);
 	  free(search_comment);
@@ -669,8 +666,7 @@ bookmark_db_search(sqlite3* db, char* field, char* str)
 	  check_oom(search_tag
 		    ,"database > bookmark_db_search - search_tag");
 	  
-	  snprintf(search_tag, strlen(search_tag) - 1
-		   ,sql_arg, sql, str);
+	  snprintf(search_tag, size, sql_arg, sql, str);
 
 	  bl = search_db(db, NULL, str, search_tag);
 	  free(search_tag);
@@ -691,8 +687,7 @@ bookmark_db_search(sqlite3* db, char* field, char* str)
 
 	  check_oom(search, "database > bookmark_db_search - search");
 	  
-	  snprintf(search, strlen(search) - 1
-		   ,sql_arg, sql, str, str, str, str);
+	  snprintf(search, size, sql_arg, sql, str, str, str, str);
 
 	  bl = search_db(db, NULL, str, search);
 	  free(search);

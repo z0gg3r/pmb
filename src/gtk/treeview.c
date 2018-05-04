@@ -138,12 +138,16 @@ tree_store_add_child(GtkTreeIter* iter, directory* child)
 		(GTK_ICON_THEME(theme), "starred", icon_size, 0, NULL);
 
 	      gtk_tree_store_set(g_bookmarks, &b_iter, 5, star_icon, -1);
-	      g_object_unref(G_OBJECT(star_icon));
+	      g_object_unref(star_icon);
 	    }
 	  else
 	    {
+	      GdkPixbuf* icon = favicon_decode(b);
+	      
 	      gtk_tree_store_set
-		(g_bookmarks, &b_iter, 5, favicon_decode(b), -1);
+		(g_bookmarks, &b_iter, 5, icon, -1);
+
+	      g_object_unref(icon);
 	    }
 
 	  gtk_tree_store_set(g_bookmarks, &b_iter, 0, bookmark_id(b), -1);
@@ -151,7 +155,6 @@ tree_store_add_child(GtkTreeIter* iter, directory* child)
 	  gtk_tree_store_set(g_bookmarks, &b_iter, 2, bookmark_url(b), -1);
 	  gtk_tree_store_set(g_bookmarks, &b_iter, 3, bookmark_comment(b), -1);
 	  gtk_tree_store_set(g_bookmarks, &b_iter, 4, bookmark_tag(b), -1);
-	  //bookmark_destroy(b);
 	}
 
       if(d)
@@ -165,9 +168,10 @@ tree_store_add_child(GtkTreeIter* iter, directory* child)
 	}
     }
 	
-  g_object_unref(G_OBJECT(folder_icon));
+  g_object_unref(folder_icon);
 }
 
+/* to be used with gtk_tree_model_foreach() */
 static gboolean
 find_path_position(GtkTreeModel* m, GtkTreePath* p, GtkTreeIter* i
 		   ,gpointer path)
@@ -177,6 +181,8 @@ find_path_position(GtkTreeModel* m, GtkTreePath* p, GtkTreeIter* i
       path = p;
       return TRUE;
     }
+
+  return FALSE;
 }
 
 void 

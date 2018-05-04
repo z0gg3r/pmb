@@ -57,27 +57,27 @@ get_full_path(bookmark* b)
 		{	  
 		  size = strlen(t_path)
 		    + strlen(parents[size_bkp - 1])
-		    + 3;	      
+		    + 2;	      
 
 		  complete_path = calloc(size, sizeof(char));
 		  
  		  check_oom(complete_path
 			    ,"dialog > get_full_path - complete_path");
 
-		  snprintf(complete_path, size - 1, "%s/%s"
+		  snprintf(complete_path, size, "%s/%s"
 			   ,t_path, parents[size_bkp - 1]);
 		}
 	      else
 		{
 		  size = strlen(parents[size_bkp - 1])
-		    + 2;
+		    + 1;
 		  
 		  complete_path = calloc(size, sizeof(char));
 
  		  check_oom(complete_path
 			    ,"dialog > get_full_path - complete_path");
 		  
-		  snprintf(complete_path, size - 1, "%s"
+		  snprintf(complete_path, size, "%s"
 			   ,parents[size_bkp - 1]);
 		}
 
@@ -93,12 +93,12 @@ get_full_path(bookmark* b)
 
 	  size = strlen(complete_path)
 	    + strlen(dir)
-	    + 3;
+	    + 2;
 	  
 	  char* full_path = malloc(size * sizeof(char));
 	  check_oom(full_path, "dialog > get_full_path - full_path");
 	  
-	  snprintf(full_path, size - 1, "%s%s"
+	  snprintf(full_path, size, "%s%s"
 		   ,complete_path, dir);
 
 	  free(parents);
@@ -230,7 +230,7 @@ favicon_decode(bookmark* b)
 void
 set_url_favicon(GtkWidget* entry)
 {
-  GdkPixbuf* 	icon;
+  GdkPixbuf* icon;
   GtkTreeIter iter;
 
   gtk_tree_model_get_iter(GTK_TREE_MODEL(g_model), &iter, g_selected_path);

@@ -16,13 +16,12 @@ main(int argc, char *argv[])
   
   size = strlen(home)
     + strlen(conf_dir)
-    + 3;
+    + 2;
   
   char*	path = calloc(size, sizeof(char));
-
   check_oom(path, "path");
   
-  snprintf(path, strlen(path) - 1, "%s/%s", home, conf_dir);
+  snprintf(path, size, "%s/%s", home, conf_dir);
   
   /* create directory, if not exist */
   {
@@ -37,13 +36,12 @@ main(int argc, char *argv[])
   /* database */
   size = strlen(path)
     + strlen(DATABASE)
-    + 3;
+    + 2;
 
   g_database_file = calloc(size, sizeof(char));
-
   check_oom(g_database_file, "database_file");
   
-  snprintf(g_database_file, strlen(g_database_file) - 1, "%s/%s" 
+  snprintf(g_database_file, size, "%s/%s" 
 	   ,path, DATABASE);
   
   if(g_database_file) 

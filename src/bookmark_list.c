@@ -18,32 +18,27 @@ bookmark_list*
 bookmark_list_new() 
 {
   bookmark_list* l = calloc(1, sizeof(bookmark_list));
-  check_oom(l, "bookmark_list - l");
+  check_oom(l, "bookmark_list > bookmark_list_new - l");
   
-  if(l) 
-    {
-      l->position = 0;
-      l->next = 0;
-      l->size = 1;
+  l->position = 0;
+  l->next = 0;
+  l->size = 1;
+  
+  l->id = calloc(l->size, sizeof(char*));
+  l->name = calloc(l->size, sizeof(char*));
+  l->url = calloc(l->size, sizeof(char*));
+  l->comment = calloc(l->size, sizeof(char*));
+  l->tag = calloc(l->size, sizeof(char*));
+  l->favicon = calloc(l->size, sizeof(char*));
+  
+  l->id[0] = NULL;
+  l->name[0] = NULL;
+  l->url[0] = NULL;
+  l->comment[0] = NULL;
+  l->tag[0] = NULL;
+  l->favicon[0] = NULL;
 
-      l->id = calloc(l->size, sizeof(char*));
-      l->name = calloc(l->size, sizeof(char*));
-      l->url = calloc(l->size, sizeof(char*));
-      l->comment = calloc(l->size, sizeof(char*));
-      l->tag = calloc(l->size, sizeof(char*));
-      l->favicon = calloc(l->size, sizeof(char*));
-		
-      l->id[0] = NULL;
-      l->name[0] = NULL;
-      l->url[0] = NULL;
-      l->comment[0] = NULL;
-      l->tag[0] = NULL;
-      l->favicon[0] = NULL;
-
-      return l;
-    }
-
-  return NULL;
+  return l;
 }
 
 void
