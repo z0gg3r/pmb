@@ -210,6 +210,9 @@ selective_dialog_content(GtkWidget* window, char* action)
   GtkWidget* db_entry_label = gtk_label_new("Database");
   db_entry = gtk_entry_new();
 
+  gtk_entry_set_icon_from_icon_name
+    (GTK_ENTRY(db_entry), GTK_ENTRY_ICON_PRIMARY, "folder");
+  
   /* select database button */
   GtkWidget* select_button = gtk_button_new_with_mnemonic("_Select database");
   g_signal_connect
@@ -220,6 +223,9 @@ selective_dialog_content(GtkWidget* window, char* action)
   GtkWidget* pattern_label = gtk_label_new("Pattern | Id");
   pattern_entry	= gtk_entry_new();
 
+  gtk_entry_set_icon_from_icon_name
+    (GTK_ENTRY(pattern_entry), GTK_ENTRY_ICON_PRIMARY, "ascii");
+  
   field_box = gtk_combo_box_text_new();
   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(field_box), NULL, "any");
   gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(field_box), NULL, "id");

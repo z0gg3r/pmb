@@ -39,103 +39,58 @@ G_SEARCHBOX=searchbox
 G_TAGBOX=tagbox
 G_INTERFACE=interface
 
+PMB_HEADERS=$(INC_DIR)/$(BOOKMARK).h $(INC_DIR)/$(BOOKMARK_LIST).h \
+	$(INC_DIR)/$(DATABASE).h $(INC_DIR)/$(TREE).h \
+	$(INC_DIR)/$(HTML).h $(INC_DIR)/$(FAVICON).h \
+	$(INC_DIR)/$(PARSER).h $(INC_DIR)/$(OPTION).h \
+	$(INC_DIR)/$(ERROR).h
+
+PMB_OBJ=$(BUILD_DIR)/$(BOOKMARK).o $(BUILD_DIR)/$(BOOKMARK_LIST).o \
+	$(BUILD_DIR)/$(DATABASE).o $(BUILD_DIR)/$(TREE).o \
+	$(BUILD_DIR)/$(HTML).o $(BUILD_DIR)/$(FAVICON).o \
+	$(BUILD_DIR)/$(PARSER).o $(BUILD_DIR)/$(OPTION).o \
+	$(BUILD_DIR)/$(ERROR).o
+
+GPMB_HEADERS=$(GPMB_DIR)/$(G_TREEVIEW).h $(GPMB_DIR)/$(G_KEYPRESS).h \
+	$(GPMB_DIR)/$(G_MENUBAR).h $(GPMB_DIR)/$(G_TOOLBOX).h \
+	$(GPMB_DIR)/$(G_DIALOG).h $(GPMB_DIR)/$(G_ADD).h \
+	$(GPMB_DIR)/$(G_DELETE).h $(GPMB_DIR)/$(G_EDIT).h \
+	$(GPMB_DIR)/$(G_FILE).h $(GPMB_DIR)/$(G_OPTIONS).h \
+	$(GPMB_DIR)/$(G_SEARCHBOX).h $(GPMB_DIR)/$(G_TAGBOX).h \
+	$(GPMB_DIR)/$(G_INTERFACE).h
+
+GPMB_OBJ=$(BUILD_DIR)/$(G_TREEVIEW).o $(BUILD_DIR)/$(G_KEYPRESS).o \
+	$(BUILD_DIR)/$(G_MENUBAR).o $(BUILD_DIR)/$(G_TOOLBOX).o \
+	$(BUILD_DIR)/$(G_DIALOG).o $(BUILD_DIR)/$(G_ADD).o \
+	$(BUILD_DIR)/$(G_DELETE).o $(BUILD_DIR)/$(G_EDIT).o \
+	$(BUILD_DIR)/$(G_FILE).o $(BUILD_DIR)/$(G_OPTIONS).o \
+	$(BUILD_DIR)/$(G_SEARCHBOX).o $(BUILD_DIR)/$(G_TAGBOX).o \
+	$(BUILD_DIR)/$(G_INTERFACE).o \
+	$(BUILD_DIR)/$(BOOKMARK).o $(BUILD_DIR)/$(BOOKMARK_LIST).o \
+	$(BUILD_DIR)/$(DATABASE).o $(BUILD_DIR)/$(TREE).o \
+	$(BUILD_DIR)/$(FAVICON).o $(BUILD_DIR)/$(HTML).o \
+	$(BUILD_DIR)/$(ERROR).o
+
 # create build directory
 $(shell if [ ! -e "./build" ]; then mkdir build; fi)
 
-define BUILD_DEP
-	$(CC) $(CCFLAGS) -c $(INC_DIR)/$(BOOKMARK).c \
-	-o $(BUILD_DIR)/$(BOOKMARK).o
-	$(CC) $(CCFLAGS) -c $(INC_DIR)/$(BOOKMARK_LIST).c \
-	-o $(BUILD_DIR)/$(BOOKMARK_LIST).o
-	$(CC) $(CCFLAGS) -c $(INC_DIR)/$(DATABASE).c \
-	-o $(BUILD_DIR)/$(DATABASE).o
-	$(CC) $(CCFLAGS) $(GLIBFLAGS) -c $(INC_DIR)/$(PARSER).c \
-	-o $(BUILD_DIR)/$(PARSER).o
-	$(CC) $(CCFLAGS) -c $(INC_DIR)/$(OPTION).c \
-	-o $(BUILD_DIR)/$(OPTION).o
-	$(CC) $(CCFLAGS) -c $(INC_DIR)/$(TREE).c \
-	-o $(BUILD_DIR)/$(TREE).o
-	$(CC) $(CCFLAGS) -c $(INC_DIR)/$(HTML).c \
-	-o $(BUILD_DIR)/$(HTML).o
-	$(CC) $(CCFLAGS) -c $(INC_DIR)/$(ERROR).c \
-	-o $(BUILD_DIR)/$(ERROR).o
-	$(CC) $(CCFLAGS) $(GLIBFLAGS) -lcurl -c $(INC_DIR)/$(FAVICON).c \
-	-o $(BUILD_DIR)/$(FAVICON).o
-endef
+default: $(PMB) $(GPMB)
 
-define BUILD_GPMB_DEP
-	$(CC) $(CCFLAGS) $(GTKFLAGS) -c $(GPMB_DIR)/$(G_TREEVIEW).c \
-	-o $(BUILD_DIR)/$(G_TREEVIEW).o
-	$(CC) $(CCFLAGS) $(GTKFLAGS) -c $(GPMB_DIR)/$(G_KEYPRESS).c \
-	-o $(BUILD_DIR)/$(G_KEYPRESS).o
-	$(CC) $(CCFLAGS) $(GTKFLAGS) -c $(GPMB_DIR)/$(G_MENUBAR).c \
-	-o $(BUILD_DIR)/$(G_MENUBAR).o
-	$(CC) $(CCFLAGS) $(GTKFLAGS) -c $(GPMB_DIR)/$(G_TOOLBOX).c \
-	-o $(BUILD_DIR)/$(G_TOOLBOX).o
-	$(CC) $(CCFLAGS) $(GTKFLAGS) -c $(GPMB_DIR)/$(G_DIALOG).c \
-	-o $(BUILD_DIR)/$(G_DIALOG).o
-	$(CC) $(CCFLAGS) $(GTKFLAGS) -c $(GPMB_DIR)/$(G_ADD).c \
-	-o $(BUILD_DIR)/$(G_ADD).o
-	$(CC) $(CCFLAGS) $(GTKFLAGS) -c $(GPMB_DIR)/$(G_DELETE).c \
-	-o $(BUILD_DIR)/$(G_DELETE).o
-	$(CC) $(CCFLAGS) $(GTKFLAGS) -c $(GPMB_DIR)/$(G_EDIT).c \
-	-o $(BUILD_DIR)/$(G_EDIT).o
-	$(CC) $(CCFLAGS) $(GTKFLAGS) -c $(GPMB_DIR)/$(G_FILE).c \
-	-o $(BUILD_DIR)/$(G_FILE).o
-	$(CC) $(CCFLAGS) $(GTKFLAGS) -c $(GPMB_DIR)/$(G_OPTIONS).c \
-	-o $(BUILD_DIR)/$(G_OPTIONS).o
-	$(CC) $(CCFLAGS) $(GTKFLAGS) -c $(GPMB_DIR)/$(G_SEARCHBOX).c \
-	-o $(BUILD_DIR)/$(G_SEARCHBOX).o
-	$(CC) $(CCFLAGS) $(GTKFLAGS) -c $(GPMB_DIR)/$(G_TAGBOX).c \
-	-o $(BUILD_DIR)/$(G_TAGBOX).o
-	$(CC) $(CCFLAGS) $(GTKFLAGS) -c $(GPMB_DIR)/$(G_INTERFACE).c \
-	-o $(BUILD_DIR)/$(G_INTERFACE).o
-endef
+all: default
 
-define BUILD_GPMB
-	$(BUILD_GPMB_DEP)
-	$(CC) $(CCFLAGS) $(GTKFLAGS) $(GLIBFLAGS) $(SQLITE_FLAGS) \
-	$(BUILD_DIR)/$(BOOKMARK).o \
-	$(BUILD_DIR)/$(BOOKMARK_LIST).o \
-	$(BUILD_DIR)/$(DATABASE).o \
-	$(BUILD_DIR)/$(TREE).o \
-	$(BUILD_DIR)/$(HTML).o \
-	$(BUILD_DIR)/$(FAVICON).o \
-	$(BUILD_DIR)/$(ERROR).o \
-	$(BUILD_DIR)/$(G_TREEVIEW).o \
-	$(BUILD_DIR)/$(G_KEYPRESS).o \
-	$(BUILD_DIR)/$(G_DIALOG).o \
-	$(BUILD_DIR)/$(G_ADD).o \
-	$(BUILD_DIR)/$(G_DELETE).o \
-	$(BUILD_DIR)/$(G_EDIT).o \
-	$(BUILD_DIR)/$(G_FILE).o \
-	$(BUILD_DIR)/$(G_OPTIONS).o \
-	$(BUILD_DIR)/$(G_MENUBAR).o \
-	$(BUILD_DIR)/$(G_TOOLBOX).o \
-	$(BUILD_DIR)/$(G_SEARCHBOX).o \
-	$(BUILD_DIR)/$(G_TAGBOX).o \
-	$(BUILD_DIR)/$(G_INTERFACE).o\
-	$(GPMB).c -o $(GPMB)
-endef
+$(BUILD_DIR)/%.o: $(INC_DIR)/%.c $(PMB_HEADERS)
+	$(CC) $(CCFLAGS) $(GLIBFLAGS) -lcurl -c $< -o $@
 
-define BUILD_PMB
-	$(BUILD_DEP)
+$(BUILD_DIR)/%.o: $(GPMB_DIR)/%.c $(GPMB_HEADERS)
+	$(CC) $(CCFLAGS) $(GTKFLAGS) -c $< -o $@
+
+$(PMB): $(PMB_OBJ) $(PMB).c
 	$(CC) $(CCFLAGS) $(GLIBFLAGS) $(SQLITE_FLAGS) \
-	$(BUILD_DIR)/$(BOOKMARK).o \
-	$(BUILD_DIR)/$(BOOKMARK_LIST).o \
-	$(BUILD_DIR)/$(DATABASE).o \
-	$(BUILD_DIR)/$(PARSER).o \
-	$(BUILD_DIR)/$(OPTION).o \
-	$(BUILD_DIR)/$(TREE).o \
-	$(BUILD_DIR)/$(HTML).o\
-	$(BUILD_DIR)/$(FAVICON).o\
-	$(BUILD_DIR)/$(ERROR).o\
-	$(PMB).c -o $(PMB)
-endef
+	$(PMB_OBJ) $(PMB).c -o $(PMB)
 
-default:
-	$(BUILD_PMB)
-	$(BUILD_GPMB)
+$(GPMB): $(GPMB_OBJ) $(GPMB).c
+	$(CC) $(CCFLAGS) $(GTKFLAGS) $(GLIBFLAGS) $(SQLITE_FLAGS) \
+	$(GPMB_OBJ) $(GPMB).c -o $(GPMB)
 
 run:$(PMB)
 	./$(PMB) $(args)
@@ -144,131 +99,13 @@ grun:$(GPMB)
 	./$(GPMB) $(args)
 
 install:$(PMB)
-	$(shell if [ -e "$(PMB)" ]; then cp "$(PWD)/$(PMB)" $(DEST_DIR); fi)
-	$(shell if [ -e "$(GPMB)" ]; then cp "$(PWD)/$(GPMB)" $(DEST_DIR); fi)
+	-cp $(PMB) $(DEST_DIR)
+	-cp $(GPMB) $(DEST_DIR)
 
 clean:
-	$(shell if [ -e "$(PMB)" ]; then rm "$(PMB)"; fi)
-	$(shell if [ -e "$(GPMB)" ]; then rm "$(GPMB)"; fi)
-	$(shell if [ -e "$(BUILD_DIR)" ]; then rm -r "$(BUILD_DIR)"; fi)
-
-$(GPMB):$(INC_DIR)/$(OPTION).c $(INC_DIR)/$(BOOKMARK).c \
-$(INC_DIR)/$(BOOKMARK_LIST).c $(INC_DIR)/$(DATABASE).c \
-$(INC_DIR)/$(PARSER).c $(INC_DIR)/$(OPTION).c \
-$(INC_DIR)/$(TREE).c $(INC_DIR)/$(HTML).c \
-$(INC_DIR)/$(FAVICON).c \
-$(GPMB_DIR)/$(G_TREEVIEW).c $(GPMB_DIR)/$(G_KEYPRESS).c \
-$(GPMB_DIR)/$(G_MENUBAR).c $(GPMB_DIR)/$(G_TOOLBOX).c \
-$(GPMB_DIR)/$(G_DIALOG).c $(GPMB_DIR)/$(G_ADD).c \
-$(GPMB_DIR)/$(G_DELETE).c $(GPMB_DIR)/$(G_EDIT).c \
-$(GPMB_DIR)/$(G_FILE).c $(GPMB_DIR)/$(G_OPTIONS).c \
-$(GPMB_DIR)/$(G_SEARCHBOX).c $(GPMB_DIR)/$(G_TAGBOX).c \
-$(GPMB_DIR)/$(G_INTERFACE).c
-	$(BUILD_GPMB)
-
-$(PMB):$(INC_DIR)/$(OPTION).c $(INC_DIR)/$(BOOKMARK).c \
-$(INC_DIR)/$(BOOKMARK_LIST).c $(INC_DIR)/$(DATABASE).c \
-$(INC_DIR)/$(PARSER).c $(INC_DIR)/$(OPTION).c \
-$(INC_DIR)/$(FAVICON).c \
-$(INC_DIR)/$(TREE).c $(INC_DIR)/$(HTML).c
-	$(BUILD_PMB)
-
-$(BOOKMARK):$(INC_DIR)/$(BOOKMARK).c
-	$(CC) $(CCFLAGS) -c $(INC_DIR)/$(BOOKMARK).c \
-	-o $(BUILD_DIR)/$(BOOKMARK).o
-
-$(BOOKMARK_LIST):$(INC_DIR)/$(BOOKMARK_LIST).c
-	$(CC) $(CCFLAGS) -c $(INC_DIR)/$(BOOKMARK_LIST).c \
-	-o $(BUILD_DIR)/$(BOOKMARK_LIST).o
-
-$(DATABASE):$(INC_DIR)/$(DATABASE).c
-	$(CC) $(CCFLAGS) -c $(INC_DIR)/$(DATABASE).c \
-	-o $(BUILD_DIR)/$(DATABASE).o
-
-$(PARSER):$(INC_DIR)/$(PARSER).c
-	$(CC) $(CCFLAGS) -c $(INC_DIR)/$(PARSER).c \
-	-o $(BUILD_DIR)/$(PARSER).o
-
-$(OPTION):$(INC_DIR)/$(OPTION).c
-	$(CC) $(CCFLAGS) -c $(INC_DIR)/$(OPTION).c \
-	-o $(BUILD_DIR)/$(OPTION).o
-
-$(TREE):$(INC_DIR)/$(TREE).c
-	$(CC) $(CCFLAGS) -c $(INC_DIR)/$(TREE).c \
-	-o $(BUILD_DIR)/$(TREE).o
-
-$(HTML):$(INC_DIR)/$(HTML).c
-	$(CC) $(CCFLAGS) -c $(INC_DIR)/$(HTML).c \
-	-o $(BUILD_DIR)/$(HTML).o
-
-$(FAVICON):$(INC_DIR)/$(FAVICON).c
-	$(CC) $(CCFLAGS) $(GLIBFLAGS) -lcurl -c $(INC_DIR)/$(FAVICON).c \
-	-o $(BUILD_DIR)/$(FAVICON).o
-
-$(G_TREEVIEW):$(GPMB_DIR)/$(G_TREEVIEW).c
-	$(CC) $(CCFLAGS) $(GTKFLAGS) -c $(GPMB_DIR)/$(G_TREEVIEW).c \
-	-o $(BUILD_DIR)/$(G_TREEVIEW).o
-	$(BUILD_GPMB)
-
-$(G_ADD):$(GPMB_DIR)/$(G_ADD).c
-	$(CC) $(CCFLAGS) $(GTKFLAGS) -c $(GPMB_DIR)/$(G_ADD).c \
-	-o $(BUILD_DIR)/$(G_ADD).o
-	$(BUILD_GPMB)
-
-$(G_DELETE):$(GPMB_DIR)/$(G_DELETE).c
-	$(CC) $(CCFLAGS) $(GTKFLAGS) -c $(GPMB_DIR)/$(G_DELETE).c \
-	-o $(BUILD_DIR)/$(G_DELETE).o
-	$(BUILD_GPMB)
-
-$(G_EDIT):$(GPMB_DIR)/$(G_EDIT).c
-	$(CC) $(CCFLAGS) $(GTKFLAGS) -c $(GPMB_DIR)/$(G_EDIT).c \
-	-o $(BUILD_DIR)/$(G_EDIT).o
-	$(BUILD_GPMB)
-
-$(G_FILE):$(GPMB_DIR)/$(G_FILE).c
-	$(CC) $(CCFLAGS) $(GTKFLAGS) -c $(GPMB_DIR)/$(G_FILE).c \
-	-o $(BUILD_DIR)/$(G_FILE).o
-	$(BUILD_GPMB)
-
-$(G_DIALOG):$(GPMB_DIR)/$(G_DIALOG).c
-	$(CC) $(CCFLAGS) $(GTKFLAGS) -c $(GPMB_DIR)/$(G_DIALOG).c \
-	-o $(BUILD_DIR)/$(G_DIALOG).o
-	$(BUILD_GPMB)
-
-$(G_MENUBAR):$(GPMB_DIR)/$(G_MENUBAR).c
-	$(CC) $(CCFLAGS) $(GTKFLAGS) -c $(GPMB_DIR)/$(G_MENUBAR).c \
-	-o $(BUILD_DIR)/$(G_MENUBAR).o
-	$(BUILD_GPMB)
-
-$(G_OPTIONS):$(GPMB_DIR)/$(G_OPTIONS).c
-	$(CC) $(CCFLAGS) $(GTKFLAGS) -c $(GPMB_DIR)/$(G_OPTIONS).c \
-	-o $(BUILD_DIR)/$(G_OPTIONS).o
-	$(BUILD_GPMB)
-
-$(G_KEYPRESS):$(GPMB_DIR)/$(G_KEYPRESS).c
-	$(CC) $(CCFLAGS) $(GTKFLAGS) -c $(GPMB_DIR)/$(G_KEYPRESS).c \
-	-o $(BUILD_DIR)/$(G_KEYPRESS).o
-	$(BUILD_GPMB)
-
-$(G_TOOLBOX):$(GPMB_DIR)/$(G_TOOLBOX).c
-	$(CC) $(CCFLAGS) $(GTKFLAGS) -c $(GPMB_DIR)/$(G_TOOLBOX).c \
-	-o $(BUILD_DIR)/$(G_TOOLBOX).o
-	$(BUILD_GPMB)
-
-$(G_TAGBOX):$(GPMB_DIR)/$(G_TAGBOX).c
-	$(CC) $(CCFLAGS) $(GTKFLAGS) -c $(GPMB_DIR)/$(G_TAGBOX).c \
-	-o $(BUILD_DIR)/$(G_TAGBOX).o
-	$(BUILD_GPMB)
-
-$(G_SEARCHBOX):$(GPMB_DIR)/$(G_SEARCHBOX).c
-	$(CC) $(CCFLAGS) $(GTKFLAGS) -c $(GPMB_DIR)/$(G_SEARCHBOX).c \
-	-o $(BUILD_DIR)/$(G_SEARCHBOX).o
-	$(BUILD_GPMB)
-
-$(G_INTERFACE):$(GPMB_DIR)/$(G_INTERFACE).c
-	$(CC) $(CCFLAGS) $(GTKFLAGS) $(GLIBFLAGS) -c $(GPMB_DIR)/$(G_INTERFACE).c \
-	-o $(BUILD_DIR)/$(G_INTERFACE).o
-	$(BUILD_GPMB)
+	-rm $(PMB)
+	-rm $(GPMB)
+	-rm -rf $(BUILD_DIR)
 
 valgrind_gpmb:
 	valgrind --leak-check=full --track-origins=yes --log-file=log.txt -v ./gpmb 
