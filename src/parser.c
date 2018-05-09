@@ -357,20 +357,6 @@ parse_config_file(char* optarg)
 	  tag_color = find_color(res[6]);
 	}
 
-      res[0]=NULL;
-      res[1]=NULL;
-      res[2]=NULL;
-      res[3]=NULL;
-      res[4]=NULL;
-      res[5]=NULL;
-      
-      free(res[0]);
-      free(res[1]);
-      free(res[2]);
-      free(res[3]);
-      free(res[4]);
-      free(res[5]);      
-      
       free(res);
     }
   else
