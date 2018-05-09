@@ -213,6 +213,7 @@ favicon_decode(bookmark* b)
 
       g_input_stream_close(memst, NULL, NULL);
       g_free(favicon);
+      g_object_unref(memst);
       
       if(icon)
 	{

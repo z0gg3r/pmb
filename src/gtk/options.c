@@ -132,6 +132,7 @@ read_config()
 		 ||(option[0] == '\t')
 		 ||(option[0] == '#')) /* comment */
 		{
+		  free(option);
 		  goto new_option;
 		}
 
@@ -215,6 +216,7 @@ read_config()
 	}
 
       free(option_bkp);
+      free(option);
       fclose(fp);
     }
   else

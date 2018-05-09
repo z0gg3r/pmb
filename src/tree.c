@@ -178,6 +178,7 @@ directory_destroy(directory* d)
 		  bookmark_destroy(b);
 		  free(d->bookmark[d->bookmark_position]);
 		  d->bookmark[d->bookmark_position] = NULL;
+		  d->n_bookmark--;
 		}
 	    }
 
@@ -195,6 +196,7 @@ directory_destroy(directory* d)
 		  directory_destroy(directory_next_children(d));
 		  free(d->children[d->children_position]);
 		  d->children[d->children_position] = NULL;
+		  d->n_children--;		  
 		}
 	    }
 
@@ -247,6 +249,8 @@ directory_delete_children(directory* d, int index)
 
       d->children[index] = NULL;
       directory* ret = NULL;
+      d->n_children--;
+
       directory** new_children = calloc(d->n_children - 1
 					,sizeof(directory*));
 
@@ -268,7 +272,6 @@ directory_delete_children(directory* d, int index)
 
       free(d->children);
       d->children = new_children;
-      d->n_children--;
       return 0;
     }
 
@@ -282,9 +285,10 @@ directory_delete_bookmark(directory* d, int index)
     {
       free(d->bookmark[index]);
       d->bookmark[index] = NULL;
-
+      d->n_bookmark--;
+      
       int i, j = 0;
-      bookmark** new_bookmark = calloc(d->n_bookmark
+      bookmark** new_bookmark = calloc(d->n_bookmark - 1
 				       ,sizeof(bookmark*));
 
       check_oom(new_bookmark
@@ -302,7 +306,6 @@ directory_delete_bookmark(directory* d, int index)
 
       free(d->bookmark);
       d->bookmark = new_bookmark;
-      d->n_bookmark--;
       directory_rewind(d);
       return 0;
     }

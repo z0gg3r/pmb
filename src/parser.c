@@ -357,6 +357,20 @@ parse_config_file(char* optarg)
 	  tag_color = find_color(res[6]);
 	}
 
+      res[0]=NULL;
+      res[1]=NULL;
+      res[2]=NULL;
+      res[3]=NULL;
+      res[4]=NULL;
+      res[5]=NULL;
+      
+      free(res[0]);
+      free(res[1]);
+      free(res[2]);
+      free(res[3]);
+      free(res[4]);
+      free(res[5]);      
+      
       free(res);
     }
   else
@@ -1689,105 +1703,3 @@ parse_options(int argc, char* argv[], cl_option_list* option
     }
 }
 
-char**
-read_config(char* filename) 
-{
-  int st;
-  FILE* fp = fopen(filename, "r");
-
-  if(fp)
-    {
-      int size = 1;
-      char* option_bkp = NULL;
-      char* option = calloc(size, sizeof(char));
-      check_oom(option, "parser - option");
-      
-      char** ret = calloc(7, sizeof(char*));
-      check_oom(ret, "parser - ret");
-
-      ret[0] = NULL;
-      ret[1] = NULL;
-
-      while(!feof(fp))
-	{
-	  st = fgetc(fp);
-
-	  if(st == '\n')
-	    {
-	      if(!(strcmp(option, "\0")) 	/* blank line */
-		 ||(option[0] == ' ')
-		 ||(option[0] == '\t')
-		 ||(option[0] == '#'))		/* comment */
-		{
-		  goto new_option;
-		}
-
-	      option_bkp = strdup(option);
-	      char* str = strsep(&option, "=");
-
-	      if(!(strcmp(str, "color")))
-		{
-		  ret[0] = strsep(&option, "=");
-		}
-
-	      else if(!(strcmp(str, "verbose")))
-		{
-		  ret[1] = strsep(&option, "=");
-		}
-
-	      else if(!(strcmp(str, "id_color")))
-		{
-		  ret[2] = strsep(&option, "=");
-		}
-
-	      else if(!(strcmp(str, "name_color")))
-		{
-		  ret[3] = strsep(&option, "=");
-		}
-
-	      else if(!(strcmp(str, "url_color")))
-		{
-		  ret[4] = strsep(&option, "=");
-		}
-
-	      else if(!(strcmp(str, "comment_color")))
-		{
-		  ret[5] = strsep(&option, "=");
-		}
-
-	      else if(!(strcmp(str, "tag_color")))
-		{
-		  ret[6] = strsep(&option, "=");
-		}
-
-	      else
-		{
-		  printf("unknown option: %s\n", str);
-		  exit(EXIT_FAILURE);
-		}
-
-	    new_option:
-	      free(option_bkp);
-	      size = 1;
-	      option = calloc(size, sizeof(char));
-	      check_oom(option, "parser - option");
-	      option_bkp = NULL;
-	    }
-	  else
-	    {
-	      option[size - 1] = st;
-	      option = realloc(option, ++size * sizeof(char));
-	      check_oom(option, "parser - option");
-	      option[size - 1] = '\0';
-	    }
-	}
-
-      free(option_bkp);
-      fclose(fp);
-      return ret;
-    }
-  else
-    {
-      return NULL;
-    }
-}

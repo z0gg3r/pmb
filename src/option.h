@@ -1,6 +1,8 @@
 #ifndef OPTION_H
 #define OPTION_H
 
+#define _GNU_SOURCE /* getsubopt, secure_getenv */
+
 #include <stdlib.h>
 #include <string.h>
 #include "error.h"
@@ -31,5 +33,9 @@ option_list_add(cl_option_list*, cl_option*);
 /* used to exec parsed options */
 void
 exec_option(cl_option_list*);
+
+/* read config file */
+char**
+read_config(char*); 
 
 #endif

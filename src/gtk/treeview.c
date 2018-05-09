@@ -18,6 +18,9 @@ GtkIconTheme* theme = NULL;
 GdkPixbuf* folder_icon = NULL;
 GdkPixbuf* star_icon = NULL;
 
+int drag_x = 0;
+int drag_y = 0;
+
 void
 copy_to_clipboard()
 {
@@ -504,10 +507,6 @@ tree_view(GtkWidget* search_entry)
   /* row activated */
   g_signal_connect
     (tree_view, "row-activated", G_CALLBACK(row_activated), NULL);
-
-  /* automatic sorting */
-  //gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(model), 0
-  //	,GTK_SORT_ASCENDING);
 
   return tree_view;	
 }

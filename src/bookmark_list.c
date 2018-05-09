@@ -90,6 +90,7 @@ bookmark_list_destroy(bookmark_list *l)
       free(l->url);
       free(l->comment);
       free(l->tag);
+      free(l->favicon);
       free(l);
     }
 }

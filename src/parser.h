@@ -18,10 +18,6 @@
 
 extern sqlite3* g_db;
 
-/* read config file */
-char**
-read_config(char*); 
-
 /* int argc, char* argv[], cl_option_list*, cl_option_list* */
 void
 parse_options(int, char*[], cl_option_list*
