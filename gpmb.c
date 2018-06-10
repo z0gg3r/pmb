@@ -48,17 +48,22 @@ main(int argc, char *argv[])
     {
       read_config();
       free(path);
-      g_db = bookmark_db_open(opts->database_file);
+      g_db = bookmark_db_open(name_options_l[0][1]);
     }
   else
     {
       exit(EXIT_FAILURE);
     }
-  
+
   short res = gtk_interface(argc, argv);
 
-  free(opts);
-  free(g_database_file);
+  destroy_options();
+
+  if(g_database_file)
+    {
+      free(g_database_file);
+    }
+  
   bookmark_db_close(g_db);
   return res;
 }

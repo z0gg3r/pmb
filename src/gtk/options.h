@@ -1,32 +1,19 @@
 #ifndef OPTIONS_H
 #define OPTIONS_H
 
+#define NAME_OPTIONS_SIZE 32
+
 #include "interface.h"
 #include "dialog.h"
 
-typedef struct gpmb_options 
-{
-  char* database_file;
-  char* tree_lines;
-  char* download_favicon;
-  
-  /* colors */
-  char* id_fg;
-  char* name_fg;
-  char* url_fg;
-  char* comment_fg;
-  char* tag_fg;
-  const char* id_font;
-  const char* name_font;
-  const char* url_font;
-  const char* comment_font;
-} gpmb_options;
-
-extern gpmb_options* opts;
+extern char* name_options_l[NAME_OPTIONS_SIZE][3];
 
 /* -- options -- */
 void
 read_config(); 
+
+void
+destroy_options();
 
 /* -- the option window -- */
 void 

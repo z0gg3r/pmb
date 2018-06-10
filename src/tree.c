@@ -9,7 +9,7 @@ directory
   int bookmark_position;
   char*	name;
   bookmark** bookmark;
-  struct directory** children;
+  directory** children;
 };
 
 struct 
@@ -23,7 +23,7 @@ directory_name_list
 directory* 
 directory_new(char* name)
 {
-  directory* d = malloc(sizeof(directory));
+  directory* d = calloc(1, sizeof(directory));
   check_oom(d, "tree > directory_new - b");
   
   d->n_children = 0;
@@ -167,7 +167,7 @@ directory_destroy(directory* d)
     {
       directory_rewind(d);
 
-      if(d->n_bookmark)
+      if(d->n_bookmark >= 0)
 	{
 	  bookmark* b = NULL;
 
@@ -178,14 +178,13 @@ directory_destroy(directory* d)
 		  bookmark_destroy(b);
 		  free(d->bookmark[d->bookmark_position]);
 		  d->bookmark[d->bookmark_position] = NULL;
-		  d->n_bookmark--;
 		}
 	    }
 
 	  free(b);
 	}
 		
-      if(d->n_children)
+      if(d->n_children >= 0)
 	{
 	  directory* ret = NULL;
 
@@ -196,7 +195,6 @@ directory_destroy(directory* d)
 		  directory_destroy(directory_next_children(d));
 		  free(d->children[d->children_position]);
 		  d->children[d->children_position] = NULL;
-		  d->n_children--;		  
 		}
 	    }
 
@@ -217,7 +215,7 @@ directory_add_children(directory* d, directory* children)
       d->children[d->n_children] = children;
       d->n_children++;
       d->children = realloc(d->children, (d->n_children + 1)
-			    * sizeof(directory));
+			    * sizeof(directory*));
       check_oom(d->children,
 		"tree > directory_add_children - d->children");
       d->children[d->n_children] = NULL;
@@ -251,7 +249,7 @@ directory_delete_children(directory* d, int index)
       directory* ret = NULL;
       d->n_children--;
 
-      directory** new_children = calloc(d->n_children - 1
+      directory** new_children = calloc(d->n_children
 					,sizeof(directory*));
 
       check_oom(new_children
@@ -288,7 +286,7 @@ directory_delete_bookmark(directory* d, int index)
       d->n_bookmark--;
       
       int i, j = 0;
-      bookmark** new_bookmark = calloc(d->n_bookmark - 1
+      bookmark** new_bookmark = calloc(d->n_bookmark
 				       ,sizeof(bookmark*));
 
       check_oom(new_bookmark
@@ -507,6 +505,7 @@ dismember(bookmark* b)
 	}
       else
 	{
+	  directory_name_list_destroy(l);
 	  return NULL;
 	}
     }
@@ -563,7 +562,6 @@ create_directory_tree_from_list(directory_name_list* l, int index)
 	  list[0] = head;
 	  list[1] = tail;
 
-	  directory_name_list_destroy(l);
 	  return list;
 	}
     }
@@ -769,7 +767,9 @@ create_tree_from_bookmark_list(bookmark_list* bl, char* name)
 
       while((b = bookmark_list_return_next_bookmark(bl)))
 	{
-	  directory_add_children_from_list(d, dismember(b), b);
+	  directory_name_list* l = dismember(b);
+	  directory_add_children_from_list(d, l, b);
+	  directory_name_list_destroy(l);
 	}
 
       return d;

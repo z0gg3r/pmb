@@ -104,76 +104,70 @@ exec_option(cl_option_list* option)
 }
 
 char**
-read_config(char* filename) 
+read_config(char* filename)
 {
-  int st;
   FILE* fp = fopen(filename, "r");
 
   if(fp)
     {
-      int size = 1;
-      char* option_bkp = NULL;
-      char* option = calloc(size, sizeof(char));
-      check_oom(option, "parser - option");
-      
+      char buffer[128];
       char** ret = calloc(7, sizeof(char*));
       check_oom(ret, "parser - ret");
-
-      ret[0] = NULL;
-      ret[1] = NULL;
-
-      while(!feof(fp))
+      
+      while(fgets(buffer, 128, fp))
 	{
-	  st = fgetc(fp);
-
-	  if(st == '\n')
+	  if((buffer[0] == '\0') 	/* blank line */
+	     ||(buffer[0] == ' ')
+	     ||(buffer[0] == '\t')
+	     ||(buffer[0] == '\n')
+	     ||(buffer[0] == '#'))	/* comment */
 	    {
-	      option_bkp = strdup(option);
+	      continue;
+	    }
+	  else
+	    {
+	      char* option;
+	      char* option_bkp;
+	      option = strdup(buffer);
+	      option_bkp = option;
 	      
-	      if(!(strcmp(option, "\0")) 	/* blank line */
-		 ||(option[0] == ' ')
-		 ||(option[0] == '\t')
-		 ||(option[0] == '#'))		/* comment */
-		{
-		  free(option);
-		  goto new_option;
-		}
-
 	      char* str = strsep(&option, "=");
-
+	      char* arg = strsep(&option, "=");
+	      arg[strlen(arg) - 1] = '\0';
+		  
 	      if(!(strcmp(str, "color")))
 		{
-		  ret[0] = strsep(&option, "=");
+		  ret[0] = strdup(arg);
 		}
 
 	      else if(!(strcmp(str, "verbose")))
 		{
-		  ret[1] = strsep(&option, "=");
+		  ret[1] = strdup(arg);
 		}
 
 	      else if(!(strcmp(str, "id_color")))
 		{
-		  ret[2] = strsep(&option, "=");
+		  ret[2] = strdup(arg);
 		}
 
 	      else if(!(strcmp(str, "name_color")))
 		{
-		  ret[3] = strsep(&option, "=");
+		  ret[3] = strdup(arg);
 		}
 
 	      else if(!(strcmp(str, "url_color")))
 		{
-		  ret[4] = strsep(&option, "=");
+		  ret[4] = strdup(arg);
 		}
 
 	      else if(!(strcmp(str, "comment_color")))
 		{
-		  ret[5] = strsep(&option, "=");
+		  ret[5] = strdup(arg);
 		}
 
 	      else if(!(strcmp(str, "tag_color")))
 		{
-		  ret[6] = strsep(&option, "=");
+		  ret[6] = strdup(arg);
 		}
 
 	      else
@@ -182,30 +176,17 @@ read_config(char* filename)
 		  exit(EXIT_FAILURE);
 		}
 
-	    new_option:
 	      free(option_bkp);
-	      size = 1;
-	      option = calloc(size, sizeof(char));
-	      check_oom(option, "option > read_config - option");
-	      option_bkp = NULL;
-	    }
-	  else
-	    {
-	      option[size - 1] = st;
-	      ++size;
-	      option = realloc(option, size * sizeof(char));
-	      check_oom(option, "option > read_config - option");
-	      option[size - 1] = '\0';
 	    }
 	}
 
-      free(option);
-      free(option_bkp);
       fclose(fp);
-      return ret;
+
+      if(ret)
+	{
+	  return ret;
+	}
     }
-  else
-    {
-      return NULL;
-    }
+
+  return NULL;
 }

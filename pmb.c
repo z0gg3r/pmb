@@ -73,14 +73,14 @@ main(int argc, char *argv[])
       if(database_file) 
 	{
 	  g_db = bookmark_db_open(database_file);
-	  free(database_file);
 	}
       else
 	{
 	  exit(EXIT_FAILURE);
 	}
     }
-
+  
+  free(database_file); 
   exec_option(command);
   destroy_option_list(option);
   destroy_option_list(command);

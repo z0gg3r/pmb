@@ -40,8 +40,8 @@ open_database(GtkWidget* button)
 	  {
 	    g_db = bookmark_db_open(filename);
 
-	    free(g_database_file);
-	    opts->database_file = g_database_file;
+	    free(name_options_l[0][1]);
+	    name_options_l[0][1] = strdup(filename);
 
 	    g_free(filename);
 	    read_database(NULL, NULL);

@@ -36,6 +36,6 @@ exec_option(cl_option_list*);
 
 /* read config file */
 char**
-read_config(char*); 
+read_config(char*);
 
 #endif

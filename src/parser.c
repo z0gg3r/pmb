@@ -315,6 +315,8 @@ parse_config_file(char* optarg)
 	      printf("unknown color parameter\nshoud be 0 or 1\n");
 	      exit(EXIT_FAILURE);
 	    }
+
+	  free(res[0]);
 	}
 
       if(res[1])
@@ -330,31 +332,38 @@ parse_config_file(char* optarg)
 	      printf("unknown verbose parameter\nshoud be 0 or 1\n");
 	      exit(EXIT_FAILURE);
 	    }
+
+	  free(res[1]);
 	}
 
       if(res[2])
 	{
 	  id_color = find_color(res[2]);
+	  free(res[2]);
 	}
 
       if(res[3])
 	{
 	  name_color = find_color(res[3]);
+	  free(res[3]);
 	}
 
       if(res[4])
 	{
 	  url_color = find_color(res[4]);
+	  free(res[4]);
 	}
 
       if(res[5])
 	{
 	  comment_color = find_color(res[5]);
+	  free(res[5]);
 	}
 
       if(res[6])
 	{
 	  tag_color = find_color(res[6]);
+	  free(res[6]);
 	}
 
       free(res);

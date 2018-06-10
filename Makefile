@@ -79,7 +79,7 @@ default: $(PMB) $(GPMB)
 all: default
 
 $(BUILD_DIR)/%.o: $(INC_DIR)/%.c $(PMB_HEADERS)
-	$(CC) $(CCFLAGS) $(GLIBFLAGS) -lcurl -c $< -o $@
+	$(CC) $(CCFLAGS) $(GLIBFLAGS) -c $< -o $@
 
 $(BUILD_DIR)/%.o: $(GPMB_DIR)/%.c $(GPMB_HEADERS)
 	$(CC) $(CCFLAGS) $(GTKFLAGS) -c $< -o $@
@@ -111,4 +111,4 @@ valgrind_gpmb:
 	valgrind --leak-check=full --track-origins=yes --log-file=log.txt -v ./gpmb 
 
 valgrind_pmb:
-	valgrind --leak-check=full --track-origins=yes --log-file=log.txt -v ./pmb 
+	valgrind --leak-check=full --track-origins=yes --log-file=log.txt -v ./pmb -s linux
