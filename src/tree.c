@@ -497,7 +497,7 @@ dismember(bookmark* b)
 	  directory_name_list_add_dir(l, name);
 	}
 
-      free(path_bkp);
+     free(path_bkp);
 
       if(l)
 	{
@@ -509,10 +509,8 @@ dismember(bookmark* b)
 	  return NULL;
 	}
     }
-  else
-    {
-      return NULL;
-    }
+
+  return NULL;
 }
 
 char*

@@ -144,7 +144,7 @@ add_window(GtkWidget* button)
 
   favicon_button = gtk_check_button_new_with_label("Favicon");
 
-  if(!strcmp(name_options_l[2][1], "true"))
+  if(!strcmp(DOWNLOAD_FAVICON_OPTION, "true"))
     {
       gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(favicon_button), TRUE);
     }

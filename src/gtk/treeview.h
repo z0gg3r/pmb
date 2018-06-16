@@ -42,4 +42,3 @@ void
 read_database(GtkWidget*, GtkWidget*); 
 
 #endif
-

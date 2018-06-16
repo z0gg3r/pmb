@@ -43,12 +43,12 @@ main(int argc, char *argv[])
   
   snprintf(g_database_file, size, "%s/%s" 
 	   ,path, DATABASE);
-  
+
   if(g_database_file) 
     {
       read_config();
       free(path);
-      g_db = bookmark_db_open(name_options_l[0][1]);
+      g_db = bookmark_db_open(DATABASE_OPTION);
     }
   else
     {

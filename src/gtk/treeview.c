@@ -91,7 +91,7 @@ update_selected_row(GtkWidget* tree, gpointer data)
   gtk_tree_view_get_cursor(GTK_TREE_VIEW(tree), &path, NULL);
   gtk_tree_path_free(g_selected_path);
 
-  g_selected_path	= path;
+  g_selected_path = path;
 }
 
 static void
@@ -197,6 +197,8 @@ read_database(GtkWidget* button, GtkWidget* entry)
   if(g_selected_path)
     {
       path_s = gtk_tree_path_to_string(g_selected_path);
+      gtk_tree_path_free(g_selected_path);
+      g_selected_path = NULL;
     }
 
   gtk_tree_store_clear(g_bookmarks);
@@ -384,7 +386,7 @@ tree_view(GtkWidget* search_entry)
 {
   /* id/tag */
   g_cell_renderer_id = cell_renderer_new
-    (name_options_l[3][1], name_options_l[7][1]);
+    (ID_FG_OPTION, ID_FONT_OPTION);
 
   /* directory icon */
   GtkCellRenderer* dir_icon = gtk_cell_renderer_pixbuf_new();
@@ -408,7 +410,7 @@ tree_view(GtkWidget* search_entry)
 
   /* name column */
   g_cell_renderer_name = cell_renderer_new
-    (name_options_l[4][1], name_options_l[8][1]);
+    (NAME_FG_OPTION, NAME_FONT_OPTION);
   
   GtkTreeViewColumn* name_view_column = 
     gtk_tree_view_column_new_with_attributes
@@ -416,7 +418,7 @@ tree_view(GtkWidget* search_entry)
 
   /* url column */
   g_cell_renderer_url = cell_renderer_new
-    (name_options_l[5][1], name_options_l[9][1]);
+    (URL_FG_OPTION, URL_FONT_OPTION);
   
   GtkTreeViewColumn* url_view_column = 
     gtk_tree_view_column_new_with_attributes
@@ -424,7 +426,7 @@ tree_view(GtkWidget* search_entry)
 
   /* comment column */
   g_cell_renderer_comment = cell_renderer_new
-    (name_options_l[6][1], name_options_l[10][1]);
+    (COMMENT_FG_OPTION, COMMENT_FONT_OPTION);
   
   GtkTreeViewColumn* comment_view_column = 
     gtk_tree_view_column_new_with_attributes
@@ -455,7 +457,7 @@ tree_view(GtkWidget* search_entry)
   /* tree view */
   GtkWidget* tree_view = gtk_tree_view_new_with_model
     (GTK_TREE_MODEL(g_bookmarks));
-
+  
   /* unref bookmarks tree store*/
   g_object_unref(g_bookmarks);
 
@@ -489,7 +491,7 @@ tree_view(GtkWidget* search_entry)
   gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(tree_view), TRUE);
 
   /* lines */
-  if(!(strcmp(name_options_l[1][1], "true")))
+  if(!(strcmp(TREE_LINES_OPTION, "true")))
     gtk_tree_view_set_enable_tree_lines(GTK_TREE_VIEW(tree_view), TRUE);
 
   /* model */

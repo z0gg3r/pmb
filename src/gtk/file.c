@@ -40,8 +40,8 @@ open_database(GtkWidget* button)
 	  {
 	    g_db = bookmark_db_open(filename);
 
-	    free(name_options_l[0][1]);
-	    name_options_l[0][1] = strdup(filename);
+	    free(DATABASE_OPTION);
+	    DATABASE_OPTION = strdup(filename);
 
 	    g_free(filename);
 	    read_database(NULL, NULL);
@@ -290,4 +290,3 @@ selective_export_window(GtkWidget* button)
   GtkWidget* window = dialog_new("Selective export", gpmb_window);
   selective_dialog_content(window, "export");
 }
-
