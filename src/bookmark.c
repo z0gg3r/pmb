@@ -158,26 +158,35 @@ bookmark_set(bookmark* b, char* name, char* url, char* comment, char* tag, char*
 {
   if(b && name && url) 
     {
+      b->name = name;
+      b->url = url;
+      
       if(!comment)
 	{
 	  comment = "none";
 	}
-		
+      else
+	{
+	  b->comment = comment;
+	}
+      
       if(!tag)
 	{
 	  tag = "none";
 	}
-
+      else
+	{
+	  b->tag = tag;
+	}
+      
       if(!favicon)
 	{
 	  favicon = "none";
 	}
-
-      b->name = name;
-      b->url = url;
-      b->comment = comment;
-      b->tag = tag;
-      b->favicon = favicon;
+      else
+	{
+	  b->favicon = favicon;
+	}
     }
   else
     {

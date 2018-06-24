@@ -3,8 +3,6 @@
 
 #include "interface.h"
 
-extern GtkWidget* g_tool_box;
-
 GtkWidget*
 tool_box_new(GtkWidget*); 
 

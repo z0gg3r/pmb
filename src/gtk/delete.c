@@ -36,6 +36,7 @@ delete_bookmark(GtkWidget* button, gpointer** args)
   gboolean r;
   g_signal_emit_by_name
     (g_treeview, "move-cursor", GTK_MOVEMENT_DISPLAY_LINES, -1, &r);
+  
   gtk_label_set_text(GTK_LABEL(g_info_label), "Delete: Done");
 }
 
@@ -70,6 +71,7 @@ delete_directory(GtkWidget* button, gpointer window)
   gboolean r;
   g_signal_emit_by_name
     (g_treeview, "move-cursor", GTK_MOVEMENT_DISPLAY_LINES, -1, &r);
+
   gtk_label_set_text(GTK_LABEL(g_info_label), "Delete Directory: Done");
 }
 
@@ -112,6 +114,7 @@ delete_multiple(GtkWidget* button, gpointer window)
   gboolean r;
   g_signal_emit_by_name
     (g_treeview, "move-cursor", GTK_MOVEMENT_DISPLAY_LINES, -1, &r);
+  
   gtk_label_set_text(GTK_LABEL(g_info_label), "Delete Multiple: Done");
 }
 

@@ -12,10 +12,9 @@ extern GtkWidget* g_treeview;
 extern GtkTreeStore* g_bookmarks;
 extern GtkTreeSelection* g_selection;
 extern GtkTreeModel* g_model;
-extern GtkIconTheme* theme;
-extern GdkPixbuf* folder_icon;
-extern GdkPixbuf* star_icon;
-
+//extern GtkIconTheme* theme;
+//extern GdkPixbuf* folder_icon;
+//extern GdkPixbuf* star_icon;
 
 /* selected path in tree view */
 extern GtkTreePath* g_selected_path;
@@ -23,6 +22,10 @@ extern GtkTreePath* g_selected_path;
 /* -- copy the selected bookmark url to clipboard -- */
 void
 copy_to_clipboard();
+
+/* -- open the selected bookmark in web browser -- */
+void
+open_bookmark();
 
 /* -- expand/collapse row -- */
 //unsigned int recursive

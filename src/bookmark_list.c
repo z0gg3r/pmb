@@ -333,10 +333,8 @@ bookmark_list_return_next(bookmark_list* l)
       l->next++;
       return ret;
     }
-  else
-    {
-      return NULL;
-    }
+
+  return NULL;
 }
 
 bookmark*
@@ -356,10 +354,8 @@ bookmark_list_return_next_bookmark(bookmark_list* l)
       l->next++;
       return b;
     }
-  else
-    {
-      return NULL;
-    }
+
+  return NULL;
 }
 
 void
@@ -375,10 +371,8 @@ bookmark_list_get_size(bookmark_list* l)
     {
       return l->size;
     }
-  else
-    {
-      return 0;
-    }
+
+  return 0;
 }
 
 int
@@ -388,10 +382,8 @@ bookmark_list_get_position(bookmark_list* l)
     {
       return l->position;
     }
-  else
-    {
-      return 0;
-    }
+
+  return 0;
 }
 
 int
@@ -401,8 +393,6 @@ bookmark_list_get_next_position(bookmark_list* l)
     {
       return l->next;
     }
-  else
-    {
-      return 0;
-    }
+
+  return 0;
 }

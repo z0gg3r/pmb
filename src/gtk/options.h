@@ -4,8 +4,8 @@
 #include "interface.h"
 #include "dialog.h"
 
-#define NAME_OPTIONS_SIZE 32 /* how many options */
-#define KEYS_N 21 /* how many keybinds */
+#define NAME_OPTIONS_SIZE 39 /* how many options */
+#define KEYS_N 23 /* how many keybinds */
 
 /* used to store parsed key options */
 struct key_s
@@ -23,35 +23,42 @@ extern char* name_options_l[NAME_OPTIONS_SIZE][3];
 #define DATABASE_OPTION name_options_l[0][1]
 #define TREE_LINES_OPTION name_options_l[1][1]
 #define DOWNLOAD_FAVICON_OPTION name_options_l[2][1]
-#define ID_FG_OPTION name_options_l[3][1]
-#define NAME_FG_OPTION name_options_l[4][1]
-#define URL_FG_OPTION name_options_l[5][1]
-#define COMMENT_FG_OPTION name_options_l[6][1]
-#define ID_FONT_OPTION name_options_l[7][1]
-#define NAME_FONT_OPTION name_options_l[8][1]
-#define URL_FONT_OPTION name_options_l[9][1]
-#define COMMENT_FONT_OPTION name_options_l[10][1]
-#define SCROLL_UP_KEY name_options_l[11][1]
-#define SCROLL_DOWN_KEY name_options_l[12][1]
-#define SCROLL_LEFT_KEY name_options_l[13][1]
-#define SCROLL_RIGHT_KEY name_options_l[14][1]
-#define SCROLL_TOP_KEY name_options_l[15][1]
-#define SCROLL_BOTTOM_KEY name_options_l[16][1]
-#define SCROLL_BEGIN_LINE_KEY name_options_l[17][1]
-#define SCROLL_END_LINE_KEY name_options_l[18][1]
-#define SCROLL_PAGE_UP_KEY name_options_l[19][1]
-#define SCROLL_PAGE_DOWN_KEY name_options_l[20][1]
-#define EC_KEY name_options_l[21][1]
-#define EA_KEY name_options_l[22][1]
-#define SEARCH_BAR_KEY name_options_l[23][1]
-#define COPY_KEY name_options_l[24][1]
-#define RELOAD_KEY name_options_l[25][1]
-#define INSERT_KEY name_options_l[26][1]
-#define EDIT_KEY name_options_l[27][1]
-#define DELETE_KEY name_options_l[28][1]
-#define RENAME_KEY name_options_l[29][1]
-#define OPTIONS_KEY name_options_l[30][1]
-#define OPEN_DATABASE_KEY name_options_l[31][1]
+#define OPEN_URL_BROWSER_OPTION name_options_l[3][1]
+#define SHOW_TOOLBAR_OPTION name_options_l[4][1]
+#define SHOW_STATUSBAR_OPTION name_options_l[5][1]
+#define SHOW_HEADERS_OPTION name_options_l[6][1]
+#define SHOW_SEARCHBAR_OPTION name_options_l[7][1]
+#define ID_FG_OPTION name_options_l[8][1]
+#define NAME_FG_OPTION name_options_l[9][1]
+#define URL_FG_OPTION name_options_l[10][1]
+#define COMMENT_FG_OPTION name_options_l[11][1]
+#define ID_FONT_OPTION name_options_l[12][1]
+#define NAME_FONT_OPTION name_options_l[13][1]
+#define URL_FONT_OPTION name_options_l[14][1]
+#define COMMENT_FONT_OPTION name_options_l[15][1]
+#define SCROLL_UP_KEY name_options_l[16][1]
+#define SCROLL_DOWN_KEY name_options_l[17][1]
+#define SCROLL_LEFT_KEY name_options_l[18][1]
+#define SCROLL_RIGHT_KEY name_options_l[19][1]
+#define SCROLL_TOP_KEY name_options_l[20][1]
+#define SCROLL_BOTTOM_KEY name_options_l[21][1]
+#define SCROLL_BEGIN_LINE_KEY name_options_l[22][1]
+#define SCROLL_END_LINE_KEY name_options_l[23][1]
+#define SCROLL_PAGE_UP_KEY name_options_l[24][1]
+#define SCROLL_PAGE_DOWN_KEY name_options_l[25][1]
+#define EC_KEY name_options_l[26][1]
+#define EA_KEY name_options_l[27][1]
+#define SEARCH_BAR_KEY name_options_l[28][1]
+#define COPY_KEY name_options_l[29][1]
+#define RELOAD_KEY name_options_l[30][1]
+#define INSERT_KEY name_options_l[31][1]
+#define EDIT_KEY name_options_l[32][1]
+#define DELETE_KEY name_options_l[33][1]
+#define RENAME_KEY name_options_l[34][1]
+#define OPTIONS_KEY name_options_l[35][1]
+#define OPEN_DATABASE_KEY name_options_l[36][1]
+#define OPEN_URL_BROWSER_KEY name_options_l[37][1]
+#define TOGGLE_SEARCHBAR_KEY name_options_l[38][1]
 
 /* key options parsed */
 #define SCROLL_UP keys[0]
@@ -75,6 +82,8 @@ extern char* name_options_l[NAME_OPTIONS_SIZE][3];
 #define RENAME keys[18]
 #define OPTIONS keys[19]
 #define OPEN_DATABASE keys[20]
+#define OPEN_URL_BROWSER keys[21]
+#define TOGGLE_SEARCHBAR keys[22]
 
 /* -- options -- */
 void

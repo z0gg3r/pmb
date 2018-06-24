@@ -3,8 +3,10 @@
 GtkWidget*
 search_box_new(GtkWidget* search_entry)
 {
-  /* search entry */
+  /* search label */
   GtkWidget* search_entry_label = gtk_label_new("Search:");
+
+  /* search entry */
   gtk_widget_set_hexpand(GTK_WIDGET(g_search_entry), 1);
 
   /* search button */
@@ -30,6 +32,8 @@ search_box_new(GtkWidget* search_entry)
 void
 search_entry_key_press(GtkWidget* window, GdkEventKey* e)
 {
-  if(!strcmp((gdk_keyval_name(e->keyval)), "Escape")) 
-    gtk_widget_grab_focus(GTK_WIDGET(g_treeview));
+  if(!strcmp((gdk_keyval_name(e->keyval)), "Escape"))
+    {
+      gtk_widget_grab_focus(GTK_WIDGET(g_treeview));
+    }
 }

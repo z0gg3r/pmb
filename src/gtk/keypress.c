@@ -208,4 +208,32 @@ key_press(GtkWidget* window, GdkEventKey* e)
       options_window(NULL);
       return;
     }
+
+  else if(!strcmp(key, OPEN_URL_BROWSER->key)
+	  && e->state == OPEN_URL_BROWSER->state)
+    {
+      open_bookmark();
+      return;
+    }
+
+  else if(!strcmp(key, TOGGLE_SEARCHBAR->key)
+	  && e->state == TOGGLE_SEARCHBAR->state)
+    {
+      widget_hide(NULL, "searchbar");
+
+      if(!(strcmp(SHOW_SEARCHBAR_OPTION, "true")))
+	{
+	  free(SHOW_SEARCHBAR_OPTION);
+	  SHOW_SEARCHBAR_OPTION = strdup("false");
+	  gtk_widget_grab_focus(GTK_WIDGET(g_treeview));
+	}
+      else
+	{
+	  free(SHOW_SEARCHBAR_OPTION);
+	  SHOW_SEARCHBAR_OPTION = strdup("true");
+	  gtk_widget_grab_focus(GTK_WIDGET(g_search_entry));
+	}
+      
+      return;
+    }
 }

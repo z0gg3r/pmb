@@ -26,6 +26,27 @@ GdkRGBA comment_rgba;
 static void
 set_keys();
 
+/* to feed the options matrix easily */
+static void
+options_insert(int index, char* option, char* data)
+{
+  char* option_cut = strdup(option);
+  char* option_bkp = strdup(option_cut);
+  char* option_name = strsep(&option_cut, "=");
+
+  name_options_l[index][0] = option;
+  name_options_l[index][2] = option_name;
+  name_options_l[index][1] = NULL;
+    
+  if(data)
+    {
+      name_options_l[index][1] = strdup(data);
+    }
+  
+  free(option_bkp);
+}
+
+/* set up default options at program start */
 static void 
 set_options() 
 {
@@ -44,137 +65,50 @@ set_options()
   snprintf(config_file, size, "%s/%s/%s", home
 	   ,conf_dir, config_filename);
 
-  name_options_l[0][0] = "database=%s\n";
-  name_options_l[0][1] = g_database_file;
-  name_options_l[0][2] = "database";
+  options_insert(0, "database=%s\n", g_database_file);
+  options_insert(1, "tree_lines=%s\n", "true");
+  options_insert(2, "download_favicons=%s\n", "false");
+  options_insert(3, "open_url_browser=%s\n", "firefox -new-tab %s &");
+  options_insert(4, "show_toolbar=%s\n", "true");
+  options_insert(5, "show_statusbar=%s\n", "true");
+  options_insert(6, "show_headers=%s\n", "true");
+  options_insert(7, "show_searchbar=%s\n", "true");
+  options_insert(8, "id_fg=%s\n", NULL);
+  options_insert(9, "name_fg=%s\n", NULL);
+  options_insert(10, "url_fg=%s\n", NULL);
+  options_insert(11, "comment_fg=%s\n", NULL);
+  options_insert(12, "id_font=%s\n", NULL);
+  options_insert(13, "name_font=%s\n", NULL);
+  options_insert(14, "url_font=%s\n", NULL);
+  options_insert(15, "comment_font=%s\n", NULL);
+  options_insert(16, "scroll_up_key=%s\n", "k");
+  options_insert(17, "scroll_down_key=%s\n", "j");
+  options_insert(18, "scroll_left_key=%s\n", "h");
+  options_insert(19, "scroll_right_key=%s\n", "l");
+  options_insert(20, "scroll_top_key=%s\n", "g");
+  options_insert(21, "scroll_bottom_key=%s\n", "Shift-G");
+  options_insert(22, "scroll_begin_line_key=%s\n", "0");
+  options_insert(23, "scroll_end_line_key=%s\n", "Shift-dollar");
+  options_insert(24, "scroll_page_up_key=%s\n", "b");
+  options_insert(25, "scroll_page_down_key=%s\n", "f");
+  options_insert(26, "ec_key=%s\n", "x");
+  options_insert(27, "ea_key=%s\n", "Shift-X");
+  options_insert(28, "search_bar_key=%s\n", "s");
+  options_insert(29, "copy_key=%s\n", "c");
+  options_insert(30, "reload_key=%s\n", "r");
+  options_insert(31, "insert_key=%s\n", "i");
+  options_insert(32, "edit_key=%s\n", "e");
+  options_insert(33, "delete_key=%s\n", "d");
+  options_insert(34, "rename_key=%s\n", "n");
+  options_insert(35, "options_key=%s\n", "o");
+  options_insert(36, "open_database_key_key=%s\n", "Control-o");
+  options_insert(37, "open_url_browser_key=%s\n", "p");
+  options_insert(38, "toggle_searchbar_key=%s\n", "Shift-S");
   
-  name_options_l[1][0] = "tree_lines=%s\n";
-  name_options_l[1][1] = strdup("true");
-  name_options_l[1][2] = "tree_lines";
-  
-  name_options_l[2][0] = "download_favicon=%s\n";
-  name_options_l[2][1] = strdup("false");
-  name_options_l[2][2] = "download_favicon";
-  
-  name_options_l[3][0] = "id_fg=%s\n";
-  name_options_l[3][1] = NULL;
-  name_options_l[3][2] = "id_fg";
-  
-  name_options_l[4][0] = "name_fg=%s\n";
-  name_options_l[4][1] = NULL;
-  name_options_l[4][2] = "name_fg";
-  
-  name_options_l[5][0] = "url_fg=%s\n";
-  name_options_l[5][1] = NULL;
-  name_options_l[5][2] = "url_fg";
-  
-  name_options_l[6][0] = "comment_fg=%s\n";
-  name_options_l[6][1] = NULL;
-  name_options_l[6][2] = "comment_fg";
-  
-  name_options_l[7][0] = "id_font=%s\n";
-  name_options_l[7][1] = NULL;
-  name_options_l[7][2] = "id_font";  
-  
-  name_options_l[8][0] = "name_font=%s\n";
-  name_options_l[8][1] = NULL;
-  name_options_l[8][2] = "name_font";
-  
-  name_options_l[9][0] = "url_font=%s\n";
-  name_options_l[9][1] = NULL;
-  name_options_l[9][2] = "url_font";
-  
-  name_options_l[10][0] = "comment_font=%s\n";
-  name_options_l[10][1] = NULL;
-  name_options_l[10][2] = "comment_font";
-  
-  name_options_l[11][0] = "scroll_up_key=%s\n";
-  name_options_l[11][1] = strdup("k");
-  name_options_l[11][2] = "scroll_up_key";
-  
-  name_options_l[12][0] = "scroll_down_key=%s\n";
-  name_options_l[12][1] = strdup("j");
-  name_options_l[12][2] = "scroll_down_key";
-  
-  name_options_l[13][0] = "scroll_left_key=%s\n";
-  name_options_l[13][1] = strdup("h");
-  name_options_l[13][2] = "scroll_left_key";
-  
-  name_options_l[14][0] = "scroll_right_key=%s\n";
-  name_options_l[14][1] = strdup("l");
-  name_options_l[14][2] = "scroll_right_key";
-  
-  name_options_l[15][0] = "scroll_top_key=%s\n";
-  name_options_l[15][1] = strdup("g");;
-  name_options_l[15][2] = "scroll_top_key";
-  
-  name_options_l[16][0] = "scroll_bottom_key=%s\n";
-  name_options_l[16][1] = strdup("Shift-G");
-  name_options_l[16][2] = "scroll_bottom_key";
-  
-  name_options_l[17][0] = "scroll_begin_line_key=%s\n";
-  name_options_l[17][1] = strdup("0");
-  name_options_l[17][2] = "scroll_begin_line_key";
-  
-  name_options_l[18][0] = "scroll_end_line_key=%s\n";
-  name_options_l[18][1] = strdup("Shift-dollar");
-  name_options_l[18][2] = "scroll_end_line_key";
-  
-  name_options_l[19][0] = "scroll_page_up_key=%s\n";
-  name_options_l[19][1] = strdup("b");
-  name_options_l[19][2] = "scroll_page_up_key";
-  
-  name_options_l[20][0] = "scroll_page_down_key=%s\n";
-  name_options_l[20][1] = strdup("f");
-  name_options_l[20][2] = "scroll_page_down_key";
-  
-  name_options_l[21][0] = "ec_key=%s\n";
-  name_options_l[21][1] = strdup("x");
-  name_options_l[21][2] = "ec_key";
-  
-  name_options_l[22][0] = "ea_key=%s\n";
-  name_options_l[22][1] = strdup("Shift-X");
-  name_options_l[22][2] = "ea_key";
-  
-  name_options_l[23][0] = "search_bar_key=%s\n";
-  name_options_l[23][1] = strdup("s");
-  name_options_l[23][2] = "search_bar_key";
-  
-  name_options_l[24][0] = "copy_key=%s\n";
-  name_options_l[24][1] = strdup("c");
-  name_options_l[24][2] = "copy_key";
-  
-  name_options_l[25][0] = "reload_key=%s\n";
-  name_options_l[25][1] = strdup("r");
-  name_options_l[25][2] = "reload_key";
-  
-  name_options_l[26][0] = "insert_key=%s\n";
-  name_options_l[26][1] = strdup("i");
-  name_options_l[26][2] = "insert_key";
-  
-  name_options_l[27][0] = "edit_key=%s\n";
-  name_options_l[27][1] = strdup("e");
-  name_options_l[27][2] = "edit_key";
-  
-  name_options_l[28][0] = "delete_key=%s\n";
-  name_options_l[28][1] = strdup("d");
-  name_options_l[28][2] = "delete_key";
-  
-  name_options_l[29][0] = "rename_key=%s\n";
-  name_options_l[29][1] = strdup("n");
-  name_options_l[29][2] = "rename_key";
-  
-  name_options_l[30][0] = "options_key=%s\n";
-  name_options_l[30][1] = strdup("o");
-  name_options_l[30][2] = "options_key";
-  
-  name_options_l[31][0] = "open_database_key=%s\n";
-  name_options_l[31][1] = strdup("Control-o");
-  name_options_l[31][2] = "open_database_key";
-
   set_keys();
 }
 
+/* free options at program end */
 void
 destroy_options()
 {
@@ -195,6 +129,7 @@ destroy_options()
     }
 }
 
+/* write confg file */
 void
 write_config()
 {
@@ -206,7 +141,8 @@ write_config()
 	{
 	  if(name_options_l[i][1])
 	    {
-	      fprintf(fp, name_options_l[i][0], name_options_l[i][1]);
+	      fprintf(fp, name_options_l[i][0]
+		      ,name_options_l[i][1]);
 	    }
 	}
       
@@ -214,6 +150,7 @@ write_config()
     }
 }
 
+/* read config file */
 void
 read_config()
 {
@@ -240,7 +177,7 @@ read_config()
 	      char* option;
 	      char* option_bkp;
 	      option = strdup(buffer);
-	      option_bkp = option;
+	      option_bkp = strdup(option);
 	      
 	      char* str = strsep(&option, "=");
 	      char* arg = strsep(&option, "=");		  
@@ -268,6 +205,7 @@ read_config()
     }
 }
 
+/* parse keybnds into key_s structures */
 static key_s*
 key_parser(char* keybind)
 {
@@ -325,6 +263,7 @@ key_parser(char* keybind)
   return k;
 }
 
+/* made parsed keys available to other parts of the program */
 static void
 set_keys()
 {
@@ -359,176 +298,111 @@ set_keys()
   RENAME = key_parser(RENAME_KEY);
   OPTIONS = key_parser(OPTIONS_KEY);
   OPEN_DATABASE = key_parser(OPEN_DATABASE_KEY);
+  OPEN_URL_BROWSER = key_parser(OPEN_URL_BROWSER_KEY);
+  TOGGLE_SEARCHBAR = key_parser(TOGGLE_SEARCHBAR_KEY);
 }
 
+/* change font via appearance_page */
 static void
 select_font(GtkFontButton* button, gpointer name)
 {
-  for(int i = 0; i < NAME_OPTIONS_SIZE; ++i)
+  char** option = NULL;
+  GtkCellRenderer* renderer = NULL;
+  
+  if(!(strcmp(name, "id_font")))
     {
-      if(!(strcmp(name, name_options_l[i][2])))
-	{
-	  if(name_options_l[i][1])
-	    {
-	      free(name_options_l[i][1]);
-	    }
-
-	  GtkCellRenderer* renderer = NULL;
-
-	  if(!(strcmp(name, "id_font")))
-	    {
-	      renderer = g_cell_renderer_id;
-	    }
-	  else if(!(strcmp(name, "name_font")))
-	    {
-	      renderer = g_cell_renderer_name;
-	    }
-	  else if(!(strcmp(name, "url_font")))
-	    {
-	      renderer = g_cell_renderer_url;
-	    }
-	  else if(!(strcmp(name, "comment_font")))
-	    {
-	      renderer = g_cell_renderer_comment;
-	    }
-	  
-	  name_options_l[i][1] = strdup(gtk_font_button_get_font_name
-				 (GTK_FONT_BUTTON(button)));
-	  
-	  g_object_set(renderer, "font", name_options_l[i][1], NULL);
-
-	  break;
-	}
+      option = &ID_FONT_OPTION;
+      renderer = g_cell_renderer_id;
     }
+  else if(!(strcmp(name, "name_font")))
+    {
+      option = &NAME_FONT_OPTION;
+      renderer = g_cell_renderer_name;
+    }
+  else if(!(strcmp(name, "url_font")))
+    {
+      option = &URL_FONT_OPTION;
+      renderer = g_cell_renderer_url;
+    }
+  else if(!(strcmp(name, "comment_font")))
+    {
+      option = &COMMENT_FONT_OPTION;
+      renderer = g_cell_renderer_comment;
+    }
+  
+  if(*option)
+    {
+      free(*option);
+    }
+  
+  *option = strdup
+    (gtk_font_button_get_font_name(GTK_FONT_BUTTON(button)));
+  
+  g_object_set(renderer, "font", *option, NULL);
 }
 
+/* change color via appearance_page */
 static void
 select_color(GtkColorButton* button, gpointer name)
 {
+  char** option = NULL;
   GdkRGBA color;
 
-  for(int i = 0; i < NAME_OPTIONS_SIZE; ++i)
+  GtkCellRenderer* renderer = NULL;
+  
+  if(!(strcmp(name, "id_fg")))
     {
-      if(!(strcmp(name, name_options_l[i][2])))
-	{
-	  if(name_options_l[i][1])
-	    {
-	      free(name_options_l[i][1]);
-	    }
-
-	  GtkCellRenderer* renderer = NULL;
-	  
-	  if(!(strcmp(name, "id_fg")))
-	    {
-	      renderer = g_cell_renderer_id;
-	    }
-	  else if(!(strcmp(name, "name_fg")))
-	    {
-	      renderer = g_cell_renderer_name;
-	    }
-	  else if(!(strcmp(name, "url_fg")))
-	    {
-	      renderer = g_cell_renderer_url;
-	    }
-	  else if(!(strcmp(name, "comment_fg")))
-	    {
-	      renderer = g_cell_renderer_comment;
-	    }
-	  
-	  gtk_color_chooser_get_rgba(GTK_COLOR_CHOOSER(button), &color);
-	  name_options_l[i][1] = strdup(gdk_rgba_to_string(&color));
-	  g_object_set(renderer, "foreground", name_options_l[i][1], NULL);
-
-	  break;
-	}
+      option = &ID_FG_OPTION;
+      renderer = g_cell_renderer_id;
     }
+  else if(!(strcmp(name, "name_fg")))
+    {
+      option = &NAME_FG_OPTION;
+      renderer = g_cell_renderer_name;
+    }
+  else if(!(strcmp(name, "url_fg")))
+    {
+      option = &URL_FG_OPTION;
+      renderer = g_cell_renderer_url;
+    }
+  else if(!(strcmp(name, "comment_fg")))
+    {
+      option = &COMMENT_FG_OPTION;
+      renderer = g_cell_renderer_comment;
+    }
+  
+  if(*option)
+    {
+      free(*option);
+    }
+  
+  gtk_color_chooser_get_rgba
+    (GTK_COLOR_CHOOSER(button), &color);
+  
+  *option = strdup(gdk_rgba_to_string(&color));
+  g_object_set(renderer, "foreground", *option, NULL);
 
   read_database(NULL, NULL);
 }
 
-static void
-tree_lines_set(GtkToggleButton* button)
-{
-  if(TREE_LINES_OPTION)
-    {
-      free(TREE_LINES_OPTION);
-    }
-  
-  if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button)))
-    {
-      TREE_LINES_OPTION = strdup("true");
-      gtk_tree_view_set_enable_tree_lines(GTK_TREE_VIEW(g_treeview), TRUE);  
-    }
-  else
-    {
-      TREE_LINES_OPTION = strdup("false");
-      gtk_tree_view_set_enable_tree_lines(GTK_TREE_VIEW(g_treeview), FALSE);        
-    }
-
-  read_database(NULL, NULL);
-}
-
-static void
-favicons_set(GtkToggleButton* button)
-{
-  if(DOWNLOAD_FAVICON_OPTION)
-    {
-      free(DOWNLOAD_FAVICON_OPTION);
-    }
-  
-  if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button)))
-    {
-      DOWNLOAD_FAVICON_OPTION = strdup("true");
-    }
-  else
-    {
-      DOWNLOAD_FAVICON_OPTION = strdup("false");
-    }
-}
-
-static void
-key_set(GtkWidget* entry, gpointer str)
-{
-  char* arg = (char*)gtk_entry_get_text(GTK_ENTRY(entry));
-
-  for(int i = 0; i < NAME_OPTIONS_SIZE; ++i)
-    {
-      if(!(strcmp(str, name_options_l[i][2])))
-	{
-	  if(name_options_l[i][1])
-	    {
-	      free(name_options_l[i][1]);
-	    }
-
-	  name_options_l[i][1] = strdup(arg);
-
-	  break;
-	}
-    }
-
-  set_keys();
-}
-
+/* reset appearance, signal to reset buttons in appearance_page */
 static void
 appearance_reset(GtkWidget* button, gpointer name)
 {
   GdkRGBA new_rgba;
   GdkRGBA old_rgba;
   
-  int color_flag = 0;
-  int font_flag = 0;
-
-  char* color_id = NULL;
-  char* font_id = NULL;
-
+  char** font_option = NULL;
+  char** color_option = NULL;
+  
   GtkCellRenderer* renderer = NULL;
   GtkWidget* color_button = NULL;
   GtkWidget* font_button = NULL;
 
   if(!(strcmp(name, "id")))
     {
-      color_id = "id_fg";
-      font_id = "id_font";
+      font_option = &ID_FONT_OPTION;
+      color_option = &ID_FG_OPTION;
       color_button = id_fg_button;
       font_button = id_font_button;
       renderer = g_cell_renderer_id;
@@ -537,8 +411,8 @@ appearance_reset(GtkWidget* button, gpointer name)
 
   if(!(strcmp(name, "name")))
     {
-      color_id = "name_fg";
-      font_id = "name_font";
+      font_option = &NAME_FONT_OPTION;
+      color_option = &NAME_FG_OPTION;
       color_button = name_fg_button;
       font_button = name_font_button;
       renderer = g_cell_renderer_name;
@@ -547,8 +421,8 @@ appearance_reset(GtkWidget* button, gpointer name)
 
   if(!(strcmp(name, "url")))
     {
-      color_id = "url_fg";
-      font_id = "url_font";
+      font_option = &URL_FONT_OPTION;
+      color_option = &URL_FG_OPTION;
       color_button = url_fg_button;
       font_button = url_font_button;
       renderer = g_cell_renderer_url;
@@ -557,63 +431,61 @@ appearance_reset(GtkWidget* button, gpointer name)
 
   if(!(strcmp(name, "comment")))
     {
-      color_id = "comment_fg";
-      font_id = "comment_font";
+      font_option = &COMMENT_FONT_OPTION;
+      color_option = &COMMENT_FG_OPTION;
       color_button = comment_fg_button;
       font_button = comment_font_button;
       renderer = g_cell_renderer_comment;
       old_rgba = comment_rgba;
     }
   
-  for(int i = 0; i < NAME_OPTIONS_SIZE; ++i)
+  if(*color_option)
     {
-      if(!(strcmp(name_options_l[i][2], color_id)))
-	{
-	  if(name_options_l[i][1])
-	    {
-	      free(name_options_l[i][1]);
-	    }
-	  
-	  old_rgba = new_rgba;
-	  gtk_color_chooser_set_rgba(GTK_COLOR_CHOOSER(color_button), &old_rgba);
-	  name_options_l[i][1] = NULL;
-	  g_object_set(renderer, "foreground", name_options_l[i][1], NULL);
-	  color_flag = 1;
-	}
-      
-      if(!(strcmp(name_options_l[i][2], font_id)))
-	{
-	  if(name_options_l[i][1])
-	    {
-	      free(name_options_l[i][1]);
-	    }
-	  
-	  gtk_font_button_set_font_name(GTK_FONT_BUTTON(font_button), "");
-	  name_options_l[i][1] = NULL;
-	  g_object_set(renderer, "font", name_options_l[i][1], NULL);
-	  font_flag = 1;
-	}
-      
-      if(font_flag && color_flag)
-	{
-	  break;
-	}
+      free(*color_option);
     }
   
+  old_rgba = new_rgba;
+  
+  gtk_color_chooser_set_rgba
+    (GTK_COLOR_CHOOSER(color_button), &old_rgba);
+
+  *color_option = NULL;
+  
+  g_object_set(renderer, "foreground", *color_option, NULL);
+  
+  if(*font_option)
+    {
+      free(*font_option);
+    }
+	  
+  gtk_font_button_set_font_name
+    (GTK_FONT_BUTTON(font_button), "");
+
+  *font_option = NULL;
+
+  g_object_set(renderer, "font", *font_option, NULL);
+      
   read_database(NULL, NULL);
+}
+
+/* set font buttons in appearance_page */
+static void
+set_font_button_name(GtkWidget* button, char* font_option)
+{
+  char* font_name = "none";
+  
+  if(font_option)
+    {
+      font_name = font_option;
+    }
+  
+  gtk_font_button_set_font_name
+    (GTK_FONT_BUTTON(button), font_name);
 }
 
 static GtkWidget*
 appearance_page()
 {
-  char* reset_label = "Reset";
-
-  /* font buttons */
-  id_font_button = gtk_font_button_new();
-  name_font_button = gtk_font_button_new();
-  url_font_button = gtk_font_button_new();
-  comment_font_button = gtk_font_button_new();
-  
   if(ID_FG_OPTION)
     {
       gdk_rgba_parse(&id_rgba, ID_FG_OPTION);
@@ -634,49 +506,18 @@ appearance_page()
       gdk_rgba_parse(&comment_rgba, COMMENT_FG_OPTION);
     }
 
-  if(ID_FONT_OPTION)
-    {
-      gtk_font_button_set_font_name
-	(GTK_FONT_BUTTON(id_font_button), ID_FONT_OPTION);
-    }
-  else
-    {
-      gtk_font_button_set_font_name
-	(GTK_FONT_BUTTON(id_font_button), "none");
-    }
-
-  if(NAME_FONT_OPTION)
-    {
-      gtk_font_button_set_font_name
-	(GTK_FONT_BUTTON(name_font_button), NAME_FONT_OPTION);
-    }
-  else
-    {
-      gtk_font_button_set_font_name
-	(GTK_FONT_BUTTON(name_font_button), "none");
-    }
+    /* font buttons */
+  id_font_button = gtk_font_button_new();
+  name_font_button = gtk_font_button_new();
+  url_font_button = gtk_font_button_new();
+  comment_font_button = gtk_font_button_new();
   
-  if(URL_FONT_OPTION)
-    {
-      gtk_font_button_set_font_name
-	(GTK_FONT_BUTTON(url_font_button), URL_FONT_OPTION);
-    }
-  else
-    {
-      gtk_font_button_set_font_name
-	(GTK_FONT_BUTTON(url_font_button), "none");
-    }
+  set_font_button_name(id_font_button, ID_FONT_OPTION);
+  set_font_button_name(name_font_button, NAME_FONT_OPTION);
+  set_font_button_name(url_font_button, URL_FONT_OPTION);
+  set_font_button_name(comment_font_button, COMMENT_FONT_OPTION);
 
-  if(COMMENT_FONT_OPTION)
-    {
-      gtk_font_button_set_font_name
-	(GTK_FONT_BUTTON(comment_font_button), COMMENT_FONT_OPTION);
-    }
-  else
-    {
-      gtk_font_button_set_font_name
-	(GTK_FONT_BUTTON(comment_font_button), "none");
-    }
+  char* reset_label = "Reset";
   
   id_fg_button = gtk_color_button_new_with_rgba(&id_rgba);
   name_fg_button = gtk_color_button_new_with_rgba(&name_rgba);
@@ -761,52 +602,243 @@ appearance_page()
   return grid;
 }
 
+/* turn toggle buttons in settings_page on/off */
+static gboolean
+toggle_buttons_set(GtkToggleButton* button, char* option)
+{
+  char* opt = "false";
+  gboolean b = FALSE;
+  
+  if(option)
+    {
+      free(option);
+    }
+  
+  if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button)))
+    {
+      opt = "true";
+      b = TRUE;
+    }
+  
+  option = strdup(opt);
+  return b;
+}
+
+/* set treelines option */
+static void
+tree_lines_set(GtkToggleButton* button)
+{
+  if(TREE_LINES_OPTION)
+    {
+      free(TREE_LINES_OPTION);
+    }
+  
+  if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button)))
+    {
+      TREE_LINES_OPTION = strdup("true");
+      gtk_tree_view_set_enable_tree_lines
+	(GTK_TREE_VIEW(g_treeview), TRUE);  
+    }
+  else
+    {
+      TREE_LINES_OPTION = strdup("false");
+      gtk_tree_view_set_enable_tree_lines
+	(GTK_TREE_VIEW(g_treeview), FALSE);        
+    }
+
+  read_database(NULL, NULL);
+}
+
+/* set favicon option */
+static void
+favicons_set(GtkToggleButton* button)
+{
+  toggle_buttons_set
+    (GTK_TOGGLE_BUTTON(button), DOWNLOAD_FAVICON_OPTION);  
+}
+
+static void
+show_toolbar_set(GtkToggleButton* button)
+{
+  toggle_buttons_set
+    (GTK_TOGGLE_BUTTON(button), SHOW_TOOLBAR_OPTION);
+
+  widget_hide(NULL, "toolbar");
+}
+
+/* show/hide statusbar option */
+static void
+show_statusbar_set(GtkToggleButton* button)
+{
+  toggle_buttons_set
+    (GTK_TOGGLE_BUTTON(button), SHOW_STATUSBAR_OPTION);
+  
+  widget_hide(NULL, "statusbar");
+}
+
+/* show/hide headers option */
+static void
+show_headers_set(GtkToggleButton* button)
+{
+  toggle_buttons_set
+    (GTK_TOGGLE_BUTTON(button), SHOW_HEADERS_OPTION);
+  
+  widget_hide(NULL, "headers"); 
+}
+
+/* show/hide searchbar option */
+static void
+show_searchbar_set(GtkToggleButton* button)
+{
+  toggle_buttons_set
+    (GTK_TOGGLE_BUTTON(button), SHOW_SEARCHBAR_OPTION);
+  
+  widget_hide(NULL, "searchbar"); 
+}
+
 static GtkWidget*
 settings_page()
 {
   /* database entry */
   GtkWidget* database_label = gtk_label_new("Database");
-  //gtk_widget_set_halign(GTK_WIDGET(database_label), GTK_ALIGN_START);
 
   GtkWidget* database_file_entry = gtk_entry_new();
   gtk_entry_set_placeholder_text
-    (GTK_ENTRY(database_file_entry), "database...");
+    (GTK_ENTRY(database_file_entry), "database");
 
-  gtk_entry_set_text(GTK_ENTRY(database_file_entry), DATABASE_OPTION);
+  gtk_entry_set_text
+    (GTK_ENTRY(database_file_entry), DATABASE_OPTION);
+
+  /* browser entry */
+  GtkWidget* browser_label = gtk_label_new("Browser");
+
+  GtkWidget* browser_entry = gtk_entry_new();
+  gtk_entry_set_placeholder_text
+    (GTK_ENTRY(browser_entry), "browser");
+
+  gtk_entry_set_text
+    (GTK_ENTRY(browser_entry), OPEN_URL_BROWSER_OPTION);
 
   /* tree lines */
   GtkWidget* tree_lines_button = gtk_check_button_new_with_label
     ("Show tree lines");
-  
-  g_signal_connect
-    (GTK_WIDGET(tree_lines_button), "toggled", G_CALLBACK(tree_lines_set), NULL);
 
-  if(gtk_tree_view_get_enable_tree_lines(GTK_TREE_VIEW(g_treeview)))
+  if(!(strcmp(TREE_LINES_OPTION, "true")))
     {
-      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(tree_lines_button)
-				   ,TRUE);
+      gtk_toggle_button_set_active
+	(GTK_TOGGLE_BUTTON(tree_lines_button), TRUE);
     }
 
+  g_signal_connect
+    (GTK_WIDGET(tree_lines_button), "toggled"
+     ,G_CALLBACK(tree_lines_set), NULL);
+  
   /* favicons */
   GtkWidget* favicon_button = gtk_check_button_new_with_label
     ("Download favicon");
-  g_signal_connect
-    (GTK_WIDGET(favicon_button), "toggled", G_CALLBACK(favicons_set), NULL);
 
   if(!(strcmp(DOWNLOAD_FAVICON_OPTION, "true")))
     {
-      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(favicon_button), TRUE);
+      gtk_toggle_button_set_active
+	(GTK_TOGGLE_BUTTON(favicon_button), TRUE);
     }
+
+  g_signal_connect
+    (GTK_WIDGET(favicon_button), "toggled"
+     ,G_CALLBACK(favicons_set), NULL);
+  
+  GtkWidget* toolbar_button = gtk_check_button_new_with_label
+    ("Show toolbar");
+
+  if(!(strcmp(SHOW_TOOLBAR_OPTION, "true")))
+    {
+      gtk_toggle_button_set_active
+	(GTK_TOGGLE_BUTTON(toolbar_button), TRUE);
+    }
+
+  g_signal_connect
+    (GTK_WIDGET(toolbar_button), "toggled"
+     ,G_CALLBACK(show_toolbar_set), NULL);
+    
+  GtkWidget* statusbar_button = gtk_check_button_new_with_label
+    ("Show statusbar");
+  
+  if(!(strcmp(SHOW_STATUSBAR_OPTION, "true")))
+    {
+      gtk_toggle_button_set_active
+	(GTK_TOGGLE_BUTTON(statusbar_button), TRUE);
+    }
+
+  g_signal_connect
+    (GTK_WIDGET(statusbar_button), "toggled"
+     ,G_CALLBACK(show_statusbar_set), NULL);
+  
+  GtkWidget* headers_button = gtk_check_button_new_with_label
+    ("Show Headers");
+
+  if(!(strcmp(SHOW_HEADERS_OPTION, "true")))
+    {
+      gtk_toggle_button_set_active
+	(GTK_TOGGLE_BUTTON(headers_button), TRUE);
+    }
+
+  g_signal_connect
+    (GTK_WIDGET(headers_button), "toggled"
+     ,G_CALLBACK(show_headers_set), NULL);
+  
+  GtkWidget* searchbar_button = gtk_check_button_new_with_label
+    ("Show searchbar");
+
+  if(!(strcmp(SHOW_SEARCHBAR_OPTION, "true")))
+    {
+      gtk_toggle_button_set_active
+	(GTK_TOGGLE_BUTTON(searchbar_button), TRUE);
+    }
+
+  g_signal_connect
+    (GTK_WIDGET(searchbar_button), "toggled"
+     ,G_CALLBACK(show_searchbar_set), NULL);
   
   GtkWidget* grid = grid_new();
-  gtk_grid_attach(GTK_GRID(grid), database_label, 0,  0, 30, 1);
+  gtk_grid_attach(GTK_GRID(grid), database_label, 0, 0, 30, 1);
   gtk_grid_attach(GTK_GRID(grid), database_file_entry, 40, 0, 50, 1);
-  gtk_grid_attach(GTK_GRID(grid), tree_lines_button, 0,  1, 25, 1);
-  gtk_grid_attach(GTK_GRID(grid), favicon_button, 25,  1, 25, 1);
-  
+  gtk_grid_attach(GTK_GRID(grid), browser_label, 0, 1, 30, 1);
+  gtk_grid_attach(GTK_GRID(grid), browser_entry, 40, 1, 50, 1);
+  gtk_grid_attach(GTK_GRID(grid), tree_lines_button, 0,  2, 25, 1);
+  gtk_grid_attach(GTK_GRID(grid), favicon_button, 25,  2, 25, 1);
+  gtk_grid_attach(GTK_GRID(grid), toolbar_button, 0, 3, 25, 1);
+  gtk_grid_attach(GTK_GRID(grid), statusbar_button, 25, 3, 25, 1);
+  gtk_grid_attach(GTK_GRID(grid), headers_button, 0, 4, 25, 1);
+  gtk_grid_attach(GTK_GRID(grid), searchbar_button, 25, 4, 25, 1);
+
   return grid;
 }
 
+/* set keys configured in keybind_page */
+static void
+key_set(GtkWidget* entry, gpointer str)
+{
+  char* arg = (char*)gtk_entry_get_text(GTK_ENTRY(entry));
+
+  for(int i = 0; i < NAME_OPTIONS_SIZE; ++i)
+    {
+      if(!(strcmp(str, name_options_l[i][2])))
+	{
+	  if(name_options_l[i][1])
+	    {
+	      free(name_options_l[i][1]);
+	    }
+
+	  name_options_l[i][1] = strdup(arg);
+
+	  break;
+	}
+    }
+
+  set_keys();
+}
+
+/* generate key entres to keybind_page */
 static GtkWidget*
 key_entry_generator(char* label, char* action, char* key)
 {
@@ -851,19 +883,31 @@ keybind_page()
       ,{"Delete", "delete_key", DELETE_KEY}
       ,{"Options", "options_key", OPTIONS_KEY}
       ,{"Open database", "open_database_key", OPEN_DATABASE_KEY}
+      ,{"Open url in browser", "open_url_browser_key", OPEN_URL_BROWSER_KEY}
+      ,{"Toggle searchbar", "toggle_searchbar_key", TOGGLE_SEARCHBAR_KEY}
     };
 
   GtkWidget* grid = grid_new();
   
-  for(int i = 0; i < 21; ++i)
+  for(int i = 0; i < KEYS_N; ++i)
     {
       GtkWidget* key_box = key_entry_generator
 	(keybind_keys[i][0], keybind_keys[i][1], keybind_keys[i][2]);
 
       gtk_grid_attach(GTK_GRID(grid), key_box, 0, i, 10, 1);      
     }
+
+  GtkWidget* scrolled_window = gtk_scrolled_window_new(NULL, NULL);
+
+  gtk_scrolled_window_set_min_content_width
+    (GTK_SCROLLED_WINDOW(scrolled_window), 500);
+
+  gtk_scrolled_window_set_min_content_height
+    (GTK_SCROLLED_WINDOW(scrolled_window), 300);
   
-  return grid;
+  gtk_container_add(GTK_CONTAINER(scrolled_window), grid);
+  
+  return scrolled_window;
 }
 
 void
@@ -891,6 +935,7 @@ options_window(GtkWidget* button)
   
   /* buttons */
   GtkWidget* write_button = gtk_button_new_with_mnemonic("_Write config");
+
   g_signal_connect
     (GTK_WIDGET(write_button), "clicked", G_CALLBACK(write_config)
      ,NULL);
@@ -918,19 +963,8 @@ options_window(GtkWidget* button)
 
   gtk_notebook_append_page
     (GTK_NOTEBOOK(notebook), page_keybind_b, page_keybind_l);
-
-  /* scrolled window */
-  GtkWidget* opt_scrolled_window = gtk_scrolled_window_new(NULL, NULL);
-
-  gtk_scrolled_window_set_min_content_width
-    (GTK_SCROLLED_WINDOW(opt_scrolled_window), 500);
-
-  gtk_scrolled_window_set_min_content_height
-    (GTK_SCROLLED_WINDOW(opt_scrolled_window), 300);
   
-  gtk_container_add(GTK_CONTAINER(opt_scrolled_window), notebook);
-  
-  gtk_box_pack_start(GTK_BOX(main_box), opt_scrolled_window, TRUE, TRUE, 1);
+  gtk_box_pack_start(GTK_BOX(main_box), notebook, TRUE, TRUE, 1);
   gtk_box_pack_end(GTK_BOX(main_box), button_box, FALSE, FALSE, 1);
   gtk_container_add(GTK_CONTAINER(window), main_box);
 

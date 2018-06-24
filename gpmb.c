@@ -55,8 +55,9 @@ main(int argc, char *argv[])
       exit(EXIT_FAILURE);
     }
 
+  //system("firefox -new-tab xyz &");
   short res = gtk_interface(argc, argv);
-
+  
   destroy_options();
 
   if(g_database_file)

@@ -59,4 +59,3 @@ tag_box_new()
 
   return tag_box;
 }
-

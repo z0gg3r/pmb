@@ -8,7 +8,9 @@ GtkWidget* g_spinner = NULL;
 GtkWidget* g_scrolled_window = NULL;
 GtkWidget* gpmb_window 	= NULL;
 
-GtkWidget* info_box = NULL;
+GtkWidget* g_statusbar = NULL;
+GtkWidget* g_searchbar = NULL;
+GtkWidget* g_toolbar = NULL;
 
 void 
 destroy() 
@@ -19,28 +21,54 @@ destroy()
 void
 widget_hide(GtkWidget* button, char* name)
 {
-  if(!strcmp(name, "info_box"))
+  if(!strcmp(name, "statusbar"))
     {
-      if(gtk_widget_get_visible(GTK_WIDGET(info_box)))
+      void (*function)(GtkWidget*) = gtk_widget_show;
+      
+      if(gtk_widget_get_visible(GTK_WIDGET(g_statusbar)))
 	{
-	  gtk_widget_hide(GTK_WIDGET(info_box));
+	  function = gtk_widget_hide;
 	}
-      else
-	{
-	  gtk_widget_show(GTK_WIDGET(info_box));
-	}
+
+      function(GTK_WIDGET(g_statusbar));
     }
 
-  if(!(strcmp(name, "tool_bar")))
+  if(!(strcmp(name, "toolbar")))
     {
-      if(gtk_widget_get_visible(GTK_WIDGET(g_tool_box)))
+      void (*function)(GtkWidget*) = gtk_widget_show;
+      
+      if(gtk_widget_get_visible(GTK_WIDGET(g_toolbar)))
 	{
-	  gtk_widget_hide(GTK_WIDGET(g_tool_box));
+	  function = gtk_widget_hide;
 	}
-      else
+
+      function(GTK_WIDGET(g_toolbar));
+    }
+
+  if(!(strcmp(name, "searchbar")))
+    {
+      void (*function)(GtkWidget*) = gtk_widget_show;
+      
+      if(gtk_widget_get_visible(GTK_WIDGET(g_searchbar)))
 	{
-	  gtk_widget_show(GTK_WIDGET(g_tool_box));
+	  function = gtk_widget_hide;
 	}
+      
+      function(GTK_WIDGET(g_searchbar));
+    }
+  
+  if(!(strcmp(name, "headers")))
+    {
+      gboolean b = TRUE;
+
+      if(gtk_tree_view_get_headers_visible
+	 (GTK_TREE_VIEW(g_treeview)))
+	{
+	  b = FALSE;
+	}
+
+      gtk_tree_view_set_headers_visible
+	(GTK_TREE_VIEW(g_treeview), b);
     }
 }
 
@@ -77,11 +105,11 @@ gtk_interface(int argc, char* argv[])
   /* menu bar */
   GtkWidget* menu_bar = menu_bar_new(gpmb_window);
 
-  /* tool box */
-  g_tool_box = tool_box_new(gpmb_window);
+  /* toolbar */
+  g_toolbar = tool_box_new(gpmb_window);
 
-  /* search box */
-  GtkWidget* search_box = search_box_new(g_search_entry);
+  /* searchbar */
+  g_searchbar = search_box_new(g_search_entry);
 
   /* info label */
   g_info_label = gtk_label_new(" ");
@@ -91,17 +119,17 @@ gtk_interface(int argc, char* argv[])
   g_spinner = gtk_spinner_new();
 
   /* info box */
-  info_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
-  gtk_box_pack_start(GTK_BOX(info_box), g_info_label, TRUE, TRUE, 1);
-  gtk_container_add(GTK_CONTAINER(info_box), g_spinner);
+  g_statusbar = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
+  gtk_box_pack_start(GTK_BOX(g_statusbar), g_info_label, TRUE, TRUE, 1);
+  gtk_container_add(GTK_CONTAINER(g_statusbar), g_spinner);
 
   /* add to main */
   GtkWidget* main_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
   gtk_container_add(GTK_CONTAINER(main_box), menu_bar);
-  gtk_container_add(GTK_CONTAINER(main_box), g_tool_box);
-  gtk_container_add(GTK_CONTAINER(main_box), search_box);
+  gtk_container_add(GTK_CONTAINER(main_box), g_toolbar);
+  gtk_container_add(GTK_CONTAINER(main_box), g_searchbar);
   gtk_box_pack_start(GTK_BOX(main_box), g_scrolled_window, TRUE, TRUE, 1);
-  gtk_container_add(GTK_CONTAINER(main_box), info_box);
+  gtk_container_add(GTK_CONTAINER(main_box), g_statusbar);
 
   /* add main_box into window */
   gtk_container_add(GTK_CONTAINER(gpmb_window), main_box);
@@ -110,6 +138,27 @@ gtk_interface(int argc, char* argv[])
   /* read database and append to tree */
   read_database(NULL, NULL);
 
+  /* hide bars? */
+  if(!(strcmp(SHOW_TOOLBAR_OPTION, "false")))
+    {
+      widget_hide(g_toolbar, "toolbar");
+    }
+
+  if(!(strcmp(SHOW_STATUSBAR_OPTION, "false")))
+    {
+      widget_hide(g_statusbar, "statusbar");     
+    }
+
+  if(!(strcmp(SHOW_HEADERS_OPTION, "false")))
+    {
+      widget_hide(NULL, "headers");     
+    }
+
+  if(!(strcmp(SHOW_SEARCHBAR_OPTION, "false")))
+    {
+      widget_hide(NULL, "searchbar");     
+    }
+  
   /* focus tree view */
   gtk_widget_grab_focus(GTK_WIDGET(g_treeview));
 

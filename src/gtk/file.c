@@ -166,24 +166,36 @@ selective_copy(GtkWidget* button, char* action)
 	    }
 
 	  if(!(strcmp(field, "any")))
-	    bl = bookmark_db_search(db_2, 0, pattern);
-
+	    {
+	      bl = bookmark_db_search(db_2, 0, pattern);
+	    }
+	  
 	  else if(!(strcmp(field, "id")))
-	    bl = bookmark_db_query
-	      (db_2, (strtol(pattern, NULL, 10)), NULL);
-
+	    {
+	      bl = bookmark_db_query
+		(db_2, (strtol(pattern, NULL, 10)), NULL);
+	    }
+	  
 	  else if(!(strcmp(field, "name")))
-	    bl = bookmark_db_search(db_2, NAME, pattern);
-
+	    {
+	      bl = bookmark_db_search(db_2, NAME, pattern);
+	    }
+	  
 	  else if(!(strcmp(field, "url")))
-	    bl = bookmark_db_search(db_2, URL, pattern);
-
+	    {
+	      bl = bookmark_db_search(db_2, URL, pattern);
+	    }
+	  
 	  else if(!(strcmp(field, "comment")))
-	    bl = bookmark_db_search(db_2, COMMENT, pattern);
-
+	    {
+	      bl = bookmark_db_search(db_2, COMMENT, pattern);
+	    }
+	  
 	  else if(!(strcmp(field, "tag")))
-	    bl = bookmark_db_search(db_2, TAG, pattern);
-
+	    {
+	      bl = bookmark_db_search(db_2, TAG, pattern);
+	    }
+	  
 	  if(bl)
 	    {
 	      bookmark* b = NULL;

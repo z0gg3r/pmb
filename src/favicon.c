@@ -77,8 +77,6 @@ download_favicon(char* url)
     {
       return favicon_enc;
     }
-  else
-    {
-      return NULL;
-    }
+
+  return NULL;
 }
