@@ -33,12 +33,19 @@ int main(int argc, char *argv[])
 	}
 
 	/* database */
-	size = strlen(path) + strlen(DATABASE) + 2;
+	char *env_database_file = secure_getenv("PMB_DATABASE");
 
-	char *database_file = calloc(size, sizeof(char));
-	check_oom(database_file, "database_file");
+	char *database_file;
+	if (!env_database_file) {
+		size = strlen(path) + strlen(DATABASE) + 2;
 
-	snprintf(database_file, size, "%s/%s", path, DATABASE);
+		database_file = calloc(size, sizeof(char));
+		check_oom(database_file, "database_file");
+
+		snprintf(database_file, size, "%s/%s", path, DATABASE);
+	} else {
+		database_file = env_database_file;
+	}
 
 	/* config file */
 	size = strlen(path) + strlen(CONFIG_FILE) + 2;
