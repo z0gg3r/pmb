@@ -5,7 +5,6 @@
 #include <stdio.h>
 
 /* check for memory allocation error */
-void
-check_oom(void*, char*);
+void check_oom(void *, char *);
 
 #endif

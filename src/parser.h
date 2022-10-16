@@ -16,67 +16,51 @@
 #include "html.h"
 #include "favicon.h"
 
-extern sqlite3* g_db;
+extern sqlite3 *g_db;
 
 /* int argc, char* argv[], cl_option_list*, cl_option_list* */
-void
-parse_options(int, char*[], cl_option_list*
-	      ,cl_option_list*);
+void parse_options(int, char *[], cl_option_list *, cl_option_list *);
 
 /* -- add a new bookmark */
-int
-add_bookmark(char*);
+int add_bookmark(char *);
 
 /* -- set colors */
-int
-color_list(char*);
+int color_list(char *);
 
 /* -- delete */
-int
-delete_bookmark(char*);
+int delete_bookmark(char *);
 
 /* -- edit */
-int
-edit_bookmark(char*);
+int edit_bookmark(char *);
 
 /* -- show help on terminal */
-void
-help();
+void help();
 
 /* -- html output */
-int
-html(char*); 
+int html(char *);
 
 /* -- import bookmarks from a database */
-int
-import(char*);
+int import(char *);
 
 /* -- open a new database file */
-int
-open_file(char*);
+int open_file(char *);
 
 /* read config file */
-int
-parse_config_file(char*);
+int parse_config_file(char *);
 
 /* -- print */
-int
-print_bookmark(char*);
+int print_bookmark(char *);
 
 /* -- search bookmarks on database */
-int
-search(char*);
+int search(char *);
 
 /* -- turn on/off terminal color output */
-int
-set_color(char*);
+int set_color(char *);
 
 /* -- turn on/off verbose output */
-int
-set_verbose(char*);
+int set_verbose(char *);
 
 /* -- show version on terminal */
-void 
-version();
+void version();
 
 #endif

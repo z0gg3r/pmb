@@ -8,7 +8,6 @@
 #include <glib.h>
 #include "error.h"
 
-gchar*
-download_favicon(char* url);
+gchar *download_favicon(char *url);
 
 #endif
