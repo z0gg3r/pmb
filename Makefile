@@ -1,6 +1,6 @@
 # gcc
 CC=gcc
-CCFLAGS=-Wall -Wextra -std=c11 -ggdb -lcurl
+CCFLAGS=-Wall -Wextra -ggdb -lcurl $(CFLAGS)
 GTKFLAGS =$(shell pkg-config --cflags --libs gtk+-3.0)
 GLIBFLAGS =$(shell pkg-config --cflags --libs glib-2.0)
 SQLITE_FLAGS=-l sqlite3
