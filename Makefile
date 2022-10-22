@@ -63,4 +63,4 @@ clean:
 	-rm -rf $(BUILD_DIR)
 
 valgrind_pmb:
-	valgrind --leak-check=full --track-origins=yes -show-leak-kinds=all --log-file=log.txt -v ./pmb -s linux
+	valgrind --leak-check=full --track-origins=yes --show-leak-kinds=all --log-file=log.txt -v ./pmb -s linux
