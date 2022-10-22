@@ -1,7 +1,8 @@
 # gcc
 CC=gcc
-CCFLAGS=-Wall -Wextra -ggdb -lcurl $(CFLAGS)
+#CCFLAGS=-Wall -Wextra -ggdb -lcurl $(CFLAGS)
 GLIBFLAGS =$(shell pkg-config --cflags --libs glib-2.0)
+CCFLAGS=-g -lcurl
 SQLITE_FLAGS=-l sqlite3
 
 # directories
