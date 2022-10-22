@@ -48,9 +48,9 @@ $(BUILD_DIR)/%.o: $(INC_DIR)/%.c $(PMB_HEADERS)
 $(BUILD_DIR)/%.o: $(GPMB_DIR)/%.c $(GPMB_HEADERS)
 	$(CC) $(CCFLAGS) $(GTKFLAGS) -c $< -o $@
 
-$(PMB): $(PMB_OBJ) $(PMB).c
+$(PMB): $(PMB_OBJ) src/$(PMB).c
 	$(CC) $(CCFLAGS) $(GLIBFLAGS) $(SQLITE_FLAGS) \
-	$(PMB_OBJ) $(PMB).c -o $(PMB)
+	$(PMB_OBJ) src/$(PMB).c -o $(PMB)
 
 run:$(PMB)
 	./$(PMB) $(args)

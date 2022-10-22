@@ -6,7 +6,7 @@
  ***************************************/
 
 #include <sys/stat.h>
-#include "src/parser.h"
+#include "parser.h"
 
 int main(int argc, char *argv[])
 {
