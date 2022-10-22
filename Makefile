@@ -22,21 +22,6 @@ HTML=html
 FAVICON=favicon
 ERROR=error
 
-GPMB=gpmb
-G_TREEVIEW=treeview
-G_KEYPRESS=keypress
-G_MENUBAR=menubar
-G_TOOLBOX=toolbox
-G_DIALOG=dialog
-G_ADD=add
-G_DELETE=delete
-G_EDIT=edit
-G_FILE=file
-G_OPTIONS=options
-G_SEARCHBOX=searchbox
-G_TAGBOX=tagbox
-G_INTERFACE=interface
-
 PMB_HEADERS=$(INC_DIR)/$(BOOKMARK).h $(INC_DIR)/$(BOOKMARK_LIST).h \
 	$(INC_DIR)/$(DATABASE).h $(INC_DIR)/$(TREE).h \
 	$(INC_DIR)/$(HTML).h $(INC_DIR)/$(FAVICON).h \
@@ -52,7 +37,7 @@ PMB_OBJ=$(BUILD_DIR)/$(BOOKMARK).o $(BUILD_DIR)/$(BOOKMARK_LIST).o \
 # create build directory
 $(shell if [ ! -e "./build" ]; then mkdir build; fi)
 
-default: $(PMB) $(GPMB)
+default: $(PMB)
 
 all: default
 
