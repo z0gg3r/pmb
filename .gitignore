@@ -8,3 +8,8 @@ configure
 depcomp
 install-sh
 missing
+Makefile
+config.log
+config.status
+src/.deps/
+src/*.o
