@@ -35,7 +35,7 @@ fi
 AM_CONDITIONAL([LIBCURL], [test "$use_libcurl" = "xyes"])
 
 # Checks for header files.
-AC_CHECK_HEADERS([string.h])
+AC_CHECK_HEADERS([string.h getopt.h limits.h stdio.h stdlib.h time.h sys/stat.h unistd.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 
