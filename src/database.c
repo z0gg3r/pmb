@@ -13,9 +13,9 @@ char *date(char *buffer, int bufsize)
 			strftime(buffer, bufsize, format, tmp);
 			return buffer;
 		}
+		free(tmp);
 	}
 
-	free(tmp);
 	return NULL;
 }
 
