@@ -338,7 +338,8 @@ int add_bookmark(char *optarg)
 			scomment_option,
 			tag_option,
 			stag_option,
-			favicon_option
+			favicon_option,
+			sfavicon_option
 		};
 
 		char *const sub_options[] = {
@@ -346,7 +347,7 @@ int add_bookmark(char *optarg)
 			[url_option] = URL,	      [surl_option] = "u",
 			[comment_option] = COMMENT,   [scomment_option] = "c",
 			[tag_option] = TAG,	      [stag_option] = "t",
-			[favicon_option] = "favicon", NULL
+			[favicon_option] = "favicon", [sfavicon_option] = "f"
 		};
 
 		while (*subopts != '\0')
@@ -388,6 +389,7 @@ int add_bookmark(char *optarg)
 
 				break;
 			case favicon_option:
+			case sfavicon_option:
 				if (value) {
 					ficon_url = value;
 				} else {
