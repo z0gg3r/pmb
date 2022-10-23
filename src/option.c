@@ -66,9 +66,8 @@ int option_list_add(cl_option_list *l, cl_option *opt)
 int destroy_option_list(cl_option_list *l)
 {
 	if (l) {
-		for (int i = 0; i < l->size - 1; ++i) {
-			destroy_option(l->opt[i]);
-		}
+		for (int i = 0; i < l->size - 1; ++i)
+			free(l->opt[i]);
 
 		free(l->opt);
 		free(l);
