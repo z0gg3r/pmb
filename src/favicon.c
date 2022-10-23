@@ -4,7 +4,7 @@
 #include "base64.h"
 
 struct favicon_mem {
-	guchar *memory;
+	uchar *memory;
 	size_t size;
 };
 
@@ -25,7 +25,7 @@ static size_t favicon_fetch(void *contents, size_t size, size_t nmemb,
 	return realsize;
 }
 
-gchar *download_favicon(char *url)
+uchar *download_favicon(char *url)
 {
 	if (!url) {
 		return NULL;
@@ -37,7 +37,7 @@ gchar *download_favicon(char *url)
 		  "favicon > download_favicon - favicon.memory");
 	favicon.size = 0;
 
-	gchar *favicon_enc = NULL;
+	uchar *favicon_enc = NULL;
 
 
 	CURL *curl_handle = curl_easy_init();
@@ -53,11 +53,11 @@ gchar *download_favicon(char *url)
 	if (res != CURLE_OK) {
 		fprintf(stderr, "libcurl: %s\n", curl_easy_strerror(res));
 	} else {
-		favicon_enc = calloc(favicon.size + 1, sizeof(gchar));
+		favicon_enc = calloc(favicon.size + 1, sizeof(uchar));
 		//favicon_enc = g_base64_encode(favicon.memory, favicon.size);
 		check_oom(favicon_enc, "favicon > download_favicon - favicon_enc");
 
-		Base64encode(favicon_enc, favicon.memory, favicon.size);
+		favicon_enc = base64_encode(favicon.memory, favicon.size, NULL);
 	}
 
 	curl_easy_cleanup(curl_handle);

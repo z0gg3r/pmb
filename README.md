@@ -2,9 +2,9 @@
 in bookmark management.
 
 src/base64.h and src/base64.c are from
-[Apple/base64.h](https://opensource.apple.com/source/QuickTimeStreamingServer/QuickTimeStreamingServer-452/CommonUtilitiesLib/base64.h)
+[FreeBSD/base64.h](https://web.mit.edu/freebsd/head/contrib/wpa/src/utils/base64.h)
 and
-[Apple/base64.c](https://opensource.apple.com/source/QuickTimeStreamingServer/QuickTimeStreamingServer-452/CommonUtilitiesLib/base64.c)
+[FreeBSD/base64.c](https://web.mit.edu/freebsd/head/contrib/wpa/src/utils/base64.c)
 respectively.
 
 ![screenshot](image/pmb.png)

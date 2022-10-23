@@ -7,9 +7,8 @@
 #include <curl/curl.h>
 #include "error.h"
 
-typedef char gchar;
-typedef unsigned char guchar;
+typedef unsigned char uchar;
 
-gchar *download_favicon(char *url);
+uchar *download_favicon(char *url);
 
 #endif
