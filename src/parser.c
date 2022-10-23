@@ -324,12 +324,10 @@ int add_bookmark(char *optarg)
 		char *comment = NULL;
 		char *tag = NULL;
 		char *favicon = NULL;
+		char *ficon_url = NULL;
 		char *value = NULL;
 		char *subopts = optarg;
 		bookmark *b = NULL;
-
-		/* download favicon? */
-		int ficon = 0;
 
 		enum {
 			name_option,
@@ -390,7 +388,11 @@ int add_bookmark(char *optarg)
 
 				break;
 			case favicon_option:
-				ficon = 1;
+				if (value) {
+					ficon_url = value;
+				} else {
+					printf("add: favicon needs an argument\n");
+				}
 				break;
 			default:
 				printf("need at least name and url to create"
@@ -399,7 +401,7 @@ int add_bookmark(char *optarg)
 			}
 
 		if (name && url) {
-			if (ficon && __is_defined(_USE_LIBCURL)) {
+			if (ficon_url && __is_defined(_USE_LIBCURL)) {
 				char *favicon_temp = download_favicon(url);
 
 				if (favicon_temp) {
