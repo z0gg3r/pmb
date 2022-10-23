@@ -73,7 +73,9 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	free(database_file);
+	if (!env_database_file)
+		free(database_file);
+
 	exec_option(command);
 	destroy_option_list(option);
 	destroy_option_list(command);
