@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.71])
-AC_INIT([pmb], [0.0.2], [zocker@10zen.eu])
+AC_INIT([pmb], [0.0.3], [zocker@10zen.eu])
 AC_CONFIG_SRCDIR([src/pmb.c])
 AM_INIT_AUTOMAKE([foreign subdir-objects])
 AM_SILENT_RULES([yes])
