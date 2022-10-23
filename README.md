@@ -160,4 +160,5 @@ And more =D
 
 **TODO:**
 
-	* And a lot more ...
+	* Rework error handeling
+	* Fix valgrind errors

@@ -25,15 +25,11 @@ fi
 AC_ARG_ENABLE([curl],
 	       AS_HELP_STRING([--disable-curl], [Do not build with libcurl support]),
 	       [use_libcurl=$enableval],
-	       [enable_libcurl=yes]
+	       [use_libcurl="xyes"]
 	)
 
 if test "x$use_libcurl" = "xyes"; then
 	AC_DEFINE([_USE_LIBCURL], [1], [Add libcurl support])
-fi
-
-if test "x$use_libcurl" = "xno"; then
-	AC_DEFINE([_USE_LIBCURL], [0], [Do not add libcurl support])
 fi
 
 AM_CONDITIONAL([LIBCURL], [test "$use_libcurl" = "xyes"])

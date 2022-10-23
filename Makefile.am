@@ -9,5 +9,5 @@ pmb_SOURCES = src/pmb.c src/bookmark.c src/bookmark.h src/bookmark_list.c src/bo
 man1_MANS = pmb.1
 
 if LIBCURL
-pmb_SOURCES += src/favicon.c src/favicon.h
+pmb_SOURCES += src/favicon.c src/favicon.h src/base64.c src/base64.h
 endif
