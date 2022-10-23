@@ -1,7 +1,7 @@
 **pmb** is a bookmark management tool for those who want more power and flexibility
 in bookmark management.
 
-![screenshot-gpmb](image/screenshot.png)
+![screenshot](image/pmb.png)
 
 A bookmark inside pmb will have 6 fields:
 
@@ -147,24 +147,17 @@ And more =D
 
 	* sqlite3
 
-	* gtk3
-
 	* curl
 
 **Build dependencies:**
 
 	* libsqlite3-dev
 	
-	* libgtk-3-dev 
-	
 	* libcurl4-openssl
 
-	To build, just clone the repository, cd to it and type make
+	To build, just clone the repository, cd into it, type ./autogen.sh &&
+	./configure && make
 
 **TODO:**
 
-	* Allow keybind customization to Gtk interface.
-
 	* And a lot more ...
-
-I'm writing it in linux and do not know if it will run into other platforms.
