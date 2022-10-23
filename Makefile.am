@@ -1,9 +1,5 @@
 LDADD = -lsqlite3
 
-if JEMALLOC
-LDADD+=-ljemalloc
-endif
-
 if LIBCURL
 LDADD+=-lcurl
 endif

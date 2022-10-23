@@ -4,10 +4,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#ifdef _USE_JEMALLOC
-#include <jemalloc/jemalloc.h>
-#endif
-
 
 /* check for memory allocation error */
 void check_oom(void *, char *);
