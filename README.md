@@ -1,6 +1,12 @@
 **pmb** is a bookmark management tool for those who want more power and flexibility
 in bookmark management.
 
+src/base64.h and src/base64.c are from
+[Apple/base64.h](https://opensource.apple.com/source/QuickTimeStreamingServer/QuickTimeStreamingServer-452/CommonUtilitiesLib/base64.h)
+and
+[Apple/base64.c](https://opensource.apple.com/source/QuickTimeStreamingServer/QuickTimeStreamingServer-452/CommonUtilitiesLib/base64.c)
+respectively.
+
 ![screenshot](image/pmb.png)
 
 A bookmark inside pmb will have 6 fields:
