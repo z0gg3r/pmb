@@ -1,0 +1,72 @@
+Usage:
+	-a | --add 
+		[n]ame		= name of the bookmark
+		[u]rl		= url of the bookmark
+		[c]omment	= comment on bookmark
+		[t]ag		= tag on bookmark
+
+		example: pmb -a n=test,u=http://test.com
+
+	-d | --delete
+		[i]d		= delete bookmark 'id'
+		[t]ag		= delete bookmarks tagged with tag
+		[g]reedy	= make tag deletion greedy
+
+		example: pmb -d id=10
+		         pmb -d tag=windows,g
+
+	-e | --edit
+		[i]d		= id of bookmark to edit
+		[n]ame		= name of bookmark to edit
+		[u]rl		= url of bookmark to edit
+		[c]omment	= comment of bookmark to edit
+		[t]ag		= tag of bookmark to edit
+
+		[f]ield		= field to edit[all bookmarkks]
+		[v]alue		= current value of selected field
+		ne[w]-value	= new value to selected field
+
+		example: pmb -e id=10,tag=new_tag
+		         pmb -e field=tag,value=linux,new-value=computer/linux
+
+	-p | --print
+		[i]d		= id of bookmark to print
+		[f]ield		= name, url, comment, tag
+		[a]ll		= print all
+
+		example: pmb -p all
+		         pmb -p field=url
+
+	-s | --search
+		[n]ame		= name to search in bookmark database
+		[u]rl		= url to search in bookmark database
+		[c]omment	= comment to search in bookmark database
+		[t]ag		= tag to search in bookmark database
+		[e]xport	= export result to [db]
+		[d]elete	= delete results
+		[f]field	= printf only specified field
+
+		example: pmb -s linux
+		         pmb -s name=linux
+		         pmb -s name=linux,e=another.db
+		         pmb -s linux,d
+		         pmb -s linux,field=url
+
+	-l | --colors
+		[n]ame		= name color
+		[u]rl		= url color
+		[c]omment	= comment color
+		[t]ag		= tag color
+
+		example: pmb s programming -l n=red
+
+	-c | --color		colored output
+	-C | --config		filename:	open config file 'filename'
+	-f | --file		filename:	open bookmark file 'filename'
+	-i | --import		filename:	import bookmarks from 'filename'
+	-H | --html:		print in html
+	-h | --help:		show [this] help
+	-v | --verbose:		be verbose
+	-V | --version:		show version
+
+Poor man's bookmark, by neoncortex, version 0.0.1
