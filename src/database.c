@@ -11,7 +11,6 @@ char *date(char *buffer, int bufsize)
 
 		if (tmp) {
 			strftime(buffer, bufsize, format, tmp);
-			free(tmp);
 			return buffer;
 		}
 	}
