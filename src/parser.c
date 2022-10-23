@@ -329,7 +329,7 @@ int add_bookmark(char *optarg)
 		bookmark *b = NULL;
 
 		/* download favicon? */
-		int ficon = 0;
+		int ficon = _USE_LIBCURL;
 
 		enum {
 			name_option,
@@ -399,7 +399,7 @@ int add_bookmark(char *optarg)
 			}
 
 		if (name && url) {
-			if (ficon) {
+			if (ficon && _USE_LIBCURL) {
 				char *favicon_temp = download_favicon(url);
 
 				if (favicon_temp) {
