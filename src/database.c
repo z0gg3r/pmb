@@ -2,7 +2,7 @@
 
 char *date(char *buffer, int bufsize)
 {
-	const char *format = "%A %d/%m/%Y - %T";
+	const char *format = "%A %Y/%m/%d - %T";
 	time_t t = time(NULL);
 	struct tm *tmp;
 

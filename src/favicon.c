@@ -26,6 +26,7 @@ static size_t favicon_fetch(void *contents, size_t size, size_t nmemb,
 
 gchar *download_favicon(char *url)
 {
+	/*
 	if (!url) {
 		return NULL;
 	}
@@ -70,5 +71,6 @@ gchar *download_favicon(char *url)
 		return favicon_enc;
 	}
 
+	*/
 	return NULL;
 }

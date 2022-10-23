@@ -5,8 +5,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <curl/curl.h>
-#include <glib.h>
 #include "error.h"
+
+typedef char gchar;
+typedef unsigned char guchar;
 
 gchar *download_favicon(char *url);
 
