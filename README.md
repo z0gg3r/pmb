@@ -1,7 +1,7 @@
 **pmb** is a bookmark management tool for those who want more power and flexibility
 in bookmark management.
 
-![screenshot-gpmb](image/screenshot.png)
+![screenshot](image/pmb.png)
 
 A bookmark inside pmb will have 6 fields:
 
