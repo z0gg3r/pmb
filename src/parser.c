@@ -323,7 +323,7 @@ int add_bookmark(char *optarg)
 		char *url = NULL;
 		char *comment = NULL;
 		char *tag = NULL;
-		char *favicon = NULL;
+		uchar *favicon = NULL;
 		char *ficon_url = NULL;
 		char *value = NULL;
 		char *subopts = optarg;
@@ -404,13 +404,21 @@ int add_bookmark(char *optarg)
 
 		if (name && url) {
 			if (ficon_url && __is_defined(_USE_LIBCURL)) {
-				char *favicon_temp = download_favicon(url);
+				uchar *favicon_temp = download_favicon(url);
 
 				if (favicon_temp) {
 					favicon = favicon_temp;
 				}
 			} else {
-				favicon = "none";
+				favicon = calloc(5, sizeof(uchar));
+
+				check_oom(favicon, "parser-> add_bookmark -> favicon");
+
+				favicon[0] = (uchar) 'n';
+				favicon[1] = (uchar) 'o';
+				favicon[2] = (uchar) 'n';
+				favicon[3] = (uchar) 'e';
+				favicon[4] = (uchar) '\0';
 			}
 
 			b = bookmark_new(name, url, comment, tag, favicon);
@@ -421,6 +429,10 @@ int add_bookmark(char *optarg)
 				}
 
 				bookmark_destroy(b);
+
+				if (!strcmp((char *)favicon, "none"))
+					free(favicon);
+
 				return 0;
 			} else {
 				printf("error creating bookmark\n");

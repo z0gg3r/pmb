@@ -51,9 +51,7 @@ bookmark *bookmark_new(char *name, char *url, char *comment, char *tag,
 
 void bookmark_destroy(bookmark *b)
 {
-	if (b) {
-		free(b);
-	}
+	free(b);
 }
 
 char *bookmark_id(bookmark *b)
