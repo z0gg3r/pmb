@@ -97,8 +97,9 @@ int html_tree_table_row(directory *d, int depth, FILE *fp)
 		bookmark *b = NULL;
 		char *open_ul = "<ul>\n";
 		char *close_ul = "</ul>\n";
-		char *span_dir_name =
-			"<span style='color:#056B24;'>%s</span>\n";
+		char *span_dir_name_start =
+			"<span style='color:#056B24;'>";
+		char *span_dir_name_end = "</span>\n";
 		char *favicon_img = NULL;
 
 		if (fp) {
@@ -108,7 +109,7 @@ int html_tree_table_row(directory *d, int depth, FILE *fp)
 
 			fprintf(fp, "<img src=data:image/png;base64,%s>",
 				html_folder_icon);
-			fprintf(fp, "%s%s", span_dir_name, directory_name(d));
+			fprintf(fp, "%s%s%s", span_dir_name_start, directory_name(d), span_dir_name_end);
 			fprintf(fp, "%s", open_ul);
 
 			while ((b = directory_next_bookmark(d))) {
@@ -131,7 +132,7 @@ int html_tree_table_row(directory *d, int depth, FILE *fp)
 
 			printf("<img src=data:image/png;base64,%s>",
 			       html_folder_icon);
-			printf(span_dir_name, directory_name(d));
+			printf("%s%s%s", span_dir_name_start, directory_name(d), span_dir_name_end);
 			printf("%s", open_ul);
 
 			while ((b = directory_next_bookmark(d))) {
