@@ -403,7 +403,7 @@ int add_bookmark(char *optarg)
 			}
 
 		if (name && url) {
-			if (ficon_url && __is_defined(_USE_LIBCURL)) {
+			if (ficon_url) {
 				uchar *favicon_temp = download_favicon(url);
 
 				if (favicon_temp) {
