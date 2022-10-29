@@ -2,7 +2,7 @@
 
 /* -- encoded gnome icons with base64 -- */
 /* gnome/16x16/status/starred.png */
-char *html_starred_icon =
+static char *html_starred_icon =
 	"iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABHNCSVQICAgIfAhkiAAAAAlwSFlz"
 	"AAAN1wAADdcBQiibeAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAAUdEVY"
 	"dEF1dGhvcgBKYWt1YiBTdGVpbmVy5vv3LwAAAm9JREFUOI2VUktIVGEYPfe/81BTRxtHTWfCwNJs"
@@ -19,7 +19,7 @@ char *html_starred_icon =
 	"qDeNYFXQf6ibpmgH8uJwJx0JfZHGd8/+AZMBHx1uqe9MAAAAAElFTkSuQmCC";
 
 /* gnome/16x16/places/folder.png */
-char *html_folder_icon =
+static char *html_folder_icon =
 	"iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABHNCSVQICAgIfAhkiAAAAAlwSFlz"
 	"AAAN1wAADdcBQiibeAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAAOdEVY"
 	"dFRpdGxlAEZvbGRlcnMhVKpgQQAAABd0RVh0QXV0aG9yAExhcG8gQ2FsYW1hbmRyZWnfkRoqAAAA"
