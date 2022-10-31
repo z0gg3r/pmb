@@ -3,7 +3,8 @@
 void check_oom(void *p, char *str)
 {
 	if (!p) {
-		printf("%s: out of memory?\n", str);
+		perror(str);
+
 		exit(EXIT_FAILURE);
 	}
 }

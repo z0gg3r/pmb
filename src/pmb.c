@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
 	/* database */
 	char *env_database_file = secure_getenv("PMB_DATABASE");
 
-	char *database_file;
+	char *database_file = NULL;
 	if (!env_database_file) {
 		size = strlen(path) + strlen(DATABASE) + 2;
 

@@ -58,6 +58,8 @@ uchar *download_favicon(char *url)
 		check_oom(favicon_enc, "favicon > download_favicon - favicon_enc");
 
 		favicon_enc = base64_encode(favicon.memory, favicon.size, NULL);
+
+		check_oom(favicon_enc, "favicon > download_favicon - favicon_enc -- encoding");
 	}
 
 	curl_easy_cleanup(curl_handle);

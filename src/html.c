@@ -97,52 +97,53 @@ int html_tree_table_row(directory *d, int depth, FILE *fp)
 		bookmark *b = NULL;
 		char *open_ul = "<ul>\n";
 		char *close_ul = "</ul>\n";
-		char *span_dir_name =
-			"<span style='color:#056B24;'>%s</span>\n";
+		char *span_dir_name_start =
+			"<span style='color:#056B24;'>";
+		char *span_dir_name_end = "</span>\n";
 		char *favicon_img = NULL;
 
 		if (fp) {
 			for (int i = 0; i <= depth; ++i) {
-				fprintf(fp, open_ul);
+				fprintf(fp, "%s", open_ul);
 			}
 
 			fprintf(fp, "<img src=data:image/png;base64,%s>",
 				html_folder_icon);
-			fprintf(fp, span_dir_name, directory_name(d));
-			fprintf(fp, open_ul);
+			fprintf(fp, "%s%s%s", span_dir_name_start, directory_name(d), span_dir_name_end);
+			fprintf(fp, "%s", open_ul);
 
 			while ((b = directory_next_bookmark(d))) {
 				char *row = bookmark_row(b);
-				fprintf(fp, row);
+				fprintf(fp, "%s", row);
 				free(favicon_img);
 				free(row);
 			}
 
 			for (int i = 0; i <= depth + 2; ++i) {
-				fprintf(fp, close_ul);
+				fprintf(fp, "%s", close_ul);
 			}
 
 			free(b);
 			return ++depth;
 		} else {
 			for (int i = 0; i <= depth; ++i) {
-				printf(open_ul);
+				printf("%s", open_ul);
 			}
 
 			printf("<img src=data:image/png;base64,%s>",
 			       html_folder_icon);
-			printf(span_dir_name, directory_name(d));
-			printf(open_ul);
+			printf("%s%s%s", span_dir_name_start, directory_name(d), span_dir_name_end);
+			printf("%s", open_ul);
 
 			while ((b = directory_next_bookmark(d))) {
 				char *row = bookmark_row(b);
-				printf(row);
+				printf("%s", row);
 				free(favicon_img);
 				free(row);
 			}
 
 			for (int i = 0; i <= depth + 2; ++i) {
-				printf(close_ul);
+				printf("%s", close_ul);
 			}
 
 			free(b);
@@ -200,15 +201,16 @@ int bookmark_html_tree(bookmark_list *bl, FILE *fp)
 			"padding:4px;'>\n";
 
 		char *page_bottom = "</div>\n<br />\nGenerated in: "
-				    "<span style='color:green;'>%s</span>\n"
+				    "<span style='color:green;'>";
+		char *page_bottom_ = "</span>\n"
 				    "</body>\n</html>\n";
 
 		directory_rewind(root);
 
 		if (fp) {
-			fprintf(fp, page_top);
+			fprintf(fp, "%s", page_top);
 		} else {
-			printf(page_top);
+			printf("%s", page_top);
 		}
 
 		while ((child = directory_next_children(root))) {
@@ -221,9 +223,9 @@ int bookmark_html_tree(bookmark_list *bl, FILE *fp)
 		}
 
 		if (fp) {
-			fprintf(fp, page_bottom, date(buf, 64));
+			fprintf(fp, "%s%s%s", page_bottom, date(buf, 64), page_bottom_);
 		} else {
-			printf(page_bottom, date(buf, 64));
+			printf("%s%s%s", page_bottom, date(buf, 64), page_bottom_);
 		}
 
 		directory_destroy(ret);

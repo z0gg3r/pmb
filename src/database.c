@@ -13,7 +13,6 @@ char *date(char *buffer, int bufsize)
 			strftime(buffer, bufsize, format, tmp);
 			return buffer;
 		}
-		free(tmp);
 	}
 
 	return NULL;
@@ -485,7 +484,12 @@ bookmark_list *bookmark_db_query(sqlite3 *db, int id, char *field)
 		if ((id) && (id < (INT_MAX - 1)) && (id > (INT_MIN))) {
 			sql = "SELECT * FROM bookmark WHERE id = ?";
 			char *s_id = NULL;
-			asprintf(&s_id, "%i", id); /*XXX*/
+			int tmp = asprintf(&s_id, "%i", id); /*XXX*/
+
+			if (tmp == -1) {
+				perror("bookmark_db_query -> Select by id");
+				return NULL;
+			}
 
 			bl = search_db(db, field, s_id, sql);
 			free(s_id);

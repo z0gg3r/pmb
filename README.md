@@ -166,5 +166,6 @@ And more =D
 
 **TODO:**
 
-	* Rework error handeling
-	* Fix valgrind errors
+* Rework error handeling
+* Fix pmb -h (10 allocs, 4 frees) 
+* Fix  pmb --html (Invalid Read/Write, Def. Lost/Indirect. Lost)

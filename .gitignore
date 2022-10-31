@@ -1,0 +1,16 @@
+Makefile.in
+aclocal.m4
+autom4te.cache/
+compile
+config.guess
+config.sub
+configure
+depcomp
+install-sh
+missing
+Makefile
+config.log
+config.status
+src/.deps/
+src/*.o
+src/.dirstamp
