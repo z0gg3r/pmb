@@ -18,21 +18,9 @@ if test "$has_sqlite3" = "0"; then
 	AC_MSG_ERROR([Please install libsqlite3])
 fi
 
-if test "$has_libcurl" = "1"; then
-	use_libcurl="xyes"
+if test "$has_libcurl" = "0"; then
+	AC_MSG_ERROR([Please install libcurl])
 fi
-
-AC_ARG_ENABLE([curl],
-	       AS_HELP_STRING([--disable-curl], [Do not build with libcurl support]),
-	       [use_libcurl=$enableval],
-	       [use_libcurl="xyes"]
-	)
-
-if test "x$use_libcurl" = "xyes"; then
-	AC_DEFINE([_USE_LIBCURL], [1], [Add libcurl support])
-fi
-
-AM_CONDITIONAL([LIBCURL], [test "$use_libcurl" = "xyes"])
 
 # Checks for header files.
 AC_CHECK_HEADERS([string.h getopt.h limits.h stdio.h stdlib.h time.h sys/stat.h unistd.h])
